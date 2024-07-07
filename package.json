@@ -1,0 +1,19 @@
+{
+  "name": "blogflex",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+ "scripts": {
+    "start": "npx concurrently \"CompileDaemon -command='go run main.go'\" \"npm run watch:css\"",
+    "build:css": "postcss static/css/tailwind.css -o static/css/tailwind.generated.css",
+    "watch:css": "postcss static/css/tailwind.css -o static/css/tailwind.generated.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^10.4.19",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^3.4.4"
+  }
+}

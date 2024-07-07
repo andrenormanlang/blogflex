@@ -1,0 +1,14 @@
+package views
+
+import "blogflex/internal/models" 
+
+templ PostList(posts []models.Post) {
+  <div>
+  for _, post := range posts {
+    <div class="border-t border-gray-200 mt-2 pt-2">
+      <h2 class="text-xl font-bold"><a href="/posts/{ post.ID }" class="text-indigo-600 hover:text-indigo-900">{ post.Title }</a></h2>
+      <p class="text-gray-700">{ post.Content }</p>
+    </div>
+  }
+  </div>
+}

@@ -1,0 +1,16 @@
+# Config file for `air` - a live reloading tool for Go applications.
+
+[build]
+# Working directory
+cmd = "go run main.go"
+bin = "main.exe"  # Binary name to output for Windows
+dir = "."
+
+# Watch files with the following extensions
+include_ext = ["go", "tmpl", "templ"]
+
+# Exclude the following files/directories
+exclude_dir = ["vendor", "node_modules"]
+
+[log]
+level = "debug"

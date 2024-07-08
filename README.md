@@ -26,12 +26,13 @@ BlogFlex is an interactive blogging platform designed for bloggers and readers a
 - Docker
 - MariaDB
 - Node.js and npm (for Tailwind CSS)
+- [Air](https://github.com/cosmtrek/air) for live reloading
 
 ### Installation
 
 1. **Clone the repository**
 
-   ```bash
+   ```sh
    git clone https://github.com/yourusername/blogflex.git
    cd blogflex
 
@@ -45,7 +46,7 @@ BlogFlex is an interactive blogging platform designed for bloggers and readers a
 
 3. **Install Go dependencies**
 
- ``` bash
+ ``` sh
    go mod tidy
  ```
 
@@ -57,14 +58,14 @@ BlogFlex is an interactive blogging platform designed for bloggers and readers a
 
 5. **Run Tailwind CSS in watch mode**
 
- ```bash
+ ```sh
    npm run watch:css
  ```
 
 6. **Run the application**
 
- ```bash
-   CompileDaemon -command="go run main.go"
+ ```sh
+   air
  ```
 
 ### API Endpoints
@@ -196,7 +197,7 @@ blogflex/
 
 To run the project locally, ensure MariaDB is running and accessible. Run the following commands:
 
-```bash
+```sh
 docker-compose up
 npm run watch:css
 CompileDaemon -command="go run main.go"
@@ -206,7 +207,7 @@ CompileDaemon -command="go run main.go"
 
 To generate Templ files, run:
 
-```bash
+```sh
 templ generate
 ```
 

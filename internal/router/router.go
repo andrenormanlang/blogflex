@@ -1,40 +1,44 @@
 package router
 
 import (
+    "context"
+    "net/http"
+
     "github.com/gorilla/mux"
+    "github.com/gorilla/sessions"
     "blogflex/internal/handlers"
+    "blogflex/middleware"
 )
 
-// SetupRouter initializes the router with the defined routes.
-func SetupRouter() *mux.Router {
+func SetupRouter(store *sessions.CookieStore) *mux.Router {
     r := mux.NewRouter()
 
-    // Main page route
+    // Middleware to handle sessions
+    r.Use(func(next http.Handler) http.Handler {
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            session, _ := store.Get(r, "session-name")
+            r = r.WithContext(context.WithValue(r.Context(), "session", session))
+            next.ServeHTTP(w, r)
+        })
+    })
+
+    // Public routes
     r.HandleFunc("/", handlers.MainPageHandler).Methods("GET")
-
-    // Route to handle user sign-up
     r.HandleFunc("/signup", handlers.SignUpHandler).Methods("POST")
+    r.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
 
-    // Route to display the form for creating a new post
-    r.HandleFunc("/posts/create", handlers.CreatePostFormHandler).Methods("GET")
+    // Protected routes
+    protected := r.PathPrefix("/protected").Subrouter()
+    protected.Use(middleware.AuthMiddleware(store))
+    protected.HandleFunc("/posts", handlers.PostListHandler).Methods("GET")
+    protected.HandleFunc("/posts/create", handlers.CreatePostFormHandler).Methods("GET")
+    protected.HandleFunc("/posts/create", handlers.CreatePostHandler).Methods("POST")
+    protected.HandleFunc("/posts/{id}", handlers.PostDetailHandler).Methods("GET")
+    protected.HandleFunc("/users/{id}", handlers.GetUserHandler).Methods("GET")
 
-    // Route to handle the creation of a new post
-    r.HandleFunc("/posts/create", handlers.CreatePostHandler).Methods("POST")
-
-    // Route to display the list of posts
-    r.HandleFunc("/posts", handlers.PostListHandler).Methods("GET")
-
-    // Route to display the details of a single post
-    r.HandleFunc("/posts/{id}", handlers.PostDetailHandler).Methods("GET")
-
-    // User-related routes
-    r.HandleFunc("/users", handlers.CreateUserHandler).Methods("POST")
-    r.HandleFunc("/users", handlers.ListUsersHandler).Methods("GET")
-    r.HandleFunc("/users/{id}", handlers.GetUserHandler).Methods("GET")
-
-    // Comment routes
-    r.HandleFunc("/posts/{postID}/comments", handlers.CreateCommentHandler).Methods("POST")
-    r.HandleFunc("/posts/{postID}/comments", handlers.GetCommentsHandler).Methods("GET")
+    // Serve static files
+    r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 
     return r
 }
+

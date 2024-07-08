@@ -77,7 +77,7 @@ func PostDetail(post models.Post) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><a href=\"/posts\" class=\"inline-block mb-4 text-indigo-600 hover:text-indigo-900\">&larr; Back to Posts</a></div><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><a href=\"/protected/posts\" class=\"inline-block mb-4 text-indigo-600 hover:text-indigo-900\">&larr; Back to Posts</a></div><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

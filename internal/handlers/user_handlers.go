@@ -1,23 +1,23 @@
 package handlers
 
 import (
-	"encoding/json"
-	"io"
-	"log"
-	"net/http"
-	"net/url"
-	"strconv"
-	"strings"
+    "encoding/json"
+    "io"
+    "log"
+    "net/http"
+    "net/url"
+    "strconv"
+    "strings"
 
-	"github.com/a-h/templ"
+    "github.com/a-h/templ"
+    "github.com/gorilla/mux"
 
-	"blogflex/internal/database"
-	"blogflex/internal/models"
 
-	"blogflex/views"
-
-	"github.com/gorilla/mux"
+    "blogflex/internal/database"
+    "blogflex/internal/models"
+    "blogflex/views"
 )
+
 
 func ListUsersHandler(w http.ResponseWriter, r *http.Request) {
     var users []models.User
@@ -116,9 +116,15 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Set session values
+    session, _ := store.Get(r, "session-name")
+    session.Values["userID"] = user.ID
+    session.Save(r, w)
+
     // Redirect to the blog page
-    w.Header().Set("HX-Redirect", "/posts")
+    w.Header().Set("HX-Redirect", "/protected/posts")
     w.WriteHeader(http.StatusCreated)
     response := map[string]string{"message": "Sign-up successful"}
     json.NewEncoder(w).Encode(response)
 }
+

@@ -13,11 +13,14 @@ import (
     "blogflex/views"
     "io"
     "net/url"
+    "github.com/gorilla/sessions"
 )
 
 // CreatePostFormHandler handles the form submission for creating a post
 func CreatePostFormHandler(w http.ResponseWriter, r *http.Request) {
-    component := views.CreatePost() // Correctly refer to the templates.CreatePost component
+    session := r.Context().Value("session").(*sessions.Session)
+    userID := session.Values["userID"].(uint)
+    component := views.CreatePost(userID)
     templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -96,8 +99,10 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreatePostHandler handles creating a new post
-// CreatePostHandler handles creating a new post
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+    session := r.Context().Value("session").(*sessions.Session)
+    userID := session.Values["userID"].(uint)
+
     var post models.Post
 
     // Log the request body for debugging
@@ -128,11 +133,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
         post.Title = values.Get("title")
         post.Content = values.Get("content")
-        post.UserID = 1 // Hardcoded user ID for demonstration
     } else {
         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
     }
+
+    post.UserID = userID // Set the user ID from session
 
     result := database.DB.Create(&post)
     if result.Error != nil {
@@ -149,3 +155,57 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
                  </div>`
     w.Write([]byte(response))
 }
+
+// CreatePostHandler handles creating a new post earlier
+// func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+//     var post models.Post
+
+//     // Log the request body for debugging
+//     body, err := io.ReadAll(r.Body)
+//     if err != nil {
+//         http.Error(w, err.Error(), http.StatusBadRequest)
+//         return
+//     }
+//     log.Printf("Request Body: %s", body)
+
+//     // Determine content type
+//     contentType := r.Header.Get("Content-Type")
+
+//     if strings.Contains(contentType, "application/json") {
+//         // Decode JSON request body
+//         err = json.Unmarshal(body, &post)
+//         if err != nil {
+//             http.Error(w, err.Error(), http.StatusBadRequest)
+//             return
+//         }
+//     } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+//         // Parse form-urlencoded request body
+//         values, err := url.ParseQuery(string(body))
+//         if err != nil {
+//             http.Error(w, err.Error(), http.StatusBadRequest)
+//             return
+//         }
+
+//         post.Title = values.Get("title")
+//         post.Content = values.Get("content")
+//         post.UserID = 1 // Hardcoded user ID for demonstration
+//     } else {
+//         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
+//         return
+//     }
+
+//     result := database.DB.Create(&post)
+//     if result.Error != nil {
+//         http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+//         return
+//     }
+
+//     // Respond with a success message
+//     w.Header().Set("Content-Type", "text/html")
+//     w.WriteHeader(http.StatusCreated)
+//     response := `<div class="bg-green-100 border-t border-b border-green-500 text-green-700 px-4 py-3" role="alert">
+//                     <p class="font-bold">Success!</p>
+//                     <p class="text-sm">Post created successfully.</p>
+//                  </div>`
+//     w.Write([]byte(response))
+// }

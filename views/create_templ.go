@@ -8,7 +8,9 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func CreatePost() templ.Component {
+import "strconv"
+
+func CreatePost(userID uint) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -26,7 +28,20 @@ func CreatePost() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n      }\r\n    </style></head><body class=\"bg-gray-100\"><div class=\"max-w-3xl mx-auto p-4 bg-white shadow-md rounded-lg mt-10\"><h1 class=\"text-3xl font-bold mb-6 text-center\">Create a New Post</h1><form hx-post=\"/posts/create\" hx-target=\"#response-message\" hx-swap=\"innerHTML\" class=\"space-y-6\"><div><label for=\"title\" class=\"block text-sm font-medium text-gray-700\">Title</label><div class=\"mt-1\"><input type=\"text\" id=\"title\" name=\"title\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div><label for=\"content\" class=\"block text-sm font-medium text-gray-700\">Content</label><div class=\"mt-1\"><textarea id=\"content\" name=\"content\" rows=\"5\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></textarea></div></div><div class=\"text-center\"><button type=\"submit\" class=\"inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500\">Create Post</button> <a href=\"/posts\" class=\"inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Back to Post List</a></div></form><div id=\"response-message\" class=\"mt-6\"></div></div><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n      }\r\n    </style></head><body class=\"bg-gray-100\"><div class=\"max-w-3xl mx-auto p-4 bg-white shadow-md rounded-lg mt-10\"><h1 class=\"text-3xl font-bold mb-6 text-center\">Create a New Post</h1><form hx-post=\"/protected/posts/create\" hx-target=\"#response-message\" hx-swap=\"innerHTML\" class=\"space-y-6\"><div><label for=\"title\" class=\"block text-sm font-medium text-gray-700\">Title</label><div class=\"mt-1\"><input type=\"text\" id=\"title\" name=\"title\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div><label for=\"content\" class=\"block text-sm font-medium text-gray-700\">Content</label><div class=\"mt-1\"><textarea id=\"content\" name=\"content\" rows=\"5\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></textarea></div></div><input type=\"hidden\" name=\"user_id\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatUint(uint64(userID), 10))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/create.templ`, Line: 34, Col: 89}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"text-center\"><button type=\"submit\" class=\"inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500\">Create Post</button></div></form><div id=\"response-message\" class=\"mt-6\"></div></div><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

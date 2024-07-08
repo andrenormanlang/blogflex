@@ -5,14 +5,17 @@ import (
     "net/http"
     "blogflex/internal/database"
     "blogflex/internal/router"
+    "github.com/gorilla/sessions"
 )
+
+var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
 
 func main() {
     // Initialize the database
     database.InitDatabase()
 
     // Set up the router
-    r := router.SetupRouter()
+    r := router.SetupRouter(store)
 
     // Serve static files
     r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
@@ -23,3 +26,4 @@ func main() {
         log.Fatal("ListenAndServe:", err)
     }
 }
+

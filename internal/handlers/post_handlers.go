@@ -96,6 +96,7 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreatePostHandler handles creating a new post
+// CreatePostHandler handles creating a new post
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     var post models.Post
 
@@ -127,9 +128,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
         post.Title = values.Get("title")
         post.Content = values.Get("content")
-        post.UserID = 1 
-        // Set user_id if needed
-        // post.UserID = <set user id here>
+        post.UserID = 1 // Hardcoded user ID for demonstration
     } else {
         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
@@ -141,6 +140,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Respond with a success message
+    w.Header().Set("Content-Type", "text/html")
     w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(post)
+    response := `<div class="bg-green-100 border-t border-b border-green-500 text-green-700 px-4 py-3" role="alert">
+                    <p class="font-bold">Success!</p>
+                    <p class="text-sm">Post created successfully.</p>
+                 </div>`
+    w.Write([]byte(response))
 }

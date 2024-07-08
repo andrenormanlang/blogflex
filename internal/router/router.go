@@ -13,7 +13,7 @@ func SetupRouter() *mux.Router {
     r.HandleFunc("/posts/create", handlers.CreatePostFormHandler).Methods("GET")
 
     // Route to handle the creation of a new post
-    r.HandleFunc("/posts", handlers.CreatePostHandler).Methods("POST")
+    r.HandleFunc("/posts/create", handlers.CreatePostHandler).Methods("POST")
 
     // Route to display the list of posts
     r.HandleFunc("/posts", handlers.PostListHandler).Methods("GET")

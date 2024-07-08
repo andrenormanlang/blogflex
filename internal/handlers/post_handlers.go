@@ -10,7 +10,9 @@ import (
     "strconv"
     "strings"
     "log"
-    "blogflex/views" 
+    "blogflex/views"
+    "io"
+    "net/url"
 )
 
 // CreatePostFormHandler handles the form submission for creating a post
@@ -19,7 +21,6 @@ func CreatePostFormHandler(w http.ResponseWriter, r *http.Request) {
     templ.Handler(component).ServeHTTP(w, r)
 }
 
-// PostListHandler handles displaying a list of posts
 // PostListHandler handles displaying a list of posts
 func PostListHandler(w http.ResponseWriter, r *http.Request) {
     var posts []models.Post
@@ -53,6 +54,7 @@ func PostListHandler(w http.ResponseWriter, r *http.Request) {
         templ.Handler(component).ServeHTTP(w, r)
     }
 }
+
 // PostDetailHandler handles displaying the details of a single post
 func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
@@ -92,12 +94,44 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         templ.Handler(component).ServeHTTP(w, r)
     }
 }
+
 // CreatePostHandler handles creating a new post
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     var post models.Post
-    err := json.NewDecoder(r.Body).Decode(&post)
+
+    // Log the request body for debugging
+    body, err := io.ReadAll(r.Body)
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+    log.Printf("Request Body: %s", body)
+
+    // Determine content type
+    contentType := r.Header.Get("Content-Type")
+
+    if strings.Contains(contentType, "application/json") {
+        // Decode JSON request body
+        err = json.Unmarshal(body, &post)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+    } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+        // Parse form-urlencoded request body
+        values, err := url.ParseQuery(string(body))
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+
+        post.Title = values.Get("title")
+        post.Content = values.Get("content")
+        post.UserID = 1 
+        // Set user_id if needed
+        // post.UserID = <set user id here>
+    } else {
+        http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
     }
 

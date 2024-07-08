@@ -1,16 +1,33 @@
 package views
 
-import "blogflex/internal/models" 
+import "blogflex/internal/models"
 
 templ PostDetail(post models.Post) {
-  <div>
-    <h1 class="text-2xl font-bold mb-4">{ post.Title }</h1>
-    <p class="text-gray-700">{ post.Content }</p>
-    <h2 class="text-xl font-bold mt-4">Comments</h2>
-    for _, comment := range post.Comments {
-      <div class="border-t border-gray-200 mt-2 pt-2">
-        <p class="text-gray-700">{ comment.Content }</p>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogFlex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/tailwind.generated.css" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+      <h1 class="text-3xl font-bold mb-6">{ post.Title }</h1>
+      <p class="text-gray-700 mb-4">{ post.Content }</p>
+      <h2 class="text-2xl font-bold mb-4">Comments</h2>
+      <div>
+        for _, comment := range post.Comments {
+          <div class="border-t border-gray-200 mt-2 pt-2">
+            <p class="text-gray-700">{ comment.Content }</p>
+          </div>
+        }
       </div>
-    }
-  </div>
+    </div>
+    <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
+  </body>
 }

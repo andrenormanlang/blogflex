@@ -32,6 +32,3 @@ func SetupRouter() *mux.Router {
 
     return r
 }
-
-
-

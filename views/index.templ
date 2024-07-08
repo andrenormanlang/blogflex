@@ -3,20 +3,35 @@ package views
 import "blogflex/internal/models"
 
 templ PostIndex(posts []models.Post) {
-  <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
-    <h1 class="text-3xl font-bold mb-6 text-center">BlogFlex Posts</h1>
-    <div id="post-list" hx-get="/posts" hx-trigger="load">
-      if len(posts) == 0 {
-        <p class="text-gray-700 text-center">No posts available. Create one to get started!</p>
-      } else {
-        for _, post := range posts {
-          <div class="border-t border-gray-200 mt-4 pt-4">
-            <h2 class="text-xl font-bold"><a href="/posts/{ post.ID }" class="text-indigo-600 hover:text-indigo-900">{ post.Title }</a></h2>
-            <p class="text-gray-700 mt-2">{ post.Content }</p>
-          </div>
-        }
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogFlex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/tailwind.generated.css" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
       }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+      <h1 class="text-3xl font-bold mb-6 text-center">BlogFlex Posts</h1>
+      <div id="post-list" hx-get="/posts" hx-trigger="load">
+        if len(posts) == 0 {
+          <p class="text-gray-700 text-center">No posts available. Create one to get started!</p>
+        } else {
+          for _, post := range posts {
+            <div class="border-t border-gray-200 mt-4 pt-4">
+              <h2 class="text-xl font-bold"><a href="/posts/{ post.ID }" class="text-indigo-600 hover:text-indigo-900">{ post.Title }</a></h2>
+              <p class="text-gray-700 mt-2">{ post.Content }</p>
+            </div>
+          }
+        }
+      </div>
     </div>
     <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
-  </div>
+  </body>
 }
+

@@ -1,26 +1,14 @@
 package router
 
 import (
-    "context"
     "net/http"
-
     "github.com/gorilla/mux"
-    "github.com/gorilla/sessions"
     "blogflex/internal/handlers"
-    "blogflex/middleware"
+    "blogflex/internal/middleware"
 )
 
-func SetupRouter(store *sessions.CookieStore) *mux.Router {
+func SetupRouter() *mux.Router {
     r := mux.NewRouter()
-
-    // Middleware to handle sessions
-    r.Use(func(next http.Handler) http.Handler {
-        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-            session, _ := store.Get(r, "session-name")
-            r = r.WithContext(context.WithValue(r.Context(), "session", session))
-            next.ServeHTTP(w, r)
-        })
-    })
 
     // Public routes
     r.HandleFunc("/", handlers.MainPageHandler).Methods("GET")
@@ -29,7 +17,7 @@ func SetupRouter(store *sessions.CookieStore) *mux.Router {
 
     // Protected routes
     protected := r.PathPrefix("/protected").Subrouter()
-    protected.Use(middleware.AuthMiddleware(store))
+    protected.Use(middleware.AuthMiddleware)
     protected.HandleFunc("/posts", handlers.PostListHandler).Methods("GET")
     protected.HandleFunc("/posts/create", handlers.CreatePostFormHandler).Methods("GET")
     protected.HandleFunc("/posts/create", handlers.CreatePostHandler).Methods("POST")
@@ -41,4 +29,3 @@ func SetupRouter(store *sessions.CookieStore) *mux.Router {
 
     return r
 }
-

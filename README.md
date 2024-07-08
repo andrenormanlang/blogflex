@@ -31,42 +31,41 @@ BlogFlex is an interactive blogging platform designed for bloggers and readers a
 
 1. **Clone the repository**
 
-   \`\`\`sh
+   ```bash
    git clone https://github.com/yourusername/blogflex.git
    cd blogflex
-   \`\`\`
 
 2. **Set up MariaDB**
 
-   Ensure MariaDB is running and create a database named \`blogflex\`. Update the database configuration in \`internal/database/database.go\` with your MariaDB credentials.
+   Ensure MariaDB is running and create a database named`blogflex\`. Update the database configuration in`internal/database/database.go\` with your MariaDB credentials.
 
-   \`\`\`sql
+ ``` sql
    CREATE DATABASE blogflex;
-   \`\`\`
+ ```
 
 3. **Install Go dependencies**
 
-   \`\`\`sh
+ ``` bash
    go mod tidy
-   \`\`\`
+ ```
 
 4. **Install Node.js dependencies**
 
-   \`\`\`sh
+ ```sh
    npm install
-   \`\`\`
+ ```
 
 5. **Run Tailwind CSS in watch mode**
 
-   \`\`\`sh
+ ```bash
    npm run watch:css
-   \`\`\`
+ ```
 
 6. **Run the application**
 
-   \`\`\`sh
+ ```bash
    CompileDaemon -command="go run main.go"
-   \`\`\`
+ ```
 
 ### API Endpoints
 
@@ -74,83 +73,83 @@ BlogFlex is an interactive blogging platform designed for bloggers and readers a
 
 - **Create a user**
 
-  \`\`\`http
+  ```http
   POST /users
-  \`\`\`
+  ```
 
-  \`\`\`json
+  ```json
   {
     "name": "Test User",
     "email": "testuser@example.com",
     "password": "password"
   }
-  \`\`\`
+  ```
 
 - **List users**
 
-  \`\`\`http
+  ```http
   GET /users
-  \`\`\`
+  ```
 
 - **Get user details**
 
-  \`\`\`http
+  ```http
   GET /users/{id}
-  \`\`\`
+  ```
 
 #### Posts
 
 - **Create a post**
 
-  \`\`\`http
+  ```http
   POST /posts
-  \`\`\`
+  ```
 
-  \`\`\`json
+```json
   {
     "title": "Test Post",
     "content": "This is the content of the test post.",
     "user_id": 1
   }
-  \`\`\`
+```
 
 - **List posts**
 
-  \`\`\`http
+```http
   GET /posts
-  \`\`\`
+```
 
 - **Get post details**
 
-  \`\`\`http
+```http
   GET /posts/{id}
-  \`\`\`
+```
 
 #### Comments
 
 - **Create a comment**
 
-  \`\`\`http
+```http
   POST /posts/{postID}/comments
-  \`\`\`
+```
 
-  \`\`\`json
+```json
   {
     "content": "This is a comment.",
     "post_id": 1,
     "user_id": 1
   }
-  \`\`\`
+```
 
 - **List comments for a post**
 
-  \`\`\`http
+```http
   GET /posts/{postID}/comments
-  \`\`\`
+```
 
 ## Directory Structure
 
-\`\`\`plaintext
+```plaintext
 blogflex/
 ├── internal/
 │   ├── database/
@@ -189,7 +188,7 @@ blogflex/
 ├── main.go
 ├── package.json
 └── README.md
-\`\`\`
+```
 
 ## Development
 
@@ -197,19 +196,19 @@ blogflex/
 
 To run the project locally, ensure MariaDB is running and accessible. Run the following commands:
 
-\`\`\`sh
+```bash
 docker-compose up
 npm run watch:css
 CompileDaemon -command="go run main.go"
-\`\`\`
+```
 
 ### Generating Templ Files
 
 To generate Templ files, run:
 
-\`\`\`sh
+```bash
 templ generate
-\`\`\`
+```
 
 ### Testing
 

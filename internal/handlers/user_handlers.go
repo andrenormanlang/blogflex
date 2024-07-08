@@ -1,14 +1,22 @@
 package handlers
 
 import (
-    "encoding/json"
-    "net/http"
-    "strconv"
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
 
-    "blogflex/internal/database"
-    "blogflex/internal/models"
+	"github.com/a-h/templ"
 
-    "github.com/gorilla/mux"
+	"blogflex/internal/database"
+	"blogflex/internal/models"
+
+	"blogflex/views"
+
+	"github.com/gorilla/mux"
 )
 
 func ListUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,4 +66,59 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(user)
+}
+
+func MainPageHandler(w http.ResponseWriter, r *http.Request) {
+    component := views.MainPage()
+    templ.Handler(component).ServeHTTP(w, r)
+}
+
+func SignUpHandler(w http.ResponseWriter, r *http.Request) {
+    var user models.User
+
+    // Log the request body for debugging
+    body, err := io.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+    log.Printf("Request Body: %s", body)
+
+    // Determine content type
+    contentType := r.Header.Get("Content-Type")
+
+    if strings.Contains(contentType, "application/json") {
+        // Decode JSON request body
+        err = json.Unmarshal(body, &user)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+    } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+        // Parse form-urlencoded request body
+        values, err := url.ParseQuery(string(body))
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+
+        user.Username = values.Get("username")
+        user.Email = values.Get("email")
+        user.Password = values.Get("password")
+    } else {
+        http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
+        return
+    }
+
+    result := database.DB.Create(&user)
+    if result.Error != nil {
+        http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Redirect to the blog page
+    w.Header().Set("HX-Redirect", "/posts")
+    w.WriteHeader(http.StatusCreated)
+    response := map[string]string{"message": "Sign-up successful"}
+    json.NewEncoder(w).Encode(response)
 }

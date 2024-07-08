@@ -8,9 +8,7 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "blogflex/internal/models"
-
-func PostIndex(posts []models.Post) templ.Component {
+func MainPage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -28,50 +26,7 @@ func PostIndex(posts []models.Post) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n      }\r\n    </style></head><body class=\"bg-gray-100\"><div class=\"max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10\"><h1 class=\"text-3xl font-bold mb-6 text-center\">BlogFlex Posts</h1><div id=\"post-list\" hx-get=\"/posts\" hx-trigger=\"load\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if len(posts) == 0 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"text-gray-700 text-center\">No posts available. Create one to get started!</p>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			for _, post := range posts {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"border-t border-gray-200 mt-4 pt-4\"><h2 class=\"text-xl font-bold\"><a href=\"/posts/{ post.ID }\" class=\"text-indigo-600 hover:text-indigo-900\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var2 string
-				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 27, Col: 131}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h2><p class=\"text-gray-700 mt-2\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var3 string
-				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(post.Content)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 28, Col: 58}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Welcome to BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n      }\r\n    </style></head><body class=\"bg-gray-100\"><div class=\"max-w-3xl mx-auto p-4 bg-white shadow-md rounded-lg mt-10 text-center\"><h1 class=\"text-4xl font-bold mb-6\">Welcome to BlogFlex</h1><p class=\"text-lg mb-6\">Join us today to share your thoughts with the world!</p><form hx-post=\"/signup\" hx-target=\"#response-message\" hx-swap=\"innerHTML\" class=\"space-y-6\"><div><label for=\"username\" class=\"block text-sm font-medium text-gray-700\">Username</label><div class=\"mt-1\"><input type=\"text\" id=\"username\" name=\"username\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div><label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label><div class=\"mt-1\"><input type=\"email\" id=\"email\" name=\"email\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div><label for=\"password\" class=\"block text-sm font-medium text-gray-700\">Password</label><div class=\"mt-1\"><input type=\"password\" id=\"password\" name=\"password\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div class=\"text-center\"><button type=\"submit\" class=\"inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500\">Sign Up</button></div></form><div id=\"response-message\" class=\"mt-6\"></div></div><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

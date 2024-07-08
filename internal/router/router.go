@@ -9,6 +9,12 @@ import (
 func SetupRouter() *mux.Router {
     r := mux.NewRouter()
 
+    // Main page route
+    r.HandleFunc("/", handlers.MainPageHandler).Methods("GET")
+
+    // Route to handle user sign-up
+    r.HandleFunc("/signup", handlers.SignUpHandler).Methods("POST")
+
     // Route to display the form for creating a new post
     r.HandleFunc("/posts/create", handlers.CreatePostFormHandler).Methods("GET")
 

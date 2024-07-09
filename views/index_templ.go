@@ -8,7 +8,12 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func MainPage() templ.Component {
+import (
+	"blogflex/internal/models"
+	"fmt"
+)
+
+func MainPage(blogs []models.Blog) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -26,7 +31,65 @@ func MainPage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Welcome to BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n      }\r\n    </style></head><body class=\"bg-gray-100\"><div class=\"max-w-3xl mx-auto p-4 bg-white shadow-md rounded-lg mt-10 text-center\"><h1 class=\"text-4xl font-bold mb-6\">Welcome to BlogFlex</h1><p class=\"text-lg mb-6\">Join us today to share your thoughts with the world!</p><form hx-post=\"/signup\" hx-target=\"#response-message\" hx-swap=\"innerHTML\" enctype=\"application/x-www-form-urlencoded\" class=\"space-y-6\"><div><label for=\"username\" class=\"block text-sm font-medium text-gray-700\">Username</label><div class=\"mt-1\"><input type=\"text\" id=\"username\" name=\"username\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div><label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label><div class=\"mt-1\"><input type=\"email\" id=\"email\" name=\"email\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div><label for=\"password\" class=\"block text-sm font-medium text-gray-700\">Password</label><div class=\"mt-1\"><input type=\"password\" id=\"password\" name=\"password\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div class=\"text-center\"><button type=\"submit\" class=\"inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500\">Sign Up</button></div></form><div id=\"response-message\" class=\"mt-6\"></div></div><div class=\"max-w-3xl mx-auto p-4 bg-white shadow-md rounded-lg mt-10 text-center\"><h1 class=\"text-4xl font-bold mb-6\">Login to BlogFlex</h1><form hx-post=\"/login\" hx-target=\"#login-response-message\" hx-swap=\"innerHTML\" enctype=\"application/x-www-form-urlencoded\" class=\"space-y-6\" hx-on=\"htmx:afterRequest: htmx.afterLogin\"><div><label for=\"username\" class=\"block text-sm font-medium text-gray-700\">Username</label><div class=\"mt-1\"><input type=\"text\" id=\"username\" name=\"username\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div><label for=\"password\" class=\"block text-sm font-medium text-gray-700\">Password</label><div class=\"mt-1\"><input type=\"password\" id=\"password\" name=\"password\" class=\"block w-full p-2 shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500\" required></div></div><div class=\"text-center\"><button type=\"submit\" class=\"inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500\">Login</button></div><div id=\"login-response-message\" class=\"mt-6\"></div></form><div id=\"login-response-message\" class=\"mt-6\"></div><script>\r\n    htmx.on(\"htmx:afterRequest\", function(evt) {\r\n        var xhr = evt.detail.xhr;\r\n        var response = JSON.parse(xhr.responseText);\r\n        if (response.redirect) {\r\n            window.location.href = response.redirect;\r\n        }\r\n    });\r\n</script></div><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Welcome to BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n      }\r\n    </style></head><body class=\"bg-gray-100\"><nav class=\"navbar navbar-expand-lg navbar-light bg-light\"><a class=\"navbar-brand text-indigo-600\" href=\"/\">BlogFlex</a><div class=\"collapse navbar-collapse\" id=\"navbarNav\"><ul class=\"navbar-nav ml-auto\"><li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" data-toggle=\"modal\" data-target=\"#signupModal\">Sign Up</a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" data-toggle=\"modal\" data-target=\"#loginModal\">Login</a></li></ul></div></nav><div class=\"container mt-5\"><h3 class=\"mb-4\">Latest Blogs</h3><div class=\"list-group\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, blog := range blogs {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"list-group-item list-group-item-action\"><h5 class=\"mb-1\"><a href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 templ.SafeURL = templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var2)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 42, Col: 101}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><p class=\"mb-1\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Description)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 43, Col: 45}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><small>by ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(blog.User.Username)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 44, Col: 41}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</small></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><!-- Sign Up Modal --><div class=\"modal fade\" id=\"signupModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"signupModalLabel\" aria-hidden=\"true\"><div class=\"modal-dialog\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\" id=\"signupModalLabel\">Join BlogFlex</h5><button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button></div><div class=\"modal-body\"><form hx-post=\"/signup\" hx-target=\"#response-message\" hx-swap=\"innerHTML\" enctype=\"application/x-www-form-urlencoded\" class=\"space-y-6\"><div class=\"form-group\"><label for=\"username\">Username</label> <input type=\"text\" class=\"form-control\" id=\"username\" name=\"username\" required></div><div class=\"form-group\"><label for=\"email\">Email</label> <input type=\"email\" class=\"form-control\" id=\"email\" name=\"email\" required></div><div class=\"form-group\"><label for=\"password\">Password</label> <input type=\"password\" class=\"form-control\" id=\"password\" name=\"password\" required></div><div class=\"form-group\"><label for=\"blog-name\">Blog Name</label> <input type=\"text\" class=\"form-control\" id=\"blog-name\" name=\"blog-name\" required></div><div class=\"form-group\"><label for=\"blog-description\">Blog Description</label> <textarea class=\"form-control\" id=\"blog-description\" name=\"blog-description\" required></textarea></div><button type=\"submit\" class=\"btn btn-primary\">Sign Up</button></form></div><div id=\"response-message\" class=\"modal-footer\"></div></div></div></div><!-- Login Modal --><div class=\"modal fade\" id=\"loginModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"loginModalLabel\" aria-hidden=\"true\"><div class=\"modal-dialog\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\" id=\"loginModalLabel\">Login to BlogFlex</h5><button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button></div><div class=\"modal-body\"><form hx-post=\"/login\" hx-target=\"#login-response-message\" hx-swap=\"innerHTML\" enctype=\"application/x-www-form-urlencoded\" class=\"space-y-6\" hx-on=\"htmx:afterRequest: htmx.afterLogin\"><div class=\"form-group\"><label for=\"username\">Username</label> <input type=\"text\" class=\"form-control\" id=\"username\" name=\"username\" required></div><div class=\"form-group\"><label for=\"password\">Password</label> <input type=\"password\" class=\"form-control\" id=\"password\" name=\"password\" required></div><button type=\"submit\" class=\"btn btn-primary\">Login</button></form></div><div id=\"login-response-message\" class=\"modal-footer\"></div></div></div></div><script src=\"https://code.jquery.com/jquery-3.5.1.slim.min.js\"></script><script src=\"https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js\"></script><script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js\"></script><script src=\"https://unpkg.com/htmx.org@1.5.0\"></script><script>\r\n      document.addEventListener(\"htmx:afterRequest\", function(evt) {\r\n          var xhr = evt.detail.xhr;\r\n          var response = xhr.responseText;\r\n          try {\r\n              var json = JSON.parse(response);\r\n              if (json.redirect) {\r\n                  window.location.href = json.redirect;\r\n              }\r\n          } catch (e) {\r\n              console.error('Failed to parse response as JSON:', e);\r\n          }\r\n      });\r\n    </script></body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

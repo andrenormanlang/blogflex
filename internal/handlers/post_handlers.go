@@ -75,6 +75,14 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
     post.UserID = userID // Set the user ID from session
 
+    // Ensure the post is linked to the user's blog
+    var blog models.Blog
+    if err := database.DB.Where("user_id = ?", userID).First(&blog).Error; err != nil {
+        http.Error(w, "User does not have a blog", http.StatusBadRequest)
+        return
+    }
+    post.BlogID = blog.ID
+
     result := database.DB.Create(&post)
     if result.Error != nil {
         http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -82,9 +90,10 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     // Respond with a redirect
-    w.Header().Set("HX-Redirect", "/protected/posts")
+    w.Header().Set("HX-Redirect", "/blogs/"+strconv.Itoa(int(blog.ID)))
     w.WriteHeader(http.StatusCreated)
 }
+
 
 // PostListHandler handles displaying a list of posts
 func PostListHandler(w http.ResponseWriter, r *http.Request) {

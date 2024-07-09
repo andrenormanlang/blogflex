@@ -7,5 +7,6 @@ type User struct {
     Username string `json:"username" gorm:"not null"`
     Email    string `json:"email" gorm:"unique;not null"`
     Password string `json:"password" gorm:"not null"`
-    Posts    []Post `gorm:"foreignKey:UserID"`
+    Blog     *Blog  `gorm:"foreignKey:UserID" json:"-"` // Use pointer and json:"-"
 }
+

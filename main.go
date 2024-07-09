@@ -13,7 +13,7 @@ func main() {
     db := database.InitDatabase()
     
     // Automatically migrate the schema
-    err := db.AutoMigrate(&models.User{}, &models.Post{}, &models.Comment{})
+    err := db.AutoMigrate(&models.User{}, &models.Blog{}, &models.Post{}, &models.Comment{})
     if err != nil {
         log.Fatalf("Failed to migrate database schema: %v", err)
     }

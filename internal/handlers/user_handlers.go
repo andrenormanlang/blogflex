@@ -1,6 +1,7 @@
 package handlers
 
 import (
+
     "encoding/json"
     "io"
     "log"
@@ -70,12 +71,20 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
-    component := views.MainPage()
+    var blogs []models.Blog
+    result := database.DB.Preload("User").Find(&blogs)
+    if result.Error != nil {
+        http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    component := views.MainPage(blogs)
     templ.Handler(component).ServeHTTP(w, r)
 }
 
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User
+    var blog models.Blog
 
     // Log the request body for debugging
     body, err := io.ReadAll(r.Body)
@@ -106,13 +115,22 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         user.Username = values.Get("username")
         user.Email = values.Get("email")
         user.Password = values.Get("password")
+        blog.Name = values.Get("blog-name")
+        blog.Description = values.Get("blog-description")
     } else {
         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
     }
 
-    
     result := database.DB.Create(&user)
+    if result.Error != nil {
+        http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    blog.UserID = user.ID
+
+    result = database.DB.Create(&blog)
     if result.Error != nil {
         http.Error(w, result.Error.Error(), http.StatusInternalServerError)
         return
@@ -141,8 +159,94 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     })
 
     log.Printf("User signed up: %s", user.Username)
-    w.Header().Set("HX-Redirect", "/protected/posts")
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]string{
+        "redirect": "/blogs/" + strconv.Itoa(int(blog.ID)),
+    })
 }
+
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+    var user models.User
+
+    // Log the request body for debugging
+    body, err := io.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+    log.Printf("Request Body: %s", body)
+
+    // Determine content type
+    contentType := r.Header.Get("Content-Type")
+
+    if strings.Contains(contentType, "application/json") {
+        // Decode JSON request body
+        err = json.Unmarshal(body, &user)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+    } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+        // Parse form-urlencoded request body
+        values, err := url.ParseQuery(string(body))
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+
+        user.Username = values.Get("username")
+        user.Password = values.Get("password")
+    } else {
+        http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
+        return
+    }
+
+    var dbUser models.User
+    result := database.DB.Where("username = ?", user.Username).First(&dbUser)
+    if result.Error != nil || dbUser.Password != user.Password {
+        http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+        return
+    }
+
+    expirationTime := time.Now().Add(5 * time.Minute)
+    claims := &auth.Claims{
+        UserID:   dbUser.ID,
+        Username: dbUser.Username,
+        StandardClaims: jwt.StandardClaims{
+            ExpiresAt: expirationTime.Unix(),
+        },
+    }
+
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    tokenString, err := token.SignedString(auth.JwtKey)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    http.SetCookie(w, &http.Cookie{
+        Name:    "token",
+        Value:   tokenString,
+        Expires: expirationTime,
+    })
+
+    // Fetch the user's blog
+    var blog models.Blog
+    result = database.DB.Where("user_id = ?", dbUser.ID).First(&blog)
+    if result.Error != nil {
+        http.Error(w, "User does not have a blog", http.StatusInternalServerError)
+        return
+    }
+
+    log.Printf("User logged in: %s", dbUser.Username)
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]string{
+        "redirect": "/blogs/" + strconv.Itoa(int(blog.ID)),
+    })
+}
+
+
 
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {

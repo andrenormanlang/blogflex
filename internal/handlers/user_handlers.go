@@ -155,9 +155,11 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
         HttpOnly: true,
     }
     http.SetCookie(w, cookie)
-    w.WriteHeader(http.StatusOK)
     w.Header().Set("HX-Redirect", "/")
+    w.WriteHeader(http.StatusOK)
 }
+
+
 
 // package handlers
 

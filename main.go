@@ -12,11 +12,11 @@ func main() {
     // Initialize the database
     db := database.InitDatabase()
     
-     // Automatically migrate the schema
-     err := db.AutoMigrate(&models.User{}, &models.Post{}, &models.Comment{})
-     if err != nil {
-         log.Fatalf("Failed to migrate database schema: %v", err)
-     }
+    // Automatically migrate the schema
+    err := db.AutoMigrate(&models.User{}, &models.Post{}, &models.Comment{})
+    if err != nil {
+        log.Fatalf("Failed to migrate database schema: %v", err)
+    }
  
     // Set up the router
     r := router.SetupRouter()
@@ -30,6 +30,7 @@ func main() {
         log.Fatal("ListenAndServe:", err)
     }
 }
+
 
 
 // package main

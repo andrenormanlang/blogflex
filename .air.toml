@@ -15,17 +15,19 @@ exclude_dir = ["vendor", "node_modules"]
 [log]
 level = "debug"
 
-# Additional settings to generate templ files in real time
 [runner]
-  # Command to run the templ generation tool
-  cmd = "templ generate"
-  # Run the templ generation tool before the main command
-  pre = true
+# Command to run the templ generation tool
+cmd = "templ generate"
+# Run the templ generation tool before the main command
+pre = true
 
 [watch]
-  # Directories to watch for changes
-  dirs = ["."]
-  # Files to watch for changes
-  files = ["**/*.go", "**/*.tmpl", "**/*.templ"]
-  # Exclude directories from being watched
-  exclude = ["vendor", "node_modules"]
+# Directories to watch for changes
+dirs = ["."]
+# Files to watch for changes
+files = ["**/*.go", "**/*.tmpl", "**/*.templ"]
+# Exclude directories from being watched
+exclude = ["vendor", "node_modules"]
+
+# Ensure the runner is executed before running the build command
+pre_build = "templ generate"

@@ -81,14 +81,9 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Respond with a success message
-    w.Header().Set("Content-Type", "text/html")
+    // Respond with a redirect
+    w.Header().Set("HX-Redirect", "/protected/posts")
     w.WriteHeader(http.StatusCreated)
-    response := `<div class="bg-green-100 border-t border-b border-green-500 text-green-700 px-4 py-3" role="alert">
-                    <p class="font-bold">Success!</p>
-                    <p class="text-sm">Post created successfully.</p>
-                 </div>`
-    w.Write([]byte(response))
 }
 
 // PostListHandler handles displaying a list of posts

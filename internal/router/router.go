@@ -15,12 +15,12 @@ func SetupRouter() *mux.Router {
     r.HandleFunc("/signup", handlers.SignUpHandler).Methods("POST")
     r.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
 
-    r.HandleFunc("/logout", handlers.LogoutHandler).Methods("POST")
-
+    
     // Protected routes
     protected := r.PathPrefix("/protected").Subrouter()
     protected.Use(middleware.AuthMiddleware)
     protected.HandleFunc("/posts", handlers.PostListHandler).Methods("GET")
+    protected.HandleFunc("/logout", handlers.LogoutHandler).Methods("POST")
     protected.HandleFunc("/posts/create", handlers.CreatePostFormHandler).Methods("GET")
     protected.HandleFunc("/posts/create", handlers.CreatePostHandler).Methods("POST")
     protected.HandleFunc("/posts/{id}", handlers.PostDetailHandler).Methods("GET")

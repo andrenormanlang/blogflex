@@ -16,6 +16,9 @@ templ PostList(posts []models.Post) {
       body {
         font-family: 'Inter', sans-serif;
       }
+      .logout-button {
+        background-color: red; /* Temporary background color for visibility */
+      }
     </style>
   </head>
   <body class="bg-gray-100">
@@ -26,7 +29,7 @@ templ PostList(posts []models.Post) {
           <a href="/protected/posts/create" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             Create a Post
           </a>
-          <button hx-post="/logout" hx-target="body" hx-swap="outerHTML" class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+          <button hx-post="/protected/logout" hx-boost="true" class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white logout-button hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
             Logout
           </button>
         </div>

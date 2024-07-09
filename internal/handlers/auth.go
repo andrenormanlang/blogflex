@@ -40,6 +40,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    
     var dbUser models.User
     result := database.DB.Where("username = ? AND password = ?", user.Username, user.Password).First(&dbUser)
     if result.Error != nil {
@@ -49,6 +50,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
     expirationTime := time.Now().Add(5 * time.Minute)
     claims := &auth.Claims{
+        UserID:   dbUser.ID,
         Username: dbUser.Username,
         StandardClaims: jwt.StandardClaims{
             ExpiresAt: expirationTime.Unix(),
@@ -69,7 +71,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     })
 
     log.Printf("User logged in: %s", dbUser.Username)
-    http.Redirect(w, r, "/protected/posts", http.StatusFound)
+    w.Header().Set("HX-Redirect", "/protected/posts")
 }
 
 

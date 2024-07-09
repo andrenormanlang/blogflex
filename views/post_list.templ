@@ -22,9 +22,14 @@ templ PostList(posts []models.Post) {
     <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Blog Posts</h1>
-        <a href="/protected/posts/create" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Create a Post
-        </a>
+        <div>
+          <a href="/protected/posts/create" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Create a Post
+          </a>
+          <button hx-post="/logout" hx-target="body" hx-swap="outerHTML" class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+            Logout
+          </button>
+        </div>
       </div>
       <div>
         for _, post := range posts {

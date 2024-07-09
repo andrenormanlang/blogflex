@@ -1,11 +1,15 @@
 package middleware
 
 import (
+    "context"
     "net/http"
     "github.com/dgrijalva/jwt-go"
     "blogflex/internal/auth"
     "log"
+    "github.com/gorilla/sessions"
 )
+
+var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
 
 func AuthMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +45,14 @@ func AuthMiddleware(next http.Handler) http.Handler {
         }
 
         log.Printf("Authenticated user: %s", claims.Username)
-        next.ServeHTTP(w, r)
+
+        // Create or retrieve session
+        session, _ := store.Get(r, "session-name")
+        session.Values["userID"] = claims.UserID // Ensure Claims struct has UserID field
+        session.Save(r, w)
+
+        ctx := context.WithValue(r.Context(), "session", session)
+        next.ServeHTTP(w, r.WithContext(ctx))
     })
 }
 

@@ -111,15 +111,16 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    
     result := database.DB.Create(&user)
     if result.Error != nil {
         http.Error(w, result.Error.Error(), http.StatusInternalServerError)
         return
     }
 
-    // Create JWT token
     expirationTime := time.Now().Add(5 * time.Minute)
     claims := &auth.Claims{
+        UserID:   user.ID,
         Username: user.Username,
         StandardClaims: jwt.StandardClaims{
             ExpiresAt: expirationTime.Unix(),
@@ -133,7 +134,6 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Set token as cookie
     http.SetCookie(w, &http.Cookie{
         Name:    "token",
         Value:   tokenString,
@@ -141,9 +141,23 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     })
 
     log.Printf("User signed up: %s", user.Username)
-    http.Redirect(w, r, "/protected/posts", http.StatusFound)
+    w.Header().Set("HX-Redirect", "/protected/posts")
 }
 
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+    // Invalidate the session token
+    cookie := &http.Cookie{
+        Name:     "token",
+        Value:    "",
+        Path:     "/",
+        MaxAge:   -1,
+        HttpOnly: true,
+    }
+    http.SetCookie(w, cookie)
+    w.WriteHeader(http.StatusOK)
+    w.Header().Set("HX-Redirect", "/")
+}
 
 // package handlers
 

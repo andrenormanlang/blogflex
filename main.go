@@ -5,12 +5,19 @@ import (
     "net/http"
     "blogflex/internal/database"
     "blogflex/internal/router"
+    "blogflex/internal/models"
 )
 
 func main() {
     // Initialize the database
-    database.InitDatabase()
-
+    db := database.InitDatabase()
+    
+     // Automatically migrate the schema
+     err := db.AutoMigrate(&models.User{}, &models.Post{}, &models.Comment{})
+     if err != nil {
+         log.Fatalf("Failed to migrate database schema: %v", err)
+     }
+ 
     // Set up the router
     r := router.SetupRouter()
 

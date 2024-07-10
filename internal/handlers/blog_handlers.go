@@ -16,6 +16,9 @@ import (
     "blogflex/internal/models"
     "blogflex/views"
     "blogflex/internal/auth"
+    "github.com/gorilla/sessions"
+    "github.com/dgrijalva/jwt-go"
+    
 )
 
 func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
@@ -94,17 +97,33 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    session, ok := r.Context().Value("session").(*auth.Session)
+    session, ok := r.Context().Value("session").(*sessions.Session)
     if !ok {
         http.Error(w, "Unauthorized", http.StatusUnauthorized)
         return
     }
-    userID := session.UserID
+    tokenStr, ok := session.Values["token"].(string)
+    if !ok {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    claims := &auth.Claims{}
+    token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+        return auth.JwtKey, nil
+    })
+    if err != nil || !token.Valid {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    userID := claims.UserID
     isOwner := userID == blog.UserID
 
     component := views.BlogPage(blog, posts, isOwner, true, "")
     templ.Handler(component).ServeHTTP(w, r)
 }
+
 
 
 

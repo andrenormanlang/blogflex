@@ -5,10 +5,14 @@ import (
     "blogflex/internal/handlers"
     "blogflex/internal/middleware"
     "net/http"
+    
 )
 
 func SetupRouter() *mux.Router {
     r := mux.NewRouter()
+
+    // Apply session middleware
+    r.Use(middleware.SessionMiddleware)
 
     // Public routes
     r.HandleFunc("/", handlers.MainPageHandler).Methods("GET")
@@ -30,3 +34,4 @@ func SetupRouter() *mux.Router {
 
     return r
 }
+

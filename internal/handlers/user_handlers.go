@@ -19,7 +19,11 @@ import (
     "blogflex/internal/models"
     "blogflex/views"
     "fmt"
+    "github.com/gorilla/sessions"
 )
+
+var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
+
 
 // ListUsersHandler handles listing all users
 func ListUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -194,11 +198,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    http.SetCookie(w, &http.Cookie{
-        Name:    "token",
-        Value:   tokenString,
-        Expires: expirationTime,
-    })
+    session, _ := store.Get(r, "session-name")
+    session.Values["token"] = tokenString
+    session.Save(r, w)
 
     log.Printf("User logged in: %s", dbUser.Username)
 
@@ -213,6 +215,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         "redirect": fmt.Sprintf("/blogs/%d", blog.ID),
     })
 }
+
+
 
 // LogoutHandler handles user logout
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {

@@ -1,11 +1,12 @@
+// middleware/auth.go
 package middleware
 
 import (
     "context"
     "net/http"
     "github.com/dgrijalva/jwt-go"
-    "blogflex/internal/auth"
     "github.com/gorilla/sessions"
+    "blogflex/internal/auth"
 )
 
 var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
@@ -44,6 +45,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
         next.ServeHTTP(w, r.WithContext(ctx))
     })
 }
+
 
 
 

@@ -5,7 +5,6 @@ import (
     "blogflex/internal/handlers"
     "blogflex/internal/middleware"
     "net/http"
-    
 )
 
 func SetupRouter() *mux.Router {
@@ -34,4 +33,3 @@ func SetupRouter() *mux.Router {
 
     return r
 }
-

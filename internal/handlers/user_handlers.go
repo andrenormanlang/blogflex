@@ -1,29 +1,30 @@
 package handlers
 
 import (
-    "encoding/json"
-    "io"
-    "log"
-    "net/http"
-    "net/url"
-    "strconv"
-    "strings"
-    "time"
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
 
-    "github.com/a-h/templ"
-    "github.com/gorilla/mux"
-    "github.com/dgrijalva/jwt-go"
+	"github.com/a-h/templ"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
 
-    "blogflex/internal/auth"
-    "blogflex/internal/database"
-    "blogflex/internal/models"
-    "blogflex/views"
-    "fmt"
-    "github.com/gorilla/sessions"
+	"blogflex/internal/auth"
+	"blogflex/internal/database"
+	"blogflex/internal/helpers"
+	"blogflex/internal/models"
+	"blogflex/views"
+	"fmt"
+
+	"github.com/gorilla/sessions"
 )
 
 var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
-
 
 // ListUsersHandler handles listing all users
 func ListUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -73,10 +74,23 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Create a blog for the new user
+    blog := models.Blog{
+        UserID:      user.ID,
+        Name:        fmt.Sprintf("%s's Blog", user.Username),
+        Description: fmt.Sprintf("This is %s's blog.", user.Username),
+    }
+    result = database.DB.Create(&blog)
+    if result.Error != nil {
+        http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+        return
+    }
+
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(user)
 }
 
+// MainPageHandler handles rendering the main page with the list of blogs
 // MainPageHandler handles rendering the main page with the list of blogs
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
     var blogs []models.Blog
@@ -90,10 +104,10 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
         blogs[i].FormattedCreatedAt = blogs[i].CreatedAt.Format("Jan 2, 2006 at 3:04pm")
     }
 
-    component := views.MainPage(blogs)
+    loggedIn := helpers.IsLoggedIn(r)
+    component := views.MainPage(blogs, loggedIn)
     templ.Handler(component).ServeHTTP(w, r)
 }
-
 // SignUpHandler handles user registration
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User
@@ -129,6 +143,18 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     result := database.DB.Create(&user)
+    if result.Error != nil {
+        http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Create a blog for the new user
+    blog := models.Blog{
+        UserID:      user.ID,
+        Name:        fmt.Sprintf("%s's Blog", user.Username),
+        Description: fmt.Sprintf("This is %s's blog.", user.Username),
+    }
+    result = database.DB.Create(&blog)
     if result.Error != nil {
         http.Error(w, result.Error.Error(), http.StatusInternalServerError)
         return
@@ -216,10 +242,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     })
 }
 
-
-
+// LogoutHandler handles user logout
 // LogoutHandler handles user logout
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+    session, _ := store.Get(r, "session-name")
+    session.Values["token"] = ""
+    session.Save(r, w)
+
+    // Invalidate the session token
     cookie := &http.Cookie{
         Name:     "token",
         Value:    "",
@@ -231,7 +261,6 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("HX-Redirect", "/")
     w.WriteHeader(http.StatusOK)
 }
-
 
 // package handlers
 

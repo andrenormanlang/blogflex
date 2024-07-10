@@ -94,7 +94,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusCreated)
 }
 
-
 // PostListHandler handles displaying a list of posts
 func PostListHandler(w http.ResponseWriter, r *http.Request) {
     var posts []models.Post
@@ -168,7 +167,6 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         templ.Handler(component).ServeHTTP(w, r)
     }
 }
-
 
 
 // CreatePostHandler handles creating a new post earlier

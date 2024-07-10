@@ -18,12 +18,22 @@ import (
     "blogflex/internal/auth"
     "github.com/gorilla/sessions"
     "github.com/dgrijalva/jwt-go"
+    "blogflex/internal/helpers"
     
 )
 
+// CreateBlogHandler handles creating a new blog
+// CreateBlogHandler handles creating a new blog
 func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
-    session := r.Context().Value("session").(*auth.Session)
-    userID := session.UserID
+    session := r.Context().Value("session").(*sessions.Session)
+    userID := session.Values["userID"].(uint)
+
+    // Check if the user already has a blog
+    var existingBlog models.Blog
+    if err := database.DB.Where("user_id = ?", userID).First(&existingBlog).Error; err == nil {
+        http.Error(w, "You already have a blog", http.StatusBadRequest)
+        return
+    }
 
     var blog models.Blog
     body, err := io.ReadAll(r.Body)
@@ -65,6 +75,7 @@ func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("HX-Redirect", "/")
 }
 
+// BlogListHandler handles displaying a list of blogs
 func BlogListHandler(w http.ResponseWriter, r *http.Request) {
     var blogs []models.Blog
     result := database.DB.Preload("User").Find(&blogs)
@@ -77,6 +88,7 @@ func BlogListHandler(w http.ResponseWriter, r *http.Request) {
     templ.Handler(component).ServeHTTP(w, r)
 }
 
+// BlogPageHandler handles displaying a single blog page with its posts
 func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     blogID, err := strconv.Atoi(vars["id"])
@@ -119,11 +131,10 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
 
     userID := claims.UserID
     isOwner := userID == blog.UserID
+    loggedIn := helpers.IsLoggedIn(r)
 
-    component := views.BlogPage(blog, posts, isOwner, true, "")
+    component := views.BlogPage(blog, posts, isOwner, loggedIn, "")
     templ.Handler(component).ServeHTTP(w, r)
 }
-
-
 
 

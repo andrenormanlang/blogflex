@@ -3,27 +3,24 @@ package handlers
 import (
     "encoding/json"
     "io"
-    "net/http"
     "log"
+    "net/http"
+    "net/url"
+    "strconv"
+    "strings"
+
+    "github.com/a-h/templ"
+    "github.com/gorilla/mux"
+
     "blogflex/internal/database"
     "blogflex/internal/models"
-    "github.com/gorilla/sessions"
     "blogflex/views"
-	"github.com/a-h/templ"
-	"strings"
-	"net/url"
-    "strconv"
-    "github.com/gorilla/mux"
+    "blogflex/internal/auth"
 )
 
-// CreateBlogHandler handles creating a new blog
 func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
-    session := r.Context().Value("session").(*sessions.Session)
-    userID, ok := session.Values["userID"].(uint)
-    if !ok {
-        http.Error(w, "Unauthorized", http.StatusUnauthorized)
-        return
-    }
+    session := r.Context().Value("session").(*auth.Session)
+    userID := session.UserID
 
     var blog models.Blog
     body, err := io.ReadAll(r.Body)
@@ -65,7 +62,6 @@ func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("HX-Redirect", "/")
 }
 
-// BlogListHandler handles displaying a list of blogs
 func BlogListHandler(w http.ResponseWriter, r *http.Request) {
     var blogs []models.Blog
     result := database.DB.Preload("User").Find(&blogs)
@@ -93,12 +89,22 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     var posts []models.Post
-    if err := database.DB.Where("blog_id = ?", blogID).Preload("User").Find(&posts).Error; err != nil {
+    if err := database.DB.Where("blog_id = ?", blogID).Find(&posts).Error; err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
-    component := views.BlogPage(blog, posts)
+    session, ok := r.Context().Value("session").(*auth.Session)
+    if !ok {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+    userID := session.UserID
+    isOwner := userID == blog.UserID
+
+    component := views.BlogPage(blog, posts, isOwner, true, "")
     templ.Handler(component).ServeHTTP(w, r)
 }
+
+
 

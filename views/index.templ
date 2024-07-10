@@ -6,6 +6,7 @@ import (
 )
 
 templ MainPage(blogs []models.Blog) {
+  <html>
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +17,12 @@ templ MainPage(blogs []models.Blog) {
     <style>
       body {
         font-family: 'Inter', sans-serif;
+      }
+      .blog-description {
+        display: none;
+      }
+      .blog-title:hover + .blog-description {
+        display: block;
       }
     </style>
   </head>
@@ -39,9 +46,9 @@ templ MainPage(blogs []models.Blog) {
       <div class="list-group">
         for _, blog := range blogs {
           <div class="list-group-item list-group-item-action">
-            <h5 class="mb-1"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{blog.Name}</a></h5>
-            <p class="mb-1">{blog.Description}</p>
-            <small>by {blog.User.Username}</small>
+            <h5 class="mb-1 blog-title"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{blog.Name}</a></h5>
+            <p class="mb-1 blog-description">{blog.Description}</p>
+            <small>by {blog.User.Username} on {blog.FormattedCreatedAt}</small>
           </div>
         }
       </div>
@@ -134,5 +141,6 @@ templ MainPage(blogs []models.Blog) {
       });
     </script>
   </body>
+  </html>
 }
 

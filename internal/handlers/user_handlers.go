@@ -1,7 +1,6 @@
 package handlers
 
 import (
-
     "encoding/json"
     "io"
     "log"
@@ -19,8 +18,10 @@ import (
     "blogflex/internal/database"
     "blogflex/internal/models"
     "blogflex/views"
+    "fmt"
 )
 
+// ListUsersHandler handles listing all users
 func ListUsersHandler(w http.ResponseWriter, r *http.Request) {
     var users []models.User
     result := database.DB.Find(&users)
@@ -33,6 +34,7 @@ func ListUsersHandler(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(users)
 }
 
+// GetUserHandler handles fetching a single user by ID
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     id, err := strconv.Atoi(vars["id"])
@@ -52,6 +54,7 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(user)
 }
 
+// CreateUserHandler handles creating a new user
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User
     err := json.NewDecoder(r.Body).Decode(&user)
@@ -70,6 +73,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(user)
 }
 
+// MainPageHandler handles rendering the main page with the list of blogs
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
     var blogs []models.Blog
     result := database.DB.Preload("User").Find(&blogs)
@@ -78,15 +82,18 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    for i := range blogs {
+        blogs[i].FormattedCreatedAt = blogs[i].CreatedAt.Format("Jan 2, 2006 at 3:04pm")
+    }
+
     component := views.MainPage(blogs)
     templ.Handler(component).ServeHTTP(w, r)
 }
 
+// SignUpHandler handles user registration
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User
-    var blog models.Blog
 
-    // Log the request body for debugging
     body, err := io.ReadAll(r.Body)
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
@@ -94,18 +101,15 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     }
     log.Printf("Request Body: %s", body)
 
-    // Determine content type
     contentType := r.Header.Get("Content-Type")
 
     if strings.Contains(contentType, "application/json") {
-        // Decode JSON request body
         err = json.Unmarshal(body, &user)
         if err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
     } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-        // Parse form-urlencoded request body
         values, err := url.ParseQuery(string(body))
         if err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
@@ -115,8 +119,6 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         user.Username = values.Get("username")
         user.Email = values.Get("email")
         user.Password = values.Get("password")
-        blog.Name = values.Get("blog-name")
-        blog.Description = values.Get("blog-description")
     } else {
         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
@@ -128,48 +130,18 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    blog.UserID = user.ID
-
-    result = database.DB.Create(&blog)
-    if result.Error != nil {
-        http.Error(w, result.Error.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    expirationTime := time.Now().Add(5 * time.Minute)
-    claims := &auth.Claims{
-        UserID:   user.ID,
-        Username: user.Username,
-        StandardClaims: jwt.StandardClaims{
-            ExpiresAt: expirationTime.Unix(),
-        },
-    }
-
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    tokenString, err := token.SignedString(auth.JwtKey)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    http.SetCookie(w, &http.Cookie{
-        Name:    "token",
-        Value:   tokenString,
-        Expires: expirationTime,
-    })
-
     log.Printf("User signed up: %s", user.Username)
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(map[string]string{
-        "redirect": "/blogs/" + strconv.Itoa(int(blog.ID)),
+        "message": "Sign up successful! Please log in to continue.",
+        "redirect": "/login",
     })
 }
 
-
+// LoginHandler handles user login
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User
 
-    // Log the request body for debugging
     body, err := io.ReadAll(r.Body)
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
@@ -177,18 +149,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     }
     log.Printf("Request Body: %s", body)
 
-    // Determine content type
     contentType := r.Header.Get("Content-Type")
 
     if strings.Contains(contentType, "application/json") {
-        // Decode JSON request body
         err = json.Unmarshal(body, &user)
         if err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
     } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-        // Parse form-urlencoded request body
         values, err := url.ParseQuery(string(body))
         if err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
@@ -231,26 +200,22 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         Expires: expirationTime,
     })
 
-    // Fetch the user's blog
+    log.Printf("User logged in: %s", dbUser.Username)
+
     var blog models.Blog
-    result = database.DB.Where("user_id = ?", dbUser.ID).First(&blog)
-    if result.Error != nil {
-        http.Error(w, "User does not have a blog", http.StatusInternalServerError)
+    if err := database.DB.Where("user_id = ?", dbUser.ID).First(&blog).Error; err != nil {
+        http.Error(w, "User does not have a blog", http.StatusBadRequest)
         return
     }
 
-    log.Printf("User logged in: %s", dbUser.Username)
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(map[string]string{
-        "redirect": "/blogs/" + strconv.Itoa(int(blog.ID)),
+        "redirect": fmt.Sprintf("/blogs/%d", blog.ID),
     })
 }
 
-
-
-
+// LogoutHandler handles user logout
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-    // Invalidate the session token
     cookie := &http.Cookie{
         Name:     "token",
         Value:    "",
@@ -262,7 +227,6 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("HX-Redirect", "/")
     w.WriteHeader(http.StatusOK)
 }
-
 
 
 // package handlers

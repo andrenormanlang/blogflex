@@ -5,56 +5,63 @@ import (
     "fmt"
 )
 
-templ BlogPage(blog models.Blog, posts []models.Post) {
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{blog.Name} - BlogFlex</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="/static/css/tailwind.generated.css" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
+templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool, successMessage string) {
+  <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>BlogFlex</title>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+      <link href="/static/css/tailwind.generated.css" rel="stylesheet">
+      <style>
+        body {
+          font-family: 'Inter', sans-serif;
+        }
+      </style>
+    </head>
+    <body>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand text-indigo-600" href="/">BlogFlex</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            if loggedIn {
+              <li class="nav-item">
+                <a class="nav-link" href="/protected/logout" hx-post="/protected/logout">Logout</a>
+              </li>
+            } else {
+              <li class="nav-item">
+                <a class="nav-link" href="#" data-toggle="modal" data-target="#signupModal">Sign Up</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" data-toggle="modal" data-target="#loginModal">Login</a>
+              </li>
+            }
+          </ul>
+        </div>
+      </nav>
+      if successMessage != "" {
+        <div class="alert alert-success" role="alert">
+          {successMessage}
+        </div>
       }
-    </style>
-  </head>
-  <body class="bg-gray-100">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand text-indigo-600" href="/">BlogFlex</a>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <button hx-post="/protected/logout" hx-boost="true" class="nav-link btn btn-link">Logout</button>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-    <div class="container mt-5">
-      <h1 class="mb-4">{blog.Name}</h1>
-      <p class="mb-4">{blog.Description}</p>
-      <div class="text-right mb-4">
-        <a href="/protected/posts/create" class="btn btn-primary">Create a Post</a>
-      </div>
-      <div class="list-group">
-        for _, post := range posts {
-          <div class="list-group-item list-group-item-action">
-            <h5 class="mb-1"><a href={ templ.URL("/posts/" + fmt.Sprintf("%d", post.ID)) }>{post.Title}</a></h5>
-            <p class="mb-1">{post.Content}</p>
-            <small>by {post.User.Username}</small>
-          </div>
+      <div class="container mt-5">
+        <h1 class="mb-4">{blog.Name}</h1>
+        <p class="mb-4">{blog.Description}</p>
+        if isOwner {
+          <a href="/protected/posts/create" class="btn btn-primary">Create a Post</a>
+          <button hx-post="/protected/logout" hx-boost="true" class="ml-4 btn btn-danger">Logout</button>
         }
-        if len(posts) == 0 {
-          <div class="list-group-item">
-            <p class="mb-1">No posts yet. Be the first to create one!</p>
-          </div>
-        }
+        <div class="list-group mt-3">
+          for _, post := range posts {
+            <div class="list-group-item list-group-item-action">
+              <h5 class="mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>{post.Title}</a></h5>
+              <p class="mb-1">{post.Content}</p>
+              <small>by {post.User.Username} on {post.CreatedAt.Format("Jan 2, 2006 at 3:04pm")}</small>
+            </div>
+          }
+        </div>
       </div>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
-  </body>
+    </body>
+  </html>
 }
+

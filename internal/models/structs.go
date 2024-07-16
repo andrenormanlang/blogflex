@@ -1,43 +1,57 @@
 package models
 
 import (
-    "gorm.io/gorm"
+    "time"
 )
+
+type GraphQLRequest struct {
+    Query     string                 `json:"query"`
+    Variables map[string]interface{} `json:"variables"`
+}
+
 type Blog struct {
-    gorm.Model
-    ID                 uint      `gorm:"primaryKey"`
+    ID                 uint      `json:"id"`
     Name               string    `json:"name"`
     Description        string    `json:"description"`
     UserID             uint      `json:"user_id"`
-    User               User      `gorm:"foreignKey:UserID"`
-    Posts              []Post
-    FormattedCreatedAt string    `gorm:"-"` 
+    User               *User     `json:"user"`
+    Posts              []Post    `json:"posts"`
+    CreatedAt          time.Time `json:"created_at"`
+    UpdatedAt          time.Time `json:"updated_at"`
+    FormattedCreatedAt string    `json:"-"`
 }
 
 type Comment struct {
-    gorm.Model
-    Content  string `json:"content" gorm:"not null"`
-    PostID   uint   `json:"post_id"`
-    UserID   uint   `json:"user_id"`
-    User     User   `gorm:"foreignKey:UserID"`
-    Post     Post   `gorm:"foreignKey:PostID"`
+    ID        uint      `json:"id"`
+    Content   string    `json:"content"`
+    PostID    uint      `json:"post_id"`
+    UserID    string    `json:"user_id"`
+    User      *User     `json:"user"`
+    Post      *Post     `json:"post"`
+    CreatedAt time.Time `json:"created_at"`
+    UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Post struct {
-    gorm.Model
-    Title    string    `json:"title" gorm:"not null"`
-    Content  string    `json:"content" gorm:"not null"`
-    UserID   uint      `json:"user_id"`
-    User     User      `gorm:"foreignKey:UserID"`
-    BlogID   uint      `json:"blog_id"`
-    Blog     Blog      `gorm:"foreignKey:BlogID"`
-    Comments []Comment `gorm:"foreignKey:PostID"`
+    ID                 uint       `json:"id"`
+    Title              string     `json:"title"`
+    Content            string     `json:"content"`
+    UserID             string     `json:"user_id"`
+    User               *User      `json:"user"`
+    BlogID             uint       `json:"blog_id"`
+    Blog               *Blog      `json:"blog"`
+    Comments           []Comment  `json:"comments"`
+    CreatedAt          time.Time  `json:"created_at"`
+    UpdatedAt          time.Time  `json:"updated_at"`
+    FormattedCreatedAt string     `json:"-"`
 }
 
 type User struct {
-    gorm.Model
-    Username string `json:"username" gorm:"not null"`
-    Email    string `json:"email" gorm:"unique;not null"`
-    Password string `json:"password" gorm:"not null"`
-    Blog     *Blog   `gorm:"foreignKey:UserID" json:"-"` // Use pointer and json:"-"
+    ID        string    `json:"id"` // UUID is stored as a string
+    Username  string    `json:"username"`
+    Email     string    `json:"email"`
+    Password  string    `json:"password"`
+    Blog      *Blog     `json:"blog"`
+    CreatedAt time.Time `json:"created_at"`
+    UpdatedAt time.Time `json:"updated_at"`
 }

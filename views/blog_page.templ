@@ -12,16 +12,19 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>{blog.Name} - BlogFlex</title>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-      <link href="/static/css/tailwind.generated.css" rel="stylesheet">
+      <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
       <style>
         body {
           font-family: 'Inter', sans-serif;
         }
       </style>
     </head>
-    <body class="bg-gray-100">
+    <body class="bg-light">
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand text-indigo-600" href="/">BlogFlex</a>
+        <a class="navbar-brand text-primary" href="/">BlogFlex</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
             if loggedIn {
@@ -39,22 +42,117 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
           </ul>
         </div>
       </nav>
+
       <div class="container mt-5">
         <h1 class="mb-4">{blog.Name}</h1>
         <p class="mb-4">{blog.Description}</p>
         if isOwner {
-          <a href="/protected/posts/create" class="btn btn-primary">Create a Post</a>
+          <a href="/protected/posts/create" class="btn btn-primary mb-3">Create a Post</a>
         }
-        <div class="list-group mt-3">
+        <div class="list-group">
           for _, post := range posts {
-            <div class="list-group-item list-group-item-action">
+            <div class="list-group-item">
               <h5 class="mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>{post.Title}</a></h5>
               <p class="mb-1">{post.Content}</p>
-              <small>by {post.User.Username} on {post.CreatedAt.Format("Jan 2, 2006 at 3:04pm")}</small>
+              <small>by {post.User.Username} on {post.FormattedCreatedAt}</small>
             </div>
           }
         </div>
       </div>
+
+      <!-- Sign Up Modal -->
+      <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="signupModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="signupModalLabel">Join BlogFlex</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form hx-post="/signup" hx-target="#signupModal" hx-swap="none" enctype="application/x-www-form-urlencoded" class="space-y-6">
+                <div class="form-group">
+                  <label for="username">Username</label>
+                  <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                  <label for="blogName">Blog Name</label>
+                  <input type="text" class="form-control" id="blogName" name="blogName" required>
+                </div>
+                <div class="form-group">
+                  <label for="blogDescription">Blog Description</label>
+                  <textarea class="form-control" id="blogDescription" name="blogDescription" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+              </form>
+            </div>
+            <div id="response-message" class="modal-footer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Modal -->
+      <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="loginModalLabel">Login to BlogFlex</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form hx-post="/login" hx-target="#login-response-message" hx-swap="innerHTML" enctype="application/x-www-form-urlencoded" class="space-y-6">
+                <div class="form-group">
+                  <label for="username">Username</label>
+                  <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+              </form>
+            </div>
+            <div id="login-response-message" class="modal-footer"></div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+      <script src="https://unpkg.com/htmx.org@1.5.0"></script>
+      <script>
+        document.addEventListener("htmx:afterRequest", function(evt) {
+            var xhr = evt.detail.xhr;
+            var response = xhr.responseText;
+            try {
+                var json = JSON.parse(response);
+                if (json.message) {
+                    // Close the signup modal
+                    $('#signupModal').modal('hide');
+                    // Show a new modal with the success message
+                    $('body').append('<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="successModalLabel">Registration Successful</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body"><div class="alert alert-success">' + json.message + '</div></div></div></div></div>');
+                    $('#successModal').modal('show');
+                }
+                if (json.redirect) {
+                    window.location.href = json.redirect;
+                }
+            } catch (e) {
+                console.error('Failed to parse response as JSON:', e);
+            }
+        });
+      </script>
     </body>
   </html>
 }

@@ -6,12 +6,13 @@ import (
 )
 
 templ PostList(posts []models.Post) {
+  <html>
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlogFlex</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="/static/css/tailwind.generated.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
       body {
         font-family: 'Inter', sans-serif;
@@ -21,28 +22,32 @@ templ PostList(posts []models.Post) {
       }
     </style>
   </head>
-  <body class="bg-gray-100">
-    <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Blog Posts</h1>
+  <body class="bg-light">
+    <div class="container mt-5">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Blog Posts</h1>
         <div>
-          <a href="/protected/posts/create" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          <a href="/protected/posts/create" class="btn btn-primary">
             Create a Post
           </a>
-          <button hx-post="/protected/logout" hx-boost="true" class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white logout-button hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+          <button hx-post="/protected/logout" hx-boost="true" class="btn btn-danger ml-2 logout-button">
             Logout
           </button>
         </div>
       </div>
       <div>
         for _, post := range posts {
-          <div class="border-t border-gray-200 mt-4 pt-4">
-            <h2 class="text-xl font-bold"><a href={ templ.URL("/posts/" + fmt.Sprintf("%d", post.ID)) } class="text-indigo-600 hover:text-indigo-900">{ post.Title }</a></h2>
-            <p class="text-gray-700 mt-2">{ post.Content }</p>
+          <div class="border-top mt-4 pt-4">
+            <h2 class="h4"><a href={ templ.URL("/posts/" + fmt.Sprintf("%d", post.ID)) } class="text-primary">{ post.Title }</a></h2>
+            <p class="text-secondary mt-2">{ post.Content }</p>
           </div>
         }
       </div>
     </div>
     <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </body>
+  </html>
 }

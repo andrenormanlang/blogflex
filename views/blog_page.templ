@@ -22,6 +22,9 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
     <body class="bg-light">
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand text-primary" href="/">BlogFlex</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
             if loggedIn {
@@ -39,6 +42,7 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
           </ul>
         </div>
       </nav>
+
       <div class="container mt-5">
         <h1 class="mb-4">{blog.Name}</h1>
         <p class="mb-4">{blog.Description}</p>
@@ -67,7 +71,7 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
               </button>
             </div>
             <div class="modal-body">
-              <form hx-post="/signup" hx-target="#response-message" hx-swap="innerHTML" enctype="application/x-www-form-urlencoded" class="space-y-6">
+              <form hx-post="/signup" hx-target="#signupModal" hx-swap="none" enctype="application/x-www-form-urlencoded" class="space-y-6">
                 <div class="form-group">
                   <label for="username">Username</label>
                   <input type="text" class="form-control" id="username" name="username" required>
@@ -79,6 +83,14 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
                 <div class="form-group">
                   <label for="password">Password</label>
                   <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                  <label for="blogName">Blog Name</label>
+                  <input type="text" class="form-control" id="blogName" name="blogName" required>
+                </div>
+                <div class="form-group">
+                  <label for="blogDescription">Blog Description</label>
+                  <textarea class="form-control" id="blogDescription" name="blogDescription" required></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Sign Up</button>
               </form>
@@ -126,6 +138,13 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
             var response = xhr.responseText;
             try {
                 var json = JSON.parse(response);
+                if (json.message) {
+                    // Close the signup modal
+                    $('#signupModal').modal('hide');
+                    // Show a new modal with the success message
+                    $('body').append('<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="successModalLabel">Registration Successful</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body"><div class="alert alert-success">' + json.message + '</div></div></div></div></div>');
+                    $('#successModal').modal('show');
+                }
                 if (json.redirect) {
                     window.location.href = json.redirect;
                 }
@@ -137,4 +156,3 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
     </body>
   </html>
 }
-

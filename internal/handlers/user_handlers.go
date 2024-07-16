@@ -124,8 +124,10 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 // SignUpHandler handles user registration
 // SignUpHandler handles user registration
+
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User
+    var blogName, blogDescription string
 
     body, err := io.ReadAll(r.Body)
     if err != nil {
@@ -152,6 +154,8 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         user.Username = values.Get("username")
         user.Email = values.Get("email")
         user.Password = values.Get("password")
+        blogName = values.Get("blogName")
+        blogDescription = values.Get("blogDescription")
     } else {
         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
@@ -197,8 +201,8 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     `
     blogVariables := map[string]interface{}{
         "user_id":     userId,
-        "name":        fmt.Sprintf("%s's Blog", user.Username),
-        "description": fmt.Sprintf("This is %s's blog.", user.Username),
+        "name":        blogName,
+        "description": blogDescription,
     }
 
     _, err = helpers.GraphQLRequest(blogMutation, blogVariables)
@@ -211,10 +215,8 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(map[string]string{
         "message": "Sign up successful! Please log in to continue.",
-        "redirect": "/login",
     })
 }
-
 // LoginHandler handles user login
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User

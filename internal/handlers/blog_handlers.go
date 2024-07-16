@@ -3,45 +3,80 @@ package handlers
 import (
     "encoding/json"
     "io"
-    "log"
+    "bytes"
+    "blogflex/internal/models"
     "net/http"
     "net/url"
     "strconv"
     "strings"
-
     "github.com/a-h/templ"
     "github.com/gorilla/mux"
-
-    "blogflex/internal/database"
-    "blogflex/internal/models"
-    "blogflex/views"
     "blogflex/internal/auth"
+    "blogflex/internal/helpers"
+    "blogflex/views"
     "github.com/gorilla/sessions"
     "github.com/dgrijalva/jwt-go"
-    "blogflex/internal/helpers"
-    
+    "fmt"
+    "log"
+    "blogflex/internal/database"
 )
 
-// CreateBlogHandler handles creating a new blog
+func graphqlRequest(query string, variables map[string]interface{}) (map[string]interface{}, error) {
+    requestBody, err := json.Marshal(database.GraphQLRequest{
+        Query:     query,
+        Variables: variables,
+    })
+    if err != nil {
+        return nil, fmt.Errorf("failed to marshal GraphQL request: %v", err)
+    }
+
+    req, err := http.NewRequest("POST", database.HasuraEndpoint, bytes.NewBuffer(requestBody))
+    if err != nil {
+        return nil, fmt.Errorf("failed to create new HTTP request: %v", err)
+    }
+    req.Header.Set("Content-Type", "application/json")
+    req.Header.Set("x-hasura-admin-secret", database.HasuraAdminSecret)
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        return nil, fmt.Errorf("failed to perform HTTP request: %v", err)
+    }
+    defer resp.Body.Close()
+
+    var result map[string]interface{}
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        return nil, fmt.Errorf("failed to decode GraphQL response: %v", err)
+    }
+
+    if errors, ok := result["errors"].([]interface{}); ok {
+        var errorMessages []string
+        for _, err := range errors {
+            errorMap := err.(map[string]interface{})
+            errorMessages = append(errorMessages, errorMap["message"].(string))
+        }
+        return nil, fmt.Errorf("GraphQL errors: %s", strings.Join(errorMessages, "; "))
+    }
+
+    return result, nil
+}
+
+
 // CreateBlogHandler handles creating a new blog
 func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
     session := r.Context().Value("session").(*sessions.Session)
-    userID := session.Values["userID"].(uint)
+    userID := session.Values["userID"].(string)
 
-    // Check if the user already has a blog
-    var existingBlog models.Blog
-    if err := database.DB.Where("user_id = ?", userID).First(&existingBlog).Error; err == nil {
-        http.Error(w, "You already have a blog", http.StatusBadRequest)
-        return
+    var blog struct {
+        Name        string `json:"name"`
+        Description string `json:"description"`
     }
 
-    var blog models.Blog
     body, err := io.ReadAll(r.Body)
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
-    log.Printf("Request Body: %s", body)
 
     contentType := r.Header.Get("Content-Type")
     if strings.Contains(contentType, "application/json") {
@@ -63,11 +98,22 @@ func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    blog.UserID = userID // Set the user ID from session
+    query := `
+        mutation CreateBlog($name: String!, $description: String!, $user_id: uuid!) {
+            insert_blogs_one(object: {name: $name, description: $description, user_id: $user_id}) {
+                id
+            }
+        }
+    `
+    variables := map[string]interface{}{
+        "name":        blog.Name,
+        "description": blog.Description,
+        "user_id":     userID,
+    }
 
-    result := database.DB.Create(&blog)
-    if result.Error != nil {
-        http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+    result, err := graphqlRequest(query, variables)
+    if err != nil || len(result["errors"].([]interface{})) > 0 {
+        http.Error(w, "Failed to create blog", http.StatusInternalServerError)
         return
     }
 
@@ -77,11 +123,40 @@ func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
 
 // BlogListHandler handles displaying a list of blogs
 func BlogListHandler(w http.ResponseWriter, r *http.Request) {
-    var blogs []models.Blog
-    result := database.DB.Preload("User").Find(&blogs)
-    if result.Error != nil {
-        http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+    query := `
+        query {
+            blogs {
+                id
+                name
+                description
+                user {
+                    username
+                }
+            }
+        }
+    `
+
+    result, err := graphqlRequest(query, nil)
+    if err != nil {
+        log.Printf("Error fetching blogs: %v", err)
+        http.Error(w, "Failed to fetch blogs: "+err.Error(), http.StatusInternalServerError)
         return
+    }
+
+    blogsData := result["data"].(map[string]interface{})["blogs"].([]interface{})
+    var blogs []models.Blog
+    for _, blogData := range blogsData {
+        blogMap := blogData.(map[string]interface{})
+        userMap := blogMap["user"].(map[string]interface{})
+
+        blogs = append(blogs, models.Blog{
+            ID:          uint(blogMap["id"].(float64)),
+            Name:        blogMap["name"].(string),
+            Description: blogMap["description"].(string),
+            User: &models.User{
+                Username: userMap["username"].(string),
+            },
+        })
     }
 
     component := views.BlogList(blogs)
@@ -97,16 +172,85 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var blog models.Blog
-    if err := database.DB.Preload("User").First(&blog, blogID).Error; err != nil {
-        http.Error(w, err.Error(), http.StatusNotFound)
+    query := `
+        query GetBlog($id: Int!) {
+            blogs_by_pk(id: $id) {
+                id
+                name
+                description
+                user {
+                    username
+                }
+                posts {
+                    id
+                    title
+                    content
+                    user {
+                        username
+                    }
+                    created_at
+                }
+            }
+        }
+    `
+    variables := map[string]interface{}{
+        "id": blogID,
+    }
+
+    result, err := graphqlRequest(query, variables)
+    if err != nil || len(result["errors"].([]interface{})) > 0 {
+        http.Error(w, "Failed to fetch blog", http.StatusInternalServerError)
         return
     }
 
-    var posts []models.Post
-    if err := database.DB.Where("blog_id = ?", blogID).Find(&posts).Error; err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+    // Ensure blogData and other fields exist
+    blogData, ok := result["data"].(map[string]interface{})["blogs_by_pk"].(map[string]interface{})
+    if !ok {
+        http.Error(w, "Failed to parse blog data", http.StatusInternalServerError)
         return
+    }
+
+    var userMap map[string]interface{}
+    if blogData["user"] != nil {
+        userMap = blogData["user"].(map[string]interface{})
+    } else {
+        userMap = map[string]interface{}{"username": "Unknown"}
+    }
+
+    postsData, ok := blogData["posts"].([]interface{})
+    if !ok {
+        postsData = []interface{}{}
+    }
+
+    var posts []models.Post
+    for _, postData := range postsData {
+        postMap := postData.(map[string]interface{})
+        var postUserMap map[string]interface{}
+        if postMap["user"] != nil {
+            postUserMap = postMap["user"].(map[string]interface{})
+        } else {
+            postUserMap = map[string]interface{}{"username": "Unknown"}
+        }
+
+        posts = append(posts, models.Post{
+            ID:       uint(postMap["id"].(float64)),
+            Title:    postMap["title"].(string),
+            Content:  postMap["content"].(string),
+            UserID:   uint(postMap["user_id"].(float64)),
+            User: &models.User{
+                Username: postUserMap["username"].(string),
+            },
+            FormattedCreatedAt: postMap["created_at"].(string),
+        })
+    }
+
+    blog := models.Blog{
+        ID:          uint(blogData["id"].(float64)),
+        Name:        blogData["name"].(string),
+        Description: blogData["description"].(string),
+        User: &models.User{
+            Username: userMap["username"].(string),
+        },
     }
 
     session, ok := r.Context().Value("session").(*sessions.Session)
@@ -136,5 +280,3 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     component := views.BlogPage(blog, posts, isOwner, loggedIn, "")
     templ.Handler(component).ServeHTTP(w, r)
 }
-
-

@@ -17,7 +17,7 @@ func SetupRouter() *mux.Router {
     r.HandleFunc("/", handlers.MainPageHandler).Methods("GET")
     r.HandleFunc("/signup", handlers.SignUpHandler).Methods("POST")
     r.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
-    r.HandleFunc("/blogs/{id}", handlers.BlogPageHandler).Methods("GET")
+    r.HandleFunc("/blogs/{id}", handlers.BlogPageHandler).Methods("GET") // Ensure this is GET
 
     // Protected routes
     protected := r.PathPrefix("/protected").Subrouter()

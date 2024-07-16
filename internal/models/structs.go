@@ -1,43 +1,53 @@
+
 package models
 
 import (
-    "gorm.io/gorm"
+    "time"
 )
+
 type Blog struct {
-    gorm.Model
-    ID                 uint      `gorm:"primaryKey"`
+    ID                 uint      `json:"id"`
     Name               string    `json:"name"`
     Description        string    `json:"description"`
     UserID             uint      `json:"user_id"`
-    User               User      `gorm:"foreignKey:UserID"`
-    Posts              []Post
-    FormattedCreatedAt string    `gorm:"-"` 
+    User               *User     `json:"user"` // Use pointer to avoid recursive type
+    Posts              []Post    `json:"posts"`
+    CreatedAt          time.Time `json:"created_at"`
+    UpdatedAt          time.Time `json:"updated_at"`
+    FormattedCreatedAt string    `json:"-"` // Omits this field from JSON serialization
 }
 
 type Comment struct {
-    gorm.Model
-    Content  string `json:"content" gorm:"not null"`
-    PostID   uint   `json:"post_id"`
-    UserID   uint   `json:"user_id"`
-    User     User   `gorm:"foreignKey:UserID"`
-    Post     Post   `gorm:"foreignKey:PostID"`
+    ID        uint      `json:"id"`
+    Content   string    `json:"content"`
+    PostID    uint      `json:"post_id"`
+    UserID    uint      `json:"user_id"`
+    User      *User     `json:"user"` // Use pointer to avoid recursive type
+    Post      *Post     `json:"post"` // Use pointer to avoid recursive type
+    CreatedAt time.Time `json:"created_at"`
+    UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Post struct {
-    gorm.Model
-    Title    string    `json:"title" gorm:"not null"`
-    Content  string    `json:"content" gorm:"not null"`
-    UserID   uint      `json:"user_id"`
-    User     User      `gorm:"foreignKey:UserID"`
-    BlogID   uint      `json:"blog_id"`
-    Blog     Blog      `gorm:"foreignKey:BlogID"`
-    Comments []Comment `gorm:"foreignKey:PostID"`
+    ID                 uint       `json:"id"`
+    Title              string     `json:"title"`
+    Content            string     `json:"content"`
+    UserID             uint       `json:"user_id"`
+    User               *User      `json:"user"` // Use pointer to avoid recursive type
+    BlogID             uint       `json:"blog_id"`
+    Blog               *Blog      `json:"blog"` // Use pointer to avoid recursive type
+    Comments           []Comment  `json:"comments"`
+    CreatedAt          time.Time  `json:"created_at"`
+    UpdatedAt          time.Time  `json:"updated_at"`
+    FormattedCreatedAt string     `json:"-"` // Omits this field from JSON serialization
 }
 
 type User struct {
-    gorm.Model
-    Username string `json:"username" gorm:"not null"`
-    Email    string `json:"email" gorm:"unique;not null"`
-    Password string `json:"password" gorm:"not null"`
-    Blog     *Blog   `gorm:"foreignKey:UserID" json:"-"` // Use pointer and json:"-"
+    ID        uint       `json:"id"`
+    Username  string     `json:"username"`
+    Email     string     `json:"email"`
+    Password  string     `json:"password"`
+    Blog      *Blog      `json:"blog"` // Use pointer to avoid recursive type
+    CreatedAt time.Time  `json:"created_at"`
+    UpdatedAt time.Time  `json:"updated_at"`
 }

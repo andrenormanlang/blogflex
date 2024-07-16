@@ -305,7 +305,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
     session, _ := store.Get(r, "session-name")
     session.Values["token"] = tokenString
-    session.Save(r, w)
+    session.Values["userID"] = userID // Store the user ID in the session
+    err = session.Save(r, w)
+    if err != nil {
+        http.Error(w, "Failed to save session", http.StatusInternalServerError)
+        return
+    }
 
     log.Printf("User logged in: %s", dbUser["username"])
 

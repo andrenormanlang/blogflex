@@ -4,7 +4,7 @@ import (
     "net/http"
     "github.com/a-h/templ"
     "blogflex/views"
-    "github.com/gorilla/sessions"
+    // "github.com/gorilla/sessions"
     "encoding/json"
     "io"
     "net/url"
@@ -14,30 +14,25 @@ import (
     "strconv"
     "github.com/gorilla/mux"
     "blogflex/internal/database"
+    "fmt"
 )
 
-// CreatePostFormHandler handles the form submission for creating a post
 func CreatePostFormHandler(w http.ResponseWriter, r *http.Request) {
-    session := r.Context().Value("session").(*sessions.Session)
-    userIDStr, ok := session.Values["userID"].(string)
+    session, _ := store.Get(r, "session-name")
+    userID, ok := session.Values["userID"].(string)
     if !ok {
         http.Error(w, "Unauthorized", http.StatusUnauthorized)
         return
     }
 
-    userID, err := strconv.ParseUint(userIDStr, 10, 32)
-    if err != nil {
-        http.Error(w, "Invalid user ID", http.StatusInternalServerError)
-        return
-    }
-
-    component := views.CreatePost(uint(userID))
+    component := views.CreatePost(userID)
     templ.Handler(component).ServeHTTP(w, r)
 }
 
-// CreatePostHandler handles creating a new post
+
+
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-    session := r.Context().Value("session").(*sessions.Session)
+    session, _ := store.Get(r, "session-name")
     userID, ok := session.Values["userID"].(string)
     if !ok {
         http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -49,26 +44,20 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
         Content string `json:"content"`
     }
 
-    // Log the request body for debugging
     body, err := io.ReadAll(r.Body)
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
-    log.Printf("Request Body: %s", body)
 
-    // Determine content type
     contentType := r.Header.Get("Content-Type")
-
     if strings.Contains(contentType, "application/json") {
-        // Decode JSON request body
         err = json.Unmarshal(body, &post)
         if err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
     } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-        // Parse form-urlencoded request body
         values, err := url.ParseQuery(string(body))
         if err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
@@ -82,7 +71,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Ensure the post is linked to the user's blog
     query := `
         query GetBlog($user_id: uuid!) {
             blogs(where: {user_id: {_eq: $user_id}}) {
@@ -95,22 +83,37 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     result, err := database.ExecuteGraphQL(query, variables)
-    if err != nil || len(result["errors"].([]interface{})) > 0 {
+    if err != nil {
+        log.Printf("Error executing GraphQL query: %v", err)
         http.Error(w, "User does not have a blog", http.StatusBadRequest)
         return
     }
 
-    blogs := result["data"].(map[string]interface{})["blogs"].([]interface{})
-    if len(blogs) == 0 {
+    log.Printf("GraphQL query result: %v", result)
+
+    blogs, ok := result["blogs"].([]interface{})
+    if !ok || len(blogs) == 0 {
+        log.Printf("No blogs found for user ID %s: %v", userID, result)
         http.Error(w, "User does not have a blog", http.StatusBadRequest)
         return
     }
 
-    blogID := blogs[0].(map[string]interface{})["id"].(string)
+    blog, ok := blogs[0].(map[string]interface{})
+    if !ok {
+        log.Printf("Error parsing blog data: %v", blogs[0])
+        http.Error(w, "Failed to retrieve blog data", http.StatusInternalServerError)
+        return
+    }
 
-    // Insert the post
+    blogID, ok := blog["id"].(float64) // Hasura returns numbers as float64
+    if !ok {
+        log.Printf("Error parsing blog ID: %v", blog["id"])
+        http.Error(w, "Failed to retrieve blog ID", http.StatusInternalServerError)
+        return
+    }
+
     query = `
-        mutation CreatePost($title: String!, $content: String!, $user_id: uuid!, $blog_id: uuid!) {
+        mutation CreatePost($title: String!, $content: String!, $user_id: uuid!, $blog_id: Int!) {
             insert_posts_one(object: {title: $title, content: $content, user_id: $user_id, blog_id: $blog_id}) {
                 id
             }
@@ -120,19 +123,42 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
         "title":   post.Title,
         "content": post.Content,
         "user_id": userID,
-        "blog_id": blogID,
+        "blog_id": int(blogID), // Convert float64 to int
     }
 
     result, err = database.ExecuteGraphQL(query, variables)
-    if err != nil || len(result["errors"].([]interface{})) > 0 {
+    if err != nil {
+        log.Printf("Error executing GraphQL mutation: %v", err)
         http.Error(w, "Failed to create post", http.StatusInternalServerError)
         return
     }
 
-    // Respond with a redirect
-    w.Header().Set("HX-Redirect", "/blogs/"+blogID)
+    log.Printf("GraphQL mutation result: %v", result)
+
+    postData, ok := result["insert_posts_one"].(map[string]interface{})
+    if !ok {
+        log.Printf("Error parsing post data from GraphQL result: %v", result)
+        http.Error(w, "Failed to create post", http.StatusInternalServerError)
+        return
+    }
+
+    postID, ok := postData["id"].(float64)
+    if !ok {
+        log.Printf("Error parsing post ID from GraphQL result: %v", postData)
+        http.Error(w, "Failed to create post", http.StatusInternalServerError)
+        return
+    }
+
+    log.Printf("Successfully created post with ID: %d", int(postID))
+    w.Header().Set("HX-Redirect", fmt.Sprintf("/blogs/%d", int(blogID)))
     w.WriteHeader(http.StatusCreated)
 }
+
+
+
+
+
+
 
 // PostListHandler handles displaying a list of posts
 func PostListHandler(w http.ResponseWriter, r *http.Request) {
@@ -169,7 +195,7 @@ func PostListHandler(w http.ResponseWriter, r *http.Request) {
             User: &models.User{
                 Username: userMap["username"].(string),
             },
-            BlogID: uint(postMap["blog_id"].(float64)),
+            BlogID: uint(postMap["blog_id"].(int)),
         })
     }
 
@@ -244,7 +270,7 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
                 Username: userMap["username"].(string),
             },
         FormattedCreatedAt: postData["created_at"].(string),
-        BlogID:    uint(postData["blog_id"].(float64)),
+        BlogID:    uint(postData["blog_id"].(int)),
     }
 
     log.Printf("Post found: ID=%d, Title=%s", post.ID, post.Title) // Log the found post

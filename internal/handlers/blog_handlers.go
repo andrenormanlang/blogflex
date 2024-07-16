@@ -124,6 +124,7 @@ func BlogListHandler(w http.ResponseWriter, r *http.Request) {
 // BlogPageHandler handles displaying a single blog page with its posts
 
 
+// BlogPageHandler handles displaying a single blog page with its posts
 func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     blogID, err := strconv.Atoi(vars["id"])
@@ -139,6 +140,7 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
                 name
                 description
                 user {
+                    id
                     username
                 }
                 posts {
@@ -190,10 +192,10 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     if blogData["user"] != nil {
         userMap, ok = blogData["user"].(map[string]interface{})
         if !ok {
-            userMap = map[string]interface{}{"username": "Unknown"}
+            userMap = map[string]interface{}{"id": "0", "username": "Unknown"}
         }
     } else {
-        userMap = map[string]interface{}{"username": "Unknown"}
+        userMap = map[string]interface{}{"id": "0", "username": "Unknown"}
     }
 
     postsData, ok := blogData["posts"].([]interface{})
@@ -249,9 +251,10 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
         Name:        blogData["name"].(string),
         Description: blogData["description"].(string),
         User: &models.User{
+            ID:       userMap["id"].(string),
             Username: userMap["username"].(string),
         },
-        UserID:      uint(blogIDFloat), // Convert to uint
+        UserID: uint(blogIDFloat), // Convert to uint
     }
 
     // Check if user is authenticated to determine if they can create posts
@@ -265,10 +268,7 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
                 return auth.JwtKey, nil
             })
             if err == nil && token.Valid {
-                userID, err := strconv.ParseUint(claims.UserID, 10, 32) // Convert string to uint
-                if err == nil {
-                    isOwner = uint(userID) == blog.UserID
-                }
+                isOwner = claims.UserID == blog.User.ID
             }
         }
     }

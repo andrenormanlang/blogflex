@@ -7,7 +7,7 @@ import (
 var JwtKey = []byte("your-very-secret-key")
 
 type Claims struct {
-    UserID   uint   `json:"user_id"`
+    UserID   string   `json:"user_id"`
     Username string `json:"username"`
     jwt.StandardClaims
 }

@@ -31,22 +31,15 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Welcome to BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n      }\r\n      .blog-description {\r\n        display: none;\r\n      }\r\n      .blog-title:hover + .blog-description {\r\n        display: block;\r\n      }\r\n    </style></head><body class=\"bg-gray-100\"><nav class=\"navbar navbar-expand-lg navbar-light bg-light\"><a class=\"navbar-brand text-indigo-600\" href=\"/\">BlogFlex</a> <button class=\"navbar-toggler\" type=\"button\" data-toggle=\"collapse\" data-target=\"#navbarNav\" aria-controls=\"navbarNav\" aria-expanded=\"false\" aria-label=\"Toggle navigation\"><span class=\"navbar-toggler-icon\"></span></button><div class=\"collapse navbar-collapse\" id=\"navbarNav\"><ul class=\"navbar-nav ml-auto\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Welcome to BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n      }\r\n      .blog-description {\r\n        display: none;\r\n      }\r\n      .blog-title:hover + .blog-description {\r\n        display: block;\r\n      }\r\n    </style></head><body class=\"bg-gray-100\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if loggedIn {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"nav-item\"><a class=\"nav-link\" href=\"/protected/logout\" hx-post=\"/protected/logout\">Logout</a></li>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" data-toggle=\"modal\" data-target=\"#signupModal\">Sign Up</a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" data-toggle=\"modal\" data-target=\"#loginModal\">Login</a></li>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		templ_7745c5c3_Err = NavBar(loggedIn).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div></nav><div class=\"container mt-5\"><h3 class=\"mb-4\">Latest Blogs</h3><div class=\"list-group\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mt-5\"><h3 class=\"mb-4\">Latest Blogs</h3><div class=\"list-group\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,7 +60,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 58, Col: 112}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 36, Col: 112}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -80,7 +73,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 59, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 37, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -93,7 +86,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(blog.User.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 60, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 38, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -106,7 +99,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(blog.FormattedCreatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 60, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 38, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -117,7 +110,15 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><!-- Sign Up Modal --><div class=\"modal fade\" id=\"signupModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"signupModalLabel\" aria-hidden=\"true\"><div class=\"modal-dialog\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\" id=\"signupModalLabel\">Join BlogFlex</h5><button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button></div><div class=\"modal-body\"><form hx-post=\"/signup\" hx-target=\"#signupModal\" hx-swap=\"none\" enctype=\"application/x-www-form-urlencoded\" class=\"space-y-6\"><div class=\"form-group\"><label for=\"username\">Username</label> <input type=\"text\" class=\"form-control\" id=\"username\" name=\"username\" required></div><div class=\"form-group\"><label for=\"email\">Email</label> <input type=\"email\" class=\"form-control\" id=\"email\" name=\"email\" required></div><div class=\"form-group\"><label for=\"password\">Password</label> <input type=\"password\" class=\"form-control\" id=\"password\" name=\"password\" required></div><div class=\"form-group\"><label for=\"blogName\">Blog Name</label> <input type=\"text\" class=\"form-control\" id=\"blogName\" name=\"blogName\" required></div><div class=\"form-group\"><label for=\"blogDescription\">Blog Description</label> <textarea class=\"form-control\" id=\"blogDescription\" name=\"blogDescription\" required></textarea></div><button type=\"submit\" class=\"btn btn-primary\">Sign Up</button></form></div><div id=\"response-message\" class=\"modal-footer\"></div></div></div></div><!-- Login Modal --><div class=\"modal fade\" id=\"loginModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"loginModalLabel\" aria-hidden=\"true\"><div class=\"modal-dialog\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\" id=\"loginModalLabel\">Login to BlogFlex</h5><button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button></div><div class=\"modal-body\"><form hx-post=\"/login\" hx-target=\"#login-response-message\" hx-swap=\"innerHTML\" enctype=\"application/x-www-form-urlencoded\" class=\"space-y-6\" hx-on=\"htmx:afterRequest: htmx.afterLogin\"><div class=\"form-group\"><label for=\"username\">Username</label> <input type=\"text\" class=\"form-control\" id=\"username\" name=\"username\" required></div><div class=\"form-group\"><label for=\"password\">Password</label> <input type=\"password\" class=\"form-control\" id=\"password\" name=\"password\" required></div><button type=\"submit\" class=\"btn btn-primary\">Login</button></form></div><div id=\"login-response-message\" class=\"modal-footer\"></div></div></div></div><script src=\"https://code.jquery.com/jquery-3.5.1.slim.min.js\"></script><script src=\"https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js\"></script><script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js\"></script><script src=\"https://unpkg.com/htmx.org@1.5.0\"></script><script>\r\n      document.addEventListener(\"htmx:afterRequest\", function(evt) {\r\n          var xhr = evt.detail.xhr;\r\n          var response = xhr.responseText;\r\n          try {\r\n              var json = JSON.parse(response);\r\n              if (json.message) {\r\n                  // Close the signup modal\r\n                  $('#signupModal').modal('hide');\r\n                  // Show a new modal with the success message\r\n                  $('body').append('<div class=\"modal fade\" id=\"successModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"successModalLabel\" aria-hidden=\"true\"><div class=\"modal-dialog\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\" id=\"successModalLabel\">Registration Successful</h5><button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button></div><div class=\"modal-body\"><div class=\"alert alert-success\">' + json.message + '</div></div></div></div></div>');\r\n                  $('#successModal').modal('show');\r\n              }\r\n              if (json.redirect) {\r\n                  window.location.href = json.redirect;\r\n              }\r\n          } catch (e) {\r\n              console.error('Failed to parse response as JSON:', e);\r\n          }\r\n      });\r\n    </script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = SharedComponents().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

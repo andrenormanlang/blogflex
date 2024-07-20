@@ -28,6 +28,10 @@ import (
 var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
 
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
+    session, _ := store.Get(r, "session-name")
+    userID := session.Values["userID"]
+    loggedIn := userID != nil
+
     query := `
         query {
             blogs {
@@ -63,7 +67,7 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
         })
     }
 
-    component := views.MainPage(blogs, false) // Adjust based on your logic for loggedIn
+    component := views.MainPage(blogs, loggedIn)
     templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -348,18 +352,26 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 // LogoutHandler handles user logout
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "session-name")
+
+    // Clear session values
     session.Values["token"] = ""
+    session.Values["userID"] = ""
+    session.Options.MaxAge = -1 // This will delete the session
+
+    // Save the session
     session.Save(r, w)
 
-    // Invalidate the session token
+    // Invalidate the session token cookie
     cookie := &http.Cookie{
-        Name:     "token",
+        Name:     "session-name",
         Value:    "",
         Path:     "/",
         MaxAge:   -1,
         HttpOnly: true,
     }
     http.SetCookie(w, cookie)
+
+    // Redirect to the main page
     w.Header().Set("HX-Redirect", "/")
     w.WriteHeader(http.StatusOK)
 }

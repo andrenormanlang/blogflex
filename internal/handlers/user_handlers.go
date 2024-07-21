@@ -1,29 +1,31 @@
 package handlers
 
 import (
-    "encoding/json"
-    "fmt"
-    "io"
-    "log"
-    "net/http"
-    "net/url"
-    "strconv"
-    "strings"
-    "time"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
 
-    "github.com/dgrijalva/jwt-go"
-    "github.com/gorilla/mux"
-    "github.com/gorilla/sessions"
-    "golang.org/x/crypto/bcrypt"
-    "blogflex/internal/database"
-    "github.com/a-h/templ"
-    "blogflex/views"
-   
+	"blogflex/internal/database"
+	"blogflex/views"
 
-    "blogflex/internal/auth"
-    "blogflex/internal/models"
-    "blogflex/internal/helpers"
+	"github.com/a-h/templ"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/bcrypt"
+
+	"blogflex/internal/auth"
+	"blogflex/internal/helpers"
+	"blogflex/internal/models"
 )
+
+
 
 var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
 
@@ -50,7 +52,7 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
         }
     `
     result, err := database.ExecuteGraphQL(query, nil)
-    if (err != nil) {
+    if err != nil {
         http.Error(w, "Failed to fetch blogs", http.StatusInternalServerError)
         return
     }
@@ -64,16 +66,28 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
         posts := blogMap["posts"].([]interface{})
         if len(posts) > 0 {
             postMap := posts[0].(map[string]interface{})
+            createdAt, err := time.Parse("2006-01-02T15:04:05", postMap["created_at"].(string))
+            if err != nil {
+                log.Printf("Error parsing created_at time: %v", err)
+                continue
+            }
             latestPost = &models.Post{
                 Title:             postMap["title"].(string),
-                FormattedCreatedAt: helpers.FormatTime(postMap["created_at"].(string)),
+                FormattedCreatedAt: helpers.FormatTime(createdAt),
             }
         }
+        createdAtStr := blogMap["created_at"].(string)
+        createdAt, err := time.Parse("2006-01-02T15:04:05", createdAtStr)
+        if err != nil {
+            log.Printf("Error parsing blog created_at time: %v", err)
+            continue
+        }
+
         blogs = append(blogs, models.Blog{
             ID:                 uint(blogMap["id"].(float64)),
             Name:               blogMap["name"].(string),
             Description:        blogMap["description"].(string),
-            FormattedCreatedAt: blogMap["created_at"].(string),
+            FormattedCreatedAt: helpers.FormatTime(createdAt),
             User: &models.User{
                 Username: userMap["username"].(string),
             },
@@ -84,7 +98,6 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
     component := views.MainPage(blogs, loggedIn)
     templ.Handler(component).ServeHTTP(w, r)
 }
-
 
 // ListUsersHandler handles listing all users
 func ListUsersHandler(w http.ResponseWriter, r *http.Request) {

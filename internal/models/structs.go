@@ -19,7 +19,9 @@ type Blog struct {
     CreatedAt          time.Time `json:"created_at"`
     UpdatedAt          time.Time `json:"updated_at"`
     FormattedCreatedAt string    `json:"-"`
+    LatestPost         *Post     `json:"latest_post,omitempty"`
 }
+
 
 type Comment struct {
     ID        uint      `json:"id"`

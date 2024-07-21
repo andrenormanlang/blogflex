@@ -42,11 +42,15 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
                     username
                 }
                 created_at
+                posts(order_by: {created_at: desc}, limit: 1) {
+                    title
+                    created_at
+                }
             }
         }
     `
     result, err := database.ExecuteGraphQL(query, nil)
-    if err != nil {
+    if (err != nil) {
         http.Error(w, "Failed to fetch blogs", http.StatusInternalServerError)
         return
     }
@@ -56,6 +60,15 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
     for _, blogData := range blogsData {
         blogMap := blogData.(map[string]interface{})
         userMap := blogMap["user"].(map[string]interface{})
+        var latestPost *models.Post
+        posts := blogMap["posts"].([]interface{})
+        if len(posts) > 0 {
+            postMap := posts[0].(map[string]interface{})
+            latestPost = &models.Post{
+                Title:             postMap["title"].(string),
+                FormattedCreatedAt: helpers.FormatTime(postMap["created_at"].(string)),
+            }
+        }
         blogs = append(blogs, models.Blog{
             ID:                 uint(blogMap["id"].(float64)),
             Name:               blogMap["name"].(string),
@@ -64,12 +77,14 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
             User: &models.User{
                 Username: userMap["username"].(string),
             },
+            LatestPost: latestPost,
         })
     }
 
     component := views.MainPage(blogs, loggedIn)
     templ.Handler(component).ServeHTTP(w, r)
 }
+
 
 // ListUsersHandler handles listing all users
 func ListUsersHandler(w http.ResponseWriter, r *http.Request) {

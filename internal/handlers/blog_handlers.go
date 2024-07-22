@@ -12,6 +12,7 @@ import (
     "github.com/gorilla/mux"
     "blogflex/internal/auth"
     "blogflex/internal/helpers"
+    "time"
     "blogflex/views"
     "github.com/gorilla/sessions"
     "github.com/dgrijalva/jwt-go"
@@ -122,9 +123,6 @@ func BlogListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // BlogPageHandler handles displaying a single blog page with its posts
-
-
-// BlogPageHandler handles displaying a single blog page with its posts
 func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     blogID, err := strconv.Atoi(vars["id"])
@@ -134,27 +132,27 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     query := `
-        query GetBlog($id: Int!) {
-            blogs_by_pk(id: $id) {
+    query GetBlog($id: Int!) {
+        blogs_by_pk(id: $id) {
+            id
+            name
+            description
+            user {
                 id
-                name
-                description
+                username
+            }
+            posts(order_by: {created_at: desc}) {
+                id
+                title
+                content
                 user {
-                    id
                     username
                 }
-                posts {
-                    id
-                    title
-                    content
-                    user {
-                        username
-                    }
-                    created_at
-                }
+                created_at
             }
         }
-    `
+    }`
+    
     variables := map[string]interface{}{
         "id": blogID,
     }
@@ -228,6 +226,17 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
             continue
         }
 
+        createdAtStr, ok := postMap["created_at"].(string)
+        var formattedCreatedAt string
+        if ok {
+            createdAt, err := time.Parse("2006-01-02T15:04:05", createdAtStr)
+            if err != nil {
+                log.Printf("Error parsing post created_at time: %v", err)
+            } else {
+                formattedCreatedAt = helpers.FormatTime(createdAt)
+            }
+        }
+
         posts = append(posts, models.Post{
             ID:       uint(postID),
             Title:    postMap["title"].(string),
@@ -235,7 +244,7 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
             User: &models.User{
                 Username: postUserMap["username"].(string),
             },
-            FormattedCreatedAt: postMap["created_at"].(string),
+            FormattedCreatedAt: formattedCreatedAt,
         })
     }
 
@@ -246,10 +255,23 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    createdAtStr, ok := blogData["created_at"].(string)
+    var formattedCreatedAt string
+    if ok {
+        createdAt, err := time.Parse("2006-01-02T15:04:05", createdAtStr)
+        if err != nil {
+            log.Printf("Error parsing blog created_at time: %v", err)
+            http.Error(w, "Invalid blog created_at time", http.StatusInternalServerError)
+            return
+        }
+        formattedCreatedAt = helpers.FormatTime(createdAt)
+    }
+
     blog := models.Blog{
-        ID:          uint(blogIDFloat),
-        Name:        blogData["name"].(string),
-        Description: blogData["description"].(string),
+        ID:                 uint(blogIDFloat),
+        Name:               blogData["name"].(string),
+        Description:        blogData["description"].(string),
+        FormattedCreatedAt: formattedCreatedAt,
         User: &models.User{
             ID:       userMap["id"].(string),
             Username: userMap["username"].(string),
@@ -280,3 +302,5 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     templ.Handler(component).ServeHTTP(w, r)
     log.Println("Blog page rendered successfully")
 }
+
+

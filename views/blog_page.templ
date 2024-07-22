@@ -32,7 +32,8 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
             <div class="list-group-item">
               <h5 class="mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>{post.Title}</a></h5>
               <p class="mb-1">{post.Content}</p>
-              <small>by {post.User.Username} on {post.FormattedCreatedAt}</small>
+              // <small>by {post.User.Username} on {post.FormattedCreatedAt}</small>
+              <small> Posted on {post.FormattedCreatedAt}</small>
             </div>
           }
         </div>

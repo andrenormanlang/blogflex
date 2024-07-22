@@ -29,8 +29,6 @@ func CreatePostFormHandler(w http.ResponseWriter, r *http.Request) {
     templ.Handler(component).ServeHTTP(w, r)
 }
 
-
-
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "session-name")
     userID, ok := session.Values["userID"].(string)
@@ -154,12 +152,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusCreated)
 }
 
-
-
-
-
-
-
 // PostListHandler handles displaying a list of posts
 func PostListHandler(w http.ResponseWriter, r *http.Request) {
     query := `
@@ -253,24 +245,36 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     result, err := database.ExecuteGraphQL(query, variables)
-    if err != nil || len(result["errors"].([]interface{})) > 0 {
+    if err != nil {
+        log.Printf("Failed to execute GraphQL query: %v", err)
         http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
-        log.Printf("Post not found: %v", id) // Log the ID not found
         return
     }
 
-    postData := result["data"].(map[string]interface{})["posts_by_pk"].(map[string]interface{})
-    userMap := postData["user"].(map[string]interface{})
+    // Check if the result directly contains the required data
+    postData, ok := result["posts_by_pk"].(map[string]interface{})
+    if !ok || postData == nil {
+        log.Printf("posts_by_pk is nil or not a map: %v", result)
+        http.Error(w, "Post not found", http.StatusNotFound)
+        return
+    }
+
+    userMap, ok := postData["user"].(map[string]interface{})
+    if !ok || userMap == nil {
+        log.Printf("user is nil or not a map: %v", postData["user"])
+        http.Error(w, "User data not found", http.StatusInternalServerError)
+        return
+    }
 
     post := models.Post{
         ID:       uint(postData["id"].(float64)),
         Title:    postData["title"].(string),
         Content:  postData["content"].(string),
-       User: &models.User{
-                Username: userMap["username"].(string),
-            },
+        User: &models.User{
+            Username: userMap["username"].(string),
+        },
         FormattedCreatedAt: postData["created_at"].(string),
-        BlogID:    uint(postData["blog_id"].(int)),
+        BlogID:    uint(postData["blog_id"].(float64)), // Ensure blog_id is correctly handled
     }
 
     log.Printf("Post found: ID=%d, Title=%s", post.ID, post.Title) // Log the found post
@@ -294,3 +298,5 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         templ.Handler(component).ServeHTTP(w, r)
     }
 }
+
+

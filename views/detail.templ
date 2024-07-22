@@ -1,6 +1,9 @@
 package views
 
-import "blogflex/internal/models"
+import (
+    "fmt"
+    "blogflex/internal/models"
+)
 
 templ PostDetail(post models.Post) {
   <head>
@@ -27,10 +30,11 @@ templ PostDetail(post models.Post) {
           </div>
         }
       </div>
-      <a href="/protected/posts" class="inline-block mb-4 text-indigo-600 hover:text-indigo-900">
-        &larr; Back to Posts
+      <a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", post.BlogID)) } class="inline-block mb-4 text-indigo-600 hover:text-indigo-900">
+        &larr; Back to User's Blog Page
       </a>
     </div>
     <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
   </body>
 }
+

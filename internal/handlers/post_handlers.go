@@ -16,6 +16,7 @@ import (
     "blogflex/internal/database"
     "fmt"
     "blogflex/internal/helpers"
+    "time"
 )
 
 func CreatePostFormHandler(w http.ResponseWriter, r *http.Request) {
@@ -267,6 +268,17 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    createdAtStr, ok := postData["created_at"].(string)
+    var formattedCreatedAt string
+    if ok {
+        createdAt, err := time.Parse("2006-01-02T15:04:05", createdAtStr)
+        if err != nil {
+            log.Printf("Error parsing post created_at time: %v", err)
+        } else {
+            formattedCreatedAt = helpers.FormatTime(createdAt)
+        }
+    }
+
     post := models.Post{
         ID:       uint(postData["id"].(float64)),
         Title:    postData["title"].(string),
@@ -274,7 +286,7 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         User: &models.User{
             Username: userMap["username"].(string),
         },
-        FormattedCreatedAt: postData["created_at"].(string),
+        FormattedCreatedAt: formattedCreatedAt,
         BlogID:    uint(postData["blog_id"].(float64)), // Ensure blog_id is correctly handled
     }
 

@@ -15,6 +15,7 @@ import (
     "github.com/gorilla/mux"
     "blogflex/internal/database"
     "fmt"
+    "blogflex/internal/helpers"
 )
 
 func CreatePostFormHandler(w http.ResponseWriter, r *http.Request) {
@@ -292,9 +293,10 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
             http.Error(w, err.Error(), http.StatusInternalServerError)
         }
     } else {
+        loggedIn := helpers.IsLoggedIn(r)
         log.Println("Returning HTML response") // Log the branch being executed
         // Render HTML template
-        component := views.PostDetail(post) // Correctly refer to the templates.PostDetail component
+        component := views.PostDetail(post, loggedIn) // Correctly refer to the templates.PostDetail component
         templ.Handler(component).ServeHTTP(w, r)
     }
 }

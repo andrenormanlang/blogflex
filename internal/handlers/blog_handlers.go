@@ -122,6 +122,8 @@ func BlogListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // BlogPageHandler handles displaying a single blog page with its posts
+// BlogPageHandler handles displaying a single blog page with its posts
+// BlogPageHandler handles displaying a single blog page with its posts
 func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     blogID, err := strconv.Atoi(vars["id"])
@@ -130,75 +132,51 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    query := `
-query GetBlog($id: Int!) {
-    blogs_by_pk(id: $id) {
-        id
-        name
-        description
-        user {
-            id
-            username
-        }
-        posts(order_by: {created_at: desc}) {
-            id
-            title
-            content
-            user {
-                username
-            }
-            created_at
-            comments_aggregate {
-                aggregate {
-                    count
+    // Query to get blog details and posts
+    blogQuery := `
+        query GetBlogWithPosts($id: Int!) {
+            blogs_by_pk(id: $id) {
+                id
+                name
+                description
+                posts {
+                    id
+                    title
+                    content
+                    created_at
+                    comments_aggregate {
+                        aggregate {
+                            count
+                        }
+                    }
                 }
             }
-            likes_count
         }
-    }
-}`
-
-    variables := map[string]interface{}{
+    `
+    blogVariables := map[string]interface{}{
         "id": blogID,
     }
 
-    result, err := helpers.GraphQLRequest(query, variables)
+    blogResult, err := helpers.GraphQLRequest(blogQuery, blogVariables)
     if err != nil {
         log.Printf("Failed to fetch blog: %v", err)
         http.Error(w, "Failed to fetch blog", http.StatusInternalServerError)
         return
     }
 
-    log.Printf("GraphQL result: %+v\n", result)
+    log.Printf("GraphQL blog result: %+v\n", blogResult)
 
-    if result["data"] == nil {
-        log.Println("result[data] is nil")
+    if blogResult["data"] == nil {
+        log.Println("blogResult[data] is nil")
         http.Error(w, "Failed to fetch blog data", http.StatusInternalServerError)
         return
     }
 
-    data, ok := result["data"].(map[string]interface{})
-    if !ok || data["blogs_by_pk"] == nil {
-        log.Println("data[blogs_by_pk] is nil or not a map")
-        http.Error(w, "Failed to fetch blog data", http.StatusInternalServerError)
-        return
-    }
-
-    blogData, ok := data["blogs_by_pk"].(map[string]interface{})
-    if !ok {
+    blogData, ok := blogResult["data"].(map[string]interface{})["blogs_by_pk"].(map[string]interface{})
+    if !ok || blogData == nil {
         log.Println("blogData is nil or not a map")
         http.Error(w, "Failed to fetch blog data", http.StatusInternalServerError)
         return
-    }
-
-    var userMap map[string]interface{}
-    if blogData["user"] != nil {
-        userMap, ok = blogData["user"].(map[string]interface{})
-        if !ok {
-            userMap = map[string]interface{}{"id": "0", "username": "Unknown"}
-        }
-    } else {
-        userMap = map[string]interface{}{"id": "0", "username": "Unknown"}
     }
 
     postsData, ok := blogData["posts"].([]interface{})
@@ -207,6 +185,53 @@ query GetBlog($id: Int!) {
         postsData = []interface{}{}
     }
 
+    // Collect post IDs to fetch likes count
+    var postIDs []int
+    for _, postData := range postsData {
+        postMap := postData.(map[string]interface{})
+        postID := int(postMap["id"].(float64))
+        postIDs = append(postIDs, postID)
+    }
+
+    // Query to get likes count for the posts
+    likesQuery := `
+        query GetLikesCounts($post_ids: [Int!]!) {
+            posts_with_likes(where: {post_id: {_in: $post_ids}}) {
+                post_id
+                likes_count
+            }
+        }
+    `
+    likesVariables := map[string]interface{}{
+        "post_ids": postIDs,
+    }
+
+    likesResult, err := helpers.GraphQLRequest(likesQuery, likesVariables)
+    if err != nil {
+        log.Printf("Failed to fetch likes count: %v", err)
+        http.Error(w, "Failed to fetch likes count", http.StatusInternalServerError)
+        return
+    }
+
+    log.Printf("GraphQL likes result: %+v\n", likesResult)
+
+    likesData, ok := likesResult["data"].(map[string]interface{})["posts_with_likes"].([]interface{})
+    if !ok || likesData == nil {
+        log.Printf("posts_with_likes is nil or not a slice: %v", likesResult["data"])
+        http.Error(w, "Failed to fetch likes data", http.StatusInternalServerError)
+        return
+    }
+
+    // Create a map of post IDs to likes count
+    likesMap := make(map[int]int)
+    for _, like := range likesData {
+        likeMap := like.(map[string]interface{})
+        postID := int(likeMap["post_id"].(float64))
+        likesCount := int(likeMap["likes_count"].(float64))
+        likesMap[postID] = likesCount
+    }
+
+    // Process posts and combine likes count
     var posts []models.Post
     for _, postData := range postsData {
         postMap, ok := postData.(map[string]interface{})
@@ -215,21 +240,7 @@ query GetBlog($id: Int!) {
             continue
         }
 
-        var postUserMap map[string]interface{}
-        if postMap["user"] != nil {
-            postUserMap, ok = postMap["user"].(map[string]interface{})
-            if !ok {
-                postUserMap = map[string]interface{}{"username": "Unknown"}
-            }
-        } else {
-            postUserMap = map[string]interface{}{"username": "Unknown"}
-        }
-
-        postID, ok := postMap["id"].(float64)
-        if !ok {
-            log.Printf("postMap[id] is not a float64: %v\n", postMap["id"])
-            continue
-        }
+        postID := int(postMap["id"].(float64))
 
         createdAtStr, ok := postMap["created_at"].(string)
         var formattedCreatedAt string
@@ -246,42 +257,17 @@ query GetBlog($id: Int!) {
             ID:                uint(postID),
             Title:             postMap["title"].(string),
             Content:           postMap["content"].(string),
-            User:              &models.User{Username: postUserMap["username"].(string)},
             FormattedCreatedAt: formattedCreatedAt,
             CommentsCount:     int(postMap["comments_aggregate"].(map[string]interface{})["aggregate"].(map[string]interface{})["count"].(float64)),
-            LikesCount:        int(postMap["likes_count"].(float64)), // Correctly handle likes_count as float64
+            LikesCount:        likesMap[postID], // Get likes count from the map
         })
     }
 
-    blogIDFloat, ok := blogData["id"].(float64)
-    if !ok {
-        log.Printf("blogData[id] is not a float64: %v\n", blogData["id"])
-        http.Error(w, "Invalid blog ID", http.StatusInternalServerError)
-        return
-    }
-
-    createdAtStr, ok := blogData["created_at"].(string)
-    var formattedCreatedAt string
-    if ok {
-        createdAt, err := time.Parse("2006-01-02T15:04:05", createdAtStr)
-        if err != nil {
-            log.Printf("Error parsing blog created_at time: %v", err)
-            http.Error(w, "Invalid blog created_at time", http.StatusInternalServerError)
-            return
-        }
-        formattedCreatedAt = helpers.FormatTime(createdAt)
-    }
-
     blog := models.Blog{
-        ID:                uint(blogIDFloat),
-        Name:              blogData["name"].(string),
-        Description:       blogData["description"].(string),
-        FormattedCreatedAt: formattedCreatedAt,
-        User: &models.User{
-            ID:       userMap["id"].(string),
-            Username: userMap["username"].(string),
-        },
-        UserID: uint(blogIDFloat), // Convert to uint
+        ID:          uint(blogData["id"].(float64)),
+        Name:        blogData["name"].(string),
+        Description: blogData["description"].(string),
+        User:        &models.User{Username: "unknown"},
     }
 
     // Check if user is authenticated to determine if they can create posts
@@ -307,5 +293,7 @@ query GetBlog($id: Int!) {
     templ.Handler(component).ServeHTTP(w, r)
     log.Println("Blog page rendered successfully")
 }
+
+
 
 

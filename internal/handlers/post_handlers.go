@@ -367,73 +367,6 @@ func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusOK)
 }
 
-
-
-// PostListHandler handles displaying a list of posts
-func PostListHandler(w http.ResponseWriter, r *http.Request) {
-    query := `
-        query {
-            posts {
-                id
-                title
-                content
-                user {
-                    username
-                }
-                blog_id
-            }
-        }
-    `
-
-    result, err := database.ExecuteGraphQL(query, nil)
-    if err != nil || len(result["errors"].([]interface{})) > 0 {
-        http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
-        return
-    }
-
-    postsData := result["data"].(map[string]interface{})["posts"].([]interface{})
-    var posts []models.Post
-    for _, postData := range postsData {
-        postMap := postData.(map[string]interface{})
-        userMap := postMap["user"].(map[string]interface{})
-
-        posts = append(posts, models.Post{
-            ID:      uint(postMap["id"].(float64)),
-            Title:   postMap["title"].(string),
-            Content: postMap["content"].(string),
-            User: &models.User{
-                Username: userMap["username"].(string),
-            },
-            BlogID: uint(postMap["blog_id"].(int)),
-        })
-    }
-
-    // Log the posts to ensure they have IDs
-    for _, post := range posts {
-        log.Printf("Post ID: %d, Title: %s", post.ID, post.Title)
-    }
-
-    // Check the Accept header to determine the response format
-    acceptHeader := r.Header.Get("Accept")
-    log.Printf("Accept header: %s", acceptHeader) // Log the Accept header value
-
-    if strings.Contains(acceptHeader, "application/json") {
-        log.Println("Returning JSON response") // Log the branch being executed
-        // Set the content type to JSON
-        w.Header().Set("Content-Type", "application/json")
-        // Encode the posts as JSON and write to the response
-        if err := json.NewEncoder(w).Encode(posts); err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-        }
-    } else {
-        log.Println("Returning HTML response") // Log the branch being executed
-        // Render HTML template
-        component := views.PostList(posts) // Correctly refer to the templates.PostList component
-        templ.Handler(component).ServeHTTP(w, r)
-    }
-}
-
-// PostDetailHandler handles displaying the details of a single post
 func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     id, err := strconv.Atoi(vars["id"])
@@ -443,6 +376,7 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Query to get post details
     query := `
         query GetPost($id: Int!) {
             posts_by_pk(id: $id) {
@@ -461,6 +395,7 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     variables := map[string]interface{}{
         "id": id,
     }
+    
 
     result, err := database.ExecuteGraphQL(query, variables)
     if err != nil {
@@ -507,6 +442,35 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         BlogID:    uint(postData["blog_id"].(float64)), // Ensure blog_id is correctly handled
     }
 
+
+    // Query to get likes count
+    likesCountQuery := `
+        query GetLikesCount($post_id: Int!) {
+            posts_with_likes(where: {id: {_eq: $post_id}}) {
+                likes_count
+            }
+        }
+    `
+    likesCountVariables := map[string]interface{}{
+        "post_id": id,
+    }
+
+    likesCountResult, err := database.ExecuteGraphQL(likesCountQuery, likesCountVariables)
+    if err != nil {
+        log.Printf("Failed to execute GraphQL query: %v", err)
+        http.Error(w, "Failed to fetch likes count", http.StatusInternalServerError)
+        return
+    }
+
+    likesData, ok := likesCountResult["data"].(map[string]interface{})["posts_with_likes"].([]interface{})
+    if !ok || len(likesData) == 0 {
+        log.Printf("posts_with_likes is nil or empty: %v", likesCountResult)
+        post.LikesCount = 0 // Default to 0 if no data is returned
+    } else {
+        likesCount := int(likesData[0].(map[string]interface{})["likes_count"].(float64))
+        post.LikesCount = likesCount
+    }
+
     // Check if the logged-in user is the owner of the post
     session, _ := store.Get(r, "session-name")
     loggedInUserID, ok := session.Values["userID"].(string)
@@ -534,6 +498,18 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         templ.Handler(component).ServeHTTP(w, r)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

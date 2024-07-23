@@ -118,20 +118,20 @@ func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/posts/%d/like", post.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 35, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 35, Col: 87}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#like-button\" hx-swap=\"outerHTML\"><i class=\"fas fa-thumbs-up\"></i> <span id=\"likes-count\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#like-button\" hx-swap=\"outerHTML\"><i class=\"fas fa-thumbs-up mt-2\"></i> <span id=\"likes-count\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.LikesCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 36, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 36, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {

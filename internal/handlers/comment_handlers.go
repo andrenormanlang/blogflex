@@ -10,6 +10,7 @@ import (
     "time"
     "blogflex/internal/database"
     "fmt"
+    "log"
 )
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -105,7 +106,7 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusCreated)
 }
 
-func LikePostHandler(w http.ResponseWriter, r *http.Request) {
+func ToggleLikePostHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     postID, err := strconv.Atoi(vars["id"])
     if err != nil {
@@ -120,23 +121,76 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Check if the user has already liked the post
     query := `
-        mutation LikePost($post_id: Int!, $user_id: uuid!, $created_at: timestamptz!) {
-            insert_likes_one(object: {post_id: $post_id, user_id: $user_id, created_at: $created_at}) {
+        query CheckLike($post_id: Int!, $user_id: uuid!) {
+            likes(where: {post_id: {_eq: $post_id}, user_id: {_eq: $user_id}}) {
                 id
             }
         }
     `
     variables := map[string]interface{}{
-        "post_id":    postID,
-        "user_id":    userID,
-        "created_at": time.Now().Format(time.RFC3339),
+        "post_id": postID,
+        "user_id": userID,
     }
 
-    _, err = database.ExecuteGraphQL(query, variables)
+    result, err := database.ExecuteGraphQL(query, variables)
     if err != nil {
-        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to like post")
+        log.Printf("Failed to check like status: %v", err)
+        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to retrieve like status")
         return
+    }
+
+    log.Printf("CheckLike result: %v", result)
+
+    likes, ok := result["likes"].([]interface{})
+    if !ok {
+        log.Printf("Unexpected format for 'likes': %v", result)
+        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to retrieve like status")
+        return
+    }
+
+    if len(likes) > 0 {
+        // User has liked the post, so unlike it
+        likeID := likes[0].(map[string]interface{})["id"].(float64)
+        deleteQuery := `
+            mutation UnlikePost($id: Int!) {
+                delete_likes_by_pk(id: $id) {
+                    id
+                }
+            }
+        `
+        deleteVariables := map[string]interface{}{
+            "id": int(likeID),
+        }
+
+        _, err = database.ExecuteGraphQL(deleteQuery, deleteVariables)
+        if err != nil {
+            log.Printf("Failed to unlike post: %v", err)
+            helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to unlike post")
+            return
+        }
+    } else {
+        // User has not liked the post, so like it
+        likeQuery := `
+            mutation LikePost($post_id: Int!, $user_id: uuid!, $created_at: timestamptz!) {
+                insert_likes_one(object: {post_id: $post_id, user_id: $user_id, created_at: $created_at}) {
+                    id
+                }
+            }
+        `
+        likeVariables := map[string]interface{}{
+            "post_id":    postID,
+            "user_id":    userID,
+            "created_at": time.Now().Format(time.RFC3339),
+        }
+
+        _, err = database.ExecuteGraphQL(likeQuery, likeVariables)
+        if err != nil {
+            log.Printf("Failed to like post: %v", err)
+            helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to like post")
+            return
+        }
     }
 
     // Fetch updated like count
@@ -153,11 +207,21 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 
     likesCountResult, err := database.ExecuteGraphQL(likesCountQuery, likesCountVariables)
     if err != nil {
+        log.Printf("Failed to fetch likes count: %v", err)
         helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch likes count")
         return
     }
 
-    likesCount := int(likesCountResult["posts_with_likes"].([]interface{})[0].(map[string]interface{})["likes_count"].(float64))
+    log.Printf("GetLikesCount result: %v", likesCountResult)
+
+    postsWithLikes, ok := likesCountResult["posts_with_likes"].([]interface{})
+    if !ok || len(postsWithLikes) == 0 {
+        log.Printf("Unexpected format or empty 'posts_with_likes': %v", likesCountResult)
+        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch likes count")
+        return
+    }
+
+    likesCount := int(postsWithLikes[0].(map[string]interface{})["likes_count"].(float64))
 
     // Return the updated HTML for the button
     w.Header().Set("Content-Type", "text/html")
@@ -166,6 +230,10 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
         <i class="fas fa-thumbs-up"></i> <span id="likes-count">%d</span>
     </button>`, postID, likesCount)))
 }
+
+
+
+
 
 
 

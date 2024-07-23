@@ -1,11 +1,11 @@
 package router
 
 import (
-	"blogflex/internal/handlers"
-	"blogflex/internal/middleware"
-	"net/http"
+    "blogflex/internal/handlers"
+    "blogflex/internal/middleware"
+    "net/http"
 
-	"github.com/gorilla/mux"
+    "github.com/gorilla/mux"
 )
 
 func SetupRouter() *mux.Router {
@@ -35,7 +35,7 @@ func SetupRouter() *mux.Router {
     protected.HandleFunc("/posts/{id}/edit", handlers.EditPostFormHandler).Methods("GET")
     protected.HandleFunc("/posts/{id}/edit", handlers.EditPostHandler).Methods("POST")
     protected.HandleFunc("/posts/{id}", handlers.DeletePostHandler).Methods("DELETE")
-    protected.HandleFunc("/posts/{id}/like", handlers.LikePostHandler).Methods("POST") // Ensure this route is defined
+    protected.HandleFunc("/posts/{id}/like", handlers.ToggleLikePostHandler).Methods("POST") // Ensure this route is defined
 
     return r
 }

@@ -86,11 +86,13 @@ func ExecuteGraphQL(query string, variables map[string]interface{}) (map[string]
         "variables": variables,
     })
     if err != nil {
+        log.Printf("Failed to marshal request body: %v", err)
         return nil, err
     }
 
     req, err := http.NewRequest("POST", HasuraEndpoint, bytes.NewBuffer(requestBody))
     if err != nil {
+        log.Printf("Failed to create new HTTP request: %v", err)
         return nil, err
     }
     req.Header.Set("Content-Type", "application/json")
@@ -99,12 +101,14 @@ func ExecuteGraphQL(query string, variables map[string]interface{}) (map[string]
     client := &http.Client{}
     resp, err := client.Do(req)
     if err != nil {
+        log.Printf("HTTP request failed: %v", err)
         return nil, err
     }
     defer resp.Body.Close()
 
     var result map[string]interface{}
     if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        log.Printf("Failed to decode response body: %v", err)
         return nil, err
     }
 
@@ -114,9 +118,15 @@ func ExecuteGraphQL(query string, variables map[string]interface{}) (map[string]
             errorMap := err.(map[string]interface{})
             errorMessages = append(errorMessages, errorMap["message"].(string))
         }
+        log.Printf("GraphQL errors: %v", strings.Join(errorMessages, "; "))
         return nil, errors.New(strings.Join(errorMessages, "; "))
     }
 
-    return result["data"].(map[string]interface{}), nil
-}
+    data, ok := result["data"].(map[string]interface{})
+    if !ok {
+        log.Printf("Response does not contain 'data': %v", result)
+        return nil, errors.New("response does not contain 'data'")
+    }
 
+    return data, nil
+}

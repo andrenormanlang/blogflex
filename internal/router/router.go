@@ -1,10 +1,11 @@
 package router
 
 import (
-    "github.com/gorilla/mux"
-    "blogflex/internal/handlers"
-    "blogflex/internal/middleware"
-    "net/http"
+	"blogflex/internal/handlers"
+	"blogflex/internal/middleware"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func SetupRouter() *mux.Router {
@@ -19,7 +20,8 @@ func SetupRouter() *mux.Router {
     r.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
     r.HandleFunc("/blogs/{id}", handlers.BlogPageHandler).Methods("GET")
     r.HandleFunc("/posts/{id}", handlers.PostDetailHandler).Methods("GET")
-    
+    r.HandleFunc("/posts/{id}/like", handlers.GetLikesCountHandler).Methods("GET")
+
     // Serve static files
     r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 
@@ -30,11 +32,9 @@ func SetupRouter() *mux.Router {
     protected.HandleFunc("/blogs/create", handlers.CreateBlogHandler).Methods("GET", "POST")
     protected.HandleFunc("/posts/create", handlers.CreatePostFormHandler).Methods("GET")
     protected.HandleFunc("/posts", handlers.CreatePostHandler).Methods("POST")
-
-    // Protected edit and delete routes
-    protected.HandleFunc("/posts/{id}/edit", handlers.EditPostFormHandler).Methods("GET")
     protected.HandleFunc("/posts/{id}/edit", handlers.EditPostHandler).Methods("POST")
-    protected.HandleFunc("/posts/{id}", handlers.DeletePostHandler).Methods("DELETE")
+    protected.HandleFunc("/posts/{id}/delete", handlers.DeletePostHandler).Methods("DELETE")
+    protected.HandleFunc("/posts/{id}/like", handlers.LikePostHandler).Methods("POST") // Ensure this route is defined
 
     return r
 }

@@ -119,3 +119,4 @@ func ExecuteGraphQL(query string, variables map[string]interface{}) (map[string]
 
     return result["data"].(map[string]interface{}), nil
 }
+

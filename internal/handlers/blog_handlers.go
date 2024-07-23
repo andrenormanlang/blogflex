@@ -1,25 +1,24 @@
 package handlers
 
 import (
-    "encoding/json"
-    "io"
-    "blogflex/internal/models"
-    "net/http"
-    "net/url"
-    "strconv"
-    "strings"
-    "github.com/a-h/templ"
-    "github.com/gorilla/mux"
-    "blogflex/internal/auth"
-    "blogflex/internal/helpers"
-    "time"
-    "blogflex/views"
-    "github.com/gorilla/sessions"
-    "github.com/dgrijalva/jwt-go"
-    "log"
+	"blogflex/internal/auth"
+	"blogflex/internal/helpers"
+	"blogflex/internal/models"
+	"blogflex/views"
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
 
+	"github.com/a-h/templ"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
-
 
 // CreateBlogHandler handles creating a new blog
 func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
@@ -132,27 +131,33 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     query := `
-    query GetBlog($id: Int!) {
-        blogs_by_pk(id: $id) {
+query GetBlog($id: Int!) {
+    blogs_by_pk(id: $id) {
+        id
+        name
+        description
+        user {
             id
-            name
-            description
+            username
+        }
+        posts(order_by: {created_at: desc}) {
+            id
+            title
+            content
             user {
-                id
                 username
             }
-            posts(order_by: {created_at: desc}) {
-                id
-                title
-                content
-                user {
-                    username
+            created_at
+            comments_aggregate {
+                aggregate {
+                    count
                 }
-                created_at
             }
+            likes_count
         }
-    }`
-    
+    }
+}`
+
     variables := map[string]interface{}{
         "id": blogID,
     }
@@ -238,13 +243,13 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         posts = append(posts, models.Post{
-            ID:       uint(postID),
-            Title:    postMap["title"].(string),
-            Content:  postMap["content"].(string),
-            User: &models.User{
-                Username: postUserMap["username"].(string),
-            },
+            ID:                uint(postID),
+            Title:             postMap["title"].(string),
+            Content:           postMap["content"].(string),
+            User:              &models.User{Username: postUserMap["username"].(string)},
             FormattedCreatedAt: formattedCreatedAt,
+            CommentsCount:     int(postMap["comments_aggregate"].(map[string]interface{})["aggregate"].(map[string]interface{})["count"].(float64)),
+            LikesCount:        int(postMap["likes_count"].(float64)), // Correctly handle likes_count as float64
         })
     }
 
@@ -268,9 +273,9 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     blog := models.Blog{
-        ID:                 uint(blogIDFloat),
-        Name:               blogData["name"].(string),
-        Description:        blogData["description"].(string),
+        ID:                uint(blogIDFloat),
+        Name:              blogData["name"].(string),
+        Description:       blogData["description"].(string),
         FormattedCreatedAt: formattedCreatedAt,
         User: &models.User{
             ID:       userMap["id"].(string),

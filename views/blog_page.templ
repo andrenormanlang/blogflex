@@ -3,6 +3,7 @@ package views
 import (
     "blogflex/internal/models"
     "fmt"
+    "strconv"
 )
 
 templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool, successMessage string) {
@@ -32,8 +33,11 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
             <div class="list-group-item">
               <h5 class="mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>{post.Title}</a></h5>
               <p class="mb-1">{post.Content}</p>
-              // <small>by {post.User.Username} on {post.FormattedCreatedAt}</small>
-              <small> Posted on {post.FormattedCreatedAt}</small>
+              <small>Posted on {post.FormattedCreatedAt}</small>
+              <div>
+                <span>Comments: { strconv.Itoa(post.CommentsCount) }</span>
+                <span>Likes: { strconv.Itoa(post.LikesCount) }</span>
+              </div>
             </div>
           }
         </div>
@@ -42,4 +46,3 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
     </body>
   </html>
 }
-

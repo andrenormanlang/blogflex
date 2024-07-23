@@ -395,7 +395,6 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     variables := map[string]interface{}{
         "id": id,
     }
-    
 
     result, err := database.ExecuteGraphQL(query, variables)
     if err != nil {
@@ -442,11 +441,10 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         BlogID:    uint(postData["blog_id"].(float64)), // Ensure blog_id is correctly handled
     }
 
-
     // Query to get likes count
     likesCountQuery := `
         query GetLikesCount($post_id: Int!) {
-            posts_with_likes(where: {id: {_eq: $post_id}}) {
+            posts_with_likes(where: {post_id: {_eq: $post_id}}) {
                 likes_count
             }
         }
@@ -462,12 +460,13 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    likesData, ok := likesCountResult["data"].(map[string]interface{})["posts_with_likes"].([]interface{})
-    if !ok || len(likesData) == 0 {
-        log.Printf("posts_with_likes is nil or empty: %v", likesCountResult)
+    // Directly check for the `posts_with_likes` key in the result
+    postsWithLikes, ok := likesCountResult["posts_with_likes"].([]interface{})
+    if !ok || len(postsWithLikes) == 0 {
+        log.Printf("posts_with_likes is nil or empty: %v", likesCountResult["posts_with_likes"])
         post.LikesCount = 0 // Default to 0 if no data is returned
     } else {
-        likesCount := int(likesData[0].(map[string]interface{})["likes_count"].(float64))
+        likesCount := int(postsWithLikes[0].(map[string]interface{})["likes_count"].(float64))
         post.LikesCount = likesCount
     }
 
@@ -498,6 +497,7 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         templ.Handler(component).ServeHTTP(w, r)
     }
 }
+
 
 
 

@@ -109,58 +109,33 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     postID, err := strconv.Atoi(vars["id"])
     if err != nil {
-        respondWithError(w, http.StatusBadRequest, "Invalid post ID")
+        helpers.RespondWithError(w, http.StatusBadRequest, "Invalid post ID")
         return
     }
 
     session, _ := store.Get(r, "session-name")
     userID, ok := session.Values["userID"].(string)
     if !ok {
-        respondWithError(w, http.StatusUnauthorized, "Unauthorized")
+        helpers.RespondWithError(w, http.StatusUnauthorized, "Unauthorized")
         return
     }
 
-    // Check if the user has already liked the post
-    checkLikeQuery := `
-        query CheckLike($post_id: Int!, $user_id: uuid!) {
-            likes(where: {post_id: {_eq: $post_id}, user_id: {_eq: $user_id}}) {
-                id
-            }
-        }
-    `
-    checkLikeVariables := map[string]interface{}{
-        "post_id": postID,
-        "user_id": userID,
-    }
-
-    checkLikeResult, err := database.ExecuteGraphQL(checkLikeQuery, checkLikeVariables)
-    if err != nil {
-        respondWithError(w, http.StatusInternalServerError, "Failed to check like status")
-        return
-    }
-
-    if len(checkLikeResult["data"].(map[string]interface{})["likes"].([]interface{})) > 0 {
-        respondWithError(w, http.StatusBadRequest, "You have already liked this post")
-        return
-    }
-
-    // Add the like
-    addLikeQuery := `
+    query := `
         mutation LikePost($post_id: Int!, $user_id: uuid!, $created_at: timestamptz!) {
             insert_likes_one(object: {post_id: $post_id, user_id: $user_id, created_at: $created_at}) {
                 id
             }
         }
     `
-    addLikeVariables := map[string]interface{}{
+    variables := map[string]interface{}{
         "post_id":    postID,
         "user_id":    userID,
         "created_at": time.Now().Format(time.RFC3339),
     }
 
-    _, err = database.ExecuteGraphQL(addLikeQuery, addLikeVariables)
+    _, err = database.ExecuteGraphQL(query, variables)
     if err != nil {
-        respondWithError(w, http.StatusInternalServerError, "Failed to like post")
+        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to like post")
         return
     }
 
@@ -178,17 +153,11 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 
     likesCountResult, err := database.ExecuteGraphQL(likesCountQuery, likesCountVariables)
     if err != nil {
-        respondWithError(w, http.StatusInternalServerError, "Failed to fetch likes count")
+        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch likes count")
         return
     }
 
-    likesData, ok := likesCountResult["data"].(map[string]interface{})["posts_with_likes"].([]interface{})
-    if !ok || len(likesData) == 0 {
-        respondWithError(w, http.StatusInternalServerError, "Failed to fetch likes count")
-        return
-    }
-
-    likesCount := int(likesData[0].(map[string]interface{})["likes_count"].(float64))
+    likesCount := int(likesCountResult["posts_with_likes"].([]interface{})[0].(map[string]interface{})["likes_count"].(float64))
 
     // Return the updated HTML for the button
     w.Header().Set("Content-Type", "text/html")
@@ -196,15 +165,6 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte(fmt.Sprintf(`<button id="like-button" hx-post="/protected/posts/%d/like" hx-target="#like-button" hx-swap="outerHTML">
         <i class="fas fa-thumbs-up"></i> <span id="likes-count">%d</span>
     </button>`, postID, likesCount)))
-}
-
-
-
-
-func respondWithError(w http.ResponseWriter, code int, message string) {
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(code)
-    json.NewEncoder(w).Encode(map[string]string{"error": message})
 }
 
 

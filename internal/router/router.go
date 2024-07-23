@@ -32,8 +32,9 @@ func SetupRouter() *mux.Router {
     protected.HandleFunc("/blogs/create", handlers.CreateBlogHandler).Methods("GET", "POST")
     protected.HandleFunc("/posts/create", handlers.CreatePostFormHandler).Methods("GET")
     protected.HandleFunc("/posts", handlers.CreatePostHandler).Methods("POST")
+    protected.HandleFunc("/posts/{id}/edit", handlers.EditPostFormHandler).Methods("GET")
     protected.HandleFunc("/posts/{id}/edit", handlers.EditPostHandler).Methods("POST")
-    protected.HandleFunc("/posts/{id}/delete", handlers.DeletePostHandler).Methods("DELETE")
+    protected.HandleFunc("/posts/{id}", handlers.DeletePostHandler).Methods("DELETE")
     protected.HandleFunc("/posts/{id}/like", handlers.LikePostHandler).Methods("POST") // Ensure this route is defined
 
     return r

@@ -154,6 +154,221 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusCreated)
 }
 
+func EditPostFormHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    id, err := strconv.Atoi(vars["id"])
+    if err != nil {
+        http.Error(w, "Invalid post ID", http.StatusBadRequest)
+        return
+    }
+
+    query := `
+        query GetPost($id: Int!) {
+            posts_by_pk(id: $id) {
+                id
+                title
+                content
+                user {
+                    id
+                }
+                created_at
+                blog_id
+            }
+        }
+    `
+    variables := map[string]interface{}{
+        "id": id,
+    }
+
+    result, err := database.ExecuteGraphQL(query, variables)
+    if err != nil {
+        log.Printf("Failed to execute GraphQL query: %v", err)
+        http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
+        return
+    }
+
+    // Check if the result directly contains the required data
+    postData, ok := result["posts_by_pk"].(map[string]interface{})
+    if (!ok) || postData == nil {
+        log.Printf("posts_by_pk is nil or not a map: %v", result)
+        http.Error(w, "Post not found", http.StatusNotFound)
+        return
+    }
+
+    userMap, ok := postData["user"].(map[string]interface{})
+    if (!ok) || userMap == nil {
+        log.Printf("user is nil or not a map: %v", postData["user"])
+        http.Error(w, "User data not found", http.StatusInternalServerError)
+        return
+    }
+
+    // Ensure only the owner can edit the post
+    session, _ := store.Get(r, "session-name")
+    loggedInUserID, ok := session.Values["userID"].(string)
+    if (!ok) || loggedInUserID != userMap["id"].(string) {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    post := models.Post{
+        ID:      uint(postData["id"].(float64)),
+        Title:   postData["title"].(string),
+        Content: postData["content"].(string),
+    }
+
+    component := views.EditPost(post)
+    templ.Handler(component).ServeHTTP(w, r)
+}
+
+func EditPostHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    id, err := strconv.Atoi(vars["id"])
+    if err != nil {
+        http.Error(w, "Invalid post ID", http.StatusBadRequest)
+        return
+    }
+
+    session, _ := store.Get(r, "session-name")
+    userID, ok := session.Values["userID"].(string)
+    if !ok {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    var post struct {
+        Title   string `json:"title"`
+        Content string `json:"content"`
+    }
+
+    body, err := io.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    contentType := r.Header.Get("Content-Type")
+    if strings.Contains(contentType, "application/json") {
+        err = json.Unmarshal(body, &post)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+    } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+        values, err := url.ParseQuery(string(body))
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+
+        post.Title = values.Get("title")
+        post.Content = values.Get("content")
+    } else {
+        http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
+        return
+    }
+
+    query := `
+        mutation UpdatePost($id: Int!, $title: String!, $content: String!, $user_id: uuid!) {
+            update_posts(where: {id: {_eq: $id}, user_id: {_eq: $user_id}}, _set: {title: $title, content: $content}) {
+                affected_rows
+            }
+        }
+    `
+    variables := map[string]interface{}{
+        "id":      id,
+        "title":   post.Title,
+        "content": post.Content,
+        "user_id": userID,
+    }
+
+    result, err := database.ExecuteGraphQL(query, variables)
+    if err != nil {
+        log.Printf("Error executing GraphQL mutation: %v", err)
+        http.Error(w, "Failed to update post", http.StatusInternalServerError)
+        return
+    }
+
+    log.Printf("GraphQL mutation result: %v", result)
+    w.Header().Set("HX-Redirect", fmt.Sprintf("/posts/%d", id)) // Redirect to post detail page
+    w.WriteHeader(http.StatusOK)
+}
+
+
+func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    id, err := strconv.Atoi(vars["id"])
+    if err != nil {
+        http.Error(w, "Invalid post ID", http.StatusBadRequest)
+        return
+    }
+
+    session, _ := store.Get(r, "session-name")
+    userID, ok := session.Values["userID"].(string)
+    if !ok {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    // Fetch blog ID before deleting the post
+    query := `
+        query GetPost($id: Int!) {
+            posts_by_pk(id: $id) {
+                blog_id
+            }
+        }
+    `
+    variables := map[string]interface{}{
+        "id": id,
+    }
+
+    result, err := database.ExecuteGraphQL(query, variables)
+    if err != nil {
+        log.Printf("Error executing GraphQL query: %v", err)
+        http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
+        return
+    }
+
+    postData, ok := result["posts_by_pk"].(map[string]interface{})
+    if !ok || postData == nil {
+        log.Printf("posts_by_pk is nil or not a map: %v", result)
+        http.Error(w, "Post not found", http.StatusNotFound)
+        return
+    }
+
+    blogID, ok := postData["blog_id"].(float64)
+    if !ok {
+        log.Printf("Error parsing blog ID from GraphQL result: %v", postData)
+        http.Error(w, "Failed to retrieve blog ID", http.StatusInternalServerError)
+        return
+    }
+
+    // Delete the post
+    query = `
+        mutation DeletePost($id: Int!, $user_id: uuid!) {
+            delete_posts(where: {id: {_eq: $id}, user_id: {_eq: $user_id}}) {
+                affected_rows
+            }
+        }
+    `
+    variables = map[string]interface{}{
+        "id":      id,
+        "user_id": userID,
+    }
+
+    result, err = database.ExecuteGraphQL(query, variables)
+    if err != nil {
+        log.Printf("Error executing GraphQL mutation: %v", err)
+        http.Error(w, "Failed to delete post", http.StatusInternalServerError)
+        return
+    }
+
+    log.Printf("GraphQL mutation result: %v", result)
+    w.Header().Set("HX-Redirect", fmt.Sprintf("/blogs/%d", int(blogID))) // Redirect to blog page
+    w.WriteHeader(http.StatusOK)
+}
+
+
+
 // PostListHandler handles displaying a list of posts
 func PostListHandler(w http.ResponseWriter, r *http.Request) {
     query := `
@@ -235,6 +450,7 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
                 title
                 content
                 user {
+                    id
                     username
                 }
                 created_at
@@ -284,11 +500,17 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         Title:    postData["title"].(string),
         Content:  postData["content"].(string),
         User: &models.User{
+            ID:       userMap["id"].(string),
             Username: userMap["username"].(string),
         },
         FormattedCreatedAt: formattedCreatedAt,
         BlogID:    uint(postData["blog_id"].(float64)), // Ensure blog_id is correctly handled
     }
+
+    // Check if the logged-in user is the owner of the post
+    session, _ := store.Get(r, "session-name")
+    loggedInUserID, ok := session.Values["userID"].(string)
+    isOwner := ok && loggedInUserID == post.User.ID
 
     log.Printf("Post found: ID=%d, Title=%s", post.ID, post.Title) // Log the found post
 
@@ -308,10 +530,11 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         loggedIn := helpers.IsLoggedIn(r)
         log.Println("Returning HTML response") // Log the branch being executed
         // Render HTML template
-        component := views.PostDetail(post, loggedIn) // Correctly refer to the templates.PostDetail component
+        component := views.PostDetail(post, loggedIn, isOwner) // Correctly refer to the templates.PostDetail component
         templ.Handler(component).ServeHTTP(w, r)
     }
 }
+
 
 
 

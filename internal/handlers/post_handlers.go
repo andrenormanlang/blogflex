@@ -475,12 +475,24 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     var comments []models.Comment
     for _, c := range commentsData {
         commentMap := c.(map[string]interface{})
+        createdAtStr, ok := commentMap["created_at"].(string)
+        var formattedCommentCreatedAt string
+        if ok {
+            createdAt, err := time.Parse("2006-01-02T15:04:05", createdAtStr)
+            if err != nil {
+                log.Printf("Error parsing comment created_at time: %v", err)
+            } else {
+                formattedCommentCreatedAt = helpers.FormatTime(createdAt)
+            }
+        }
+
         comments = append(comments, models.Comment{
-            ID:      uint(commentMap["id"].(float64)),
-            Content: commentMap["content"].(string),
+            ID:                 uint(commentMap["id"].(float64)),
+            Content:            commentMap["content"].(string),
             User: &models.User{
                 Username: commentMap["user"].(map[string]interface{})["username"].(string),
             },
+            FormattedCreatedAt: formattedCommentCreatedAt,
         })
     }
     post.Comments = comments
@@ -497,3 +509,5 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     component := views.PostDetail(post, loggedIn, isOwner)
     templ.Handler(component).ServeHTTP(w, r)
 }
+
+

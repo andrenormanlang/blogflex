@@ -11,6 +11,7 @@ import (
     "blogflex/internal/database"
     "fmt"
     "log"
+    "strings"
 )
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,56 +55,6 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(comments)
-}
-
-func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    postID, err := strconv.Atoi(vars["postID"])
-    if err != nil {
-        http.Error(w, "Invalid post ID", http.StatusBadRequest)
-        return
-    }
-
-    session, _ := store.Get(r, "session-name")
-    userID, ok := session.Values["userID"].(string)
-    if !ok {
-        http.Error(w, "Unauthorized", http.StatusUnauthorized)
-        return
-    }
-
-    var comment models.Comment
-    if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-        http.Error(w, "Invalid input", http.StatusBadRequest)
-        return
-    }
-
-    comment.PostID = uint(postID)
-    comment.UserID = userID
-    comment.CreatedAt = time.Now()
-    comment.UpdatedAt = time.Now()
-
-    query := `
-        mutation AddComment($content: String!, $post_id: Int!, $user_id: uuid!, $created_at: timestamptz!, $updated_at: timestamptz!) {
-            insert_comments_one(object: {content: $content, post_id: $post_id, user_id: $user_id, created_at: $created_at, updated_at: $updated_at}) {
-                id
-            }
-        }
-    `
-    variables := map[string]interface{}{
-        "content":    comment.Content,
-        "post_id":    comment.PostID,
-        "user_id":    comment.UserID,
-        "created_at": comment.CreatedAt,
-        "updated_at": comment.UpdatedAt,
-    }
-
-    _, err = helpers.GraphQLRequest(query, variables)
-    if err != nil {
-        http.Error(w, "Failed to add comment", http.StatusInternalServerError)
-        return
-    }
-
-    w.WriteHeader(http.StatusCreated)
 }
 
 func ToggleLikePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -231,8 +182,145 @@ func ToggleLikePostHandler(w http.ResponseWriter, r *http.Request) {
     </button>`, postID, likesCount)))
 }
 
+func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    postID, err := strconv.Atoi(vars["id"])
+    if err != nil {
+        helpers.RespondWithError(w, http.StatusBadRequest, "Invalid post ID")
+        return
+    }
 
+    session, _ := store.Get(r, "session-name")
+    userID, ok := session.Values["userID"].(string)
+    if !ok {
+        helpers.RespondWithError(w, http.StatusUnauthorized, "Unauthorized")
+        return
+    }
 
+    var input struct {
+        Content string `json:"content"`
+    }
+
+    contentType := r.Header.Get("Content-Type")
+    if strings.Contains(contentType, "application/json") {
+        // Handle JSON input
+        if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+            log.Printf("Error decoding JSON input: %v", err)
+            http.Error(w, "Invalid input", http.StatusBadRequest)
+            return
+        }
+    } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+        // Handle URL-encoded input
+        if err := r.ParseForm(); err != nil {
+            log.Printf("Error parsing form input: %v", err)
+            http.Error(w, "Invalid input", http.StatusBadRequest)
+            return
+        }
+        input.Content = r.FormValue("content")
+    } else {
+        // Unsupported content type
+        log.Printf("Unsupported content type: %v", contentType)
+        http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
+        return
+    }
+
+    log.Printf("Adding comment: %s by user: %s", input.Content, userID)
+
+    comment := models.Comment{
+        PostID:    uint(postID),
+        UserID:    userID,
+        Content:   input.Content,
+        CreatedAt: time.Now(),
+        UpdatedAt: time.Now(),
+    }
+
+    query := `
+        mutation AddComment($content: String!, $post_id: Int!, $user_id: uuid!, $created_at: timestamp!, $updated_at: timestamp!) {
+            insert_comments_one(object: {content: $content, post_id: $post_id, user_id: $user_id, created_at: $created_at, updated_at: $updated_at}) {
+                id
+                content
+                user_id
+                post_id
+                created_at
+                updated_at
+            }
+        }
+    `
+    variables := map[string]interface{}{
+        "content":    comment.Content,
+        "post_id":    comment.PostID,
+        "user_id":    comment.UserID,
+        "created_at": comment.CreatedAt.Format(time.RFC3339),
+        "updated_at": comment.UpdatedAt.Format(time.RFC3339),
+    }
+
+    result, err := database.ExecuteGraphQL(query, variables)
+    if err != nil {
+        log.Printf("Error executing GraphQL request: %v", err)
+        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to add comment")
+        return
+    }
+
+    newCommentData, ok := result["insert_comments_one"].(map[string]interface{})
+    if !ok {
+        log.Printf("Unexpected format for insert_comments_one: %v", result)
+        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to add comment")
+        return
+    }
+
+    comment.ID = uint(newCommentData["id"].(float64))
+    comment.CreatedAt, _ = time.Parse(time.RFC3339, newCommentData["created_at"].(string))
+    comment.UpdatedAt, _ = time.Parse(time.RFC3339, newCommentData["updated_at"].(string))
+
+    // Fetch updated comments list
+    commentsQuery := `
+        query GetComments($post_id: Int!) {
+            comments(where: {post_id: {_eq: $post_id}}) {
+                id
+                content
+                user_id
+                post_id
+                created_at
+                updated_at
+            }
+        }
+    `
+    commentsVariables := map[string]interface{}{
+        "post_id": postID,
+    }
+
+    commentsResult, err := database.ExecuteGraphQL(commentsQuery, commentsVariables)
+    if err != nil {
+        log.Printf("Error fetching updated comments: %v", err)
+        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch comments")
+        return
+    }
+
+    commentsData, ok := commentsResult["comments"].([]interface{})
+    if !ok {
+        log.Printf("Unexpected format for comments: %v", commentsResult)
+        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch comments")
+        return
+    }
+
+    var comments []models.Comment
+    for _, c := range commentsData {
+        commentMap := c.(map[string]interface{})
+        createdAt, _ := time.Parse(time.RFC3339, commentMap["created_at"].(string))
+        updatedAt, _ := time.Parse(time.RFC3339, commentMap["updated_at"].(string))
+        comments = append(comments, models.Comment{
+            ID:        uint(commentMap["id"].(float64)),
+            Content:   commentMap["content"].(string),
+            PostID:    uint(commentMap["post_id"].(float64)),
+            UserID:    commentMap["user_id"].(string),
+            CreatedAt: createdAt,
+            UpdatedAt: updatedAt,
+        })
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(comments)
+}
 
 
 

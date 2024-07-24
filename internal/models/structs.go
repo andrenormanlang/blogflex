@@ -26,10 +26,10 @@ type Blog struct {
 type Comment struct {
     ID        uint      `json:"id"`
     Content   string    `json:"content"`
+    User               *User     `json:"user"`
+    Post              *Post     `json:"post"`
     PostID    uint      `json:"post_id"`
     UserID    string    `json:"user_id"`
-    User      *User     `json:"user"`
-    Post      *Post     `json:"post"`
     CreatedAt time.Time `json:"created_at"`
     UpdatedAt time.Time `json:"updated_at"`
 }

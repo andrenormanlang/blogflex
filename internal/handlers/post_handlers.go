@@ -377,7 +377,7 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     // Query to get post details
-    query := `
+    postQuery := `
         query GetPost($id: Int!) {
             posts_by_pk(id: $id) {
                 id
@@ -396,17 +396,16 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         "id": id,
     }
 
-    result, err := database.ExecuteGraphQL(query, variables)
+    postResult, err := database.ExecuteGraphQL(postQuery, variables)
     if err != nil {
         log.Printf("Failed to execute GraphQL query: %v", err)
         http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
         return
     }
 
-    // Check if the result directly contains the required data
-    postData, ok := result["posts_by_pk"].(map[string]interface{})
+    postData, ok := postResult["posts_by_pk"].(map[string]interface{})
     if !ok || postData == nil {
-        log.Printf("posts_by_pk is nil or not a map: %v", result)
+        log.Printf("posts_by_pk is nil or not a map: %v", postResult)
         http.Error(w, "Post not found", http.StatusNotFound)
         return
     }
@@ -438,37 +437,53 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
             Username: userMap["username"].(string),
         },
         FormattedCreatedAt: formattedCreatedAt,
-        BlogID:    uint(postData["blog_id"].(float64)), // Ensure blog_id is correctly handled
+        BlogID:    uint(postData["blog_id"].(float64)),
     }
 
-    // Query to get likes count
-    likesCountQuery := `
-        query GetLikesCount($post_id: Int!) {
-            posts_with_likes(where: {post_id: {_eq: $post_id}}) {
-                likes_count
+    // Fetch comments for the post
+    commentsQuery := `
+        query GetComments($post_id: Int!) {
+            comments(where: {post_id: {_eq: $post_id}}) {
+                id
+                content
+                user {
+                    username
+                }
+                created_at
+                updated_at
             }
         }
     `
-    likesCountVariables := map[string]interface{}{
+    commentsVariables := map[string]interface{}{
         "post_id": id,
     }
 
-    likesCountResult, err := database.ExecuteGraphQL(likesCountQuery, likesCountVariables)
+    commentsResult, err := database.ExecuteGraphQL(commentsQuery, commentsVariables)
     if err != nil {
         log.Printf("Failed to execute GraphQL query: %v", err)
-        http.Error(w, "Failed to fetch likes count", http.StatusInternalServerError)
+        http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
         return
     }
 
-    // Directly check for the `posts_with_likes` key in the result
-    postsWithLikes, ok := likesCountResult["posts_with_likes"].([]interface{})
-    if !ok || len(postsWithLikes) == 0 {
-        log.Printf("posts_with_likes is nil or empty: %v", likesCountResult["posts_with_likes"])
-        post.LikesCount = 0 // Default to 0 if no data is returned
-    } else {
-        likesCount := int(postsWithLikes[0].(map[string]interface{})["likes_count"].(float64))
-        post.LikesCount = likesCount
+    commentsData, ok := commentsResult["comments"].([]interface{})
+    if !ok {
+        log.Printf("Unexpected format for comments: %v", commentsResult)
+        http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
+        return
     }
+
+    var comments []models.Comment
+    for _, c := range commentsData {
+        commentMap := c.(map[string]interface{})
+        comments = append(comments, models.Comment{
+            ID:      uint(commentMap["id"].(float64)),
+            Content: commentMap["content"].(string),
+            User: &models.User{
+                Username: commentMap["user"].(map[string]interface{})["username"].(string),
+            },
+        })
+    }
+    post.Comments = comments
 
     // Check if the logged-in user is the owner of the post
     session, _ := store.Get(r, "session-name")
@@ -477,23 +492,8 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
 
     log.Printf("Post found: ID=%d, Title=%s", post.ID, post.Title) // Log the found post
 
-    // Check the Accept header to determine the response format
-    acceptHeader := r.Header.Get("Accept")
-    log.Printf("Accept header: %s", acceptHeader) // Log the Accept header value
-
-    if strings.Contains(acceptHeader, "application/json") {
-        log.Println("Returning JSON response") // Log the branch being executed
-        // Set the content type to JSON
-        w.Header().Set("Content-Type", "application/json")
-        // Encode the post as JSON and write to the response
-        if err := json.NewEncoder(w).Encode(post); err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-        }
-    } else {
-        loggedIn := helpers.IsLoggedIn(r)
-        log.Println("Returning HTML response") // Log the branch being executed
-        // Render HTML template
-        component := views.PostDetail(post, loggedIn, isOwner) // Correctly refer to the templates.PostDetail component
-        templ.Handler(component).ServeHTTP(w, r)
-    }
+    // Render HTML template
+    loggedIn := helpers.IsLoggedIn(r)
+    component := views.PostDetail(post, loggedIn, isOwner)
+    templ.Handler(component).ServeHTTP(w, r)
 }

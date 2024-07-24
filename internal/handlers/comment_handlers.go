@@ -271,10 +271,17 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
         Username: newCommentData["user"].(map[string]interface{})["username"].(string),
     }
 
-    // Return the updated comments in JSON format
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(comment)
+    // Render the new comment as HTML
+    commentHTML := fmt.Sprintf(`
+        <div class="list-group-item list-group-item-action border-t border-gray-200 mt-2 pt-2">
+            <p class="text-gray-700"><strong>%s</strong>: %s</p>
+        </div>`, comment.User.Username, comment.Content)
+
+    w.Header().Set("Content-Type", "text/html")
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(commentHTML))
 }
+
 
 
 

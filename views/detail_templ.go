@@ -191,7 +191,7 @@ func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#comments-section\" hx-swap=\"innerHTML\" method=\"POST\" class=\"mt-3\"><div><textarea name=\"content\" placeholder=\"Add a Comment\" class=\"form-control\" required></textarea></div><div class=\"text-center mt-3\"><button type=\"submit\" class=\"btn btn-primary\">Submit</button></div></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#comments-section\" hx-swap=\"afterbegin\" method=\"POST\" class=\"mt-3\"><div><textarea name=\"content\" placeholder=\"Add a Comment\" class=\"form-control\" required></textarea></div><div class=\"text-center mt-3\"><button type=\"submit\" class=\"btn btn-primary\">Submit</button></div></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

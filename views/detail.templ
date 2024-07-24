@@ -4,6 +4,7 @@ import (
     "blogflex/internal/models"
     "fmt"
     "strconv"
+    "blogflex/internal/helpers"
 )
 
 templ PostDetail(post models.Post, loggedIn bool, isOwner bool) {
@@ -41,7 +42,8 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool) {
         <div class="list-group" id="comments-section">
           for _, comment := range post.Comments {
             <div class="list-group-item list-group-item-action border-t border-gray-200 mt-2 pt-2">
-              <p class="text-gray-700"><strong>{ comment.User.Username }</strong>: { comment.Content }</p>
+              <p class="text-gray-700"><strong>{ comment.User.Username }</strong> posted on { helpers.FormatTime(comment.CreatedAt) }</p>
+              <p class="text-gray-700">{ comment.Content }</p>
             </div>
           }
         </div>

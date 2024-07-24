@@ -270,12 +270,14 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
     comment.User = &models.User{
         Username: newCommentData["user"].(map[string]interface{})["username"].(string),
     }
+    formattedCreatedAt := helpers.FormatTime(comment.CreatedAt)
 
     // Render the new comment as HTML
     commentHTML := fmt.Sprintf(`
         <div class="list-group-item list-group-item-action border-t border-gray-200 mt-2 pt-2">
-            <p class="text-gray-700"><strong>%s</strong>: %s</p>
-        </div>`, comment.User.Username, comment.Content)
+            <p class="text-gray-700"><strong>%s</strong> posted on %s</p>
+            <p class="text-gray-700">%s</p>
+        </div>`, comment.User.Username, formattedCreatedAt, comment.Content)
 
     w.Header().Set("Content-Type", "text/html")
     w.WriteHeader(http.StatusOK)

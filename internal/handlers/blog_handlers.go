@@ -181,11 +181,14 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    userMap, ok := blogData["user"].(map[string]interface{})
-    if !ok {
-        log.Println("userMap is nil or not a map")
-        http.Error(w, "Failed to fetch blog user data", http.StatusInternalServerError)
-        return
+    var userMap map[string]interface{}
+    if blogData["user"] != nil {
+        userMap, ok = blogData["user"].(map[string]interface{})
+        if !ok {
+            userMap = map[string]interface{}{"id": "0", "username": "Unknown"}
+        }
+    } else {
+        userMap = map[string]interface{}{"id": "0", "username": "Unknown"}
     }
 
     postsData, ok := blogData["posts"].([]interface{})

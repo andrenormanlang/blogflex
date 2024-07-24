@@ -145,6 +145,43 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
+func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
+    // Limit the size of the uploaded file
+    r.ParseMultipartForm(10 << 20) // 10 MB
+
+    file, handler, err := r.FormFile("upload")
+    if err != nil {
+        http.Error(w, "Unable to upload file", http.StatusBadRequest)
+        return
+    }
+    defer file.Close()
+
+    // Create a unique file name
+    fileName := filepath.Join("uploads", handler.Filename)
+    out, err := os.Create(fileName)
+    if err != nil {
+        http.Error(w, "Unable to create the file for writing. Check your write access privilege", http.StatusInternalServerError)
+        return
+    }
+    defer out.Close()
+
+    // Write the content from the file to the new file
+    _, err = io.Copy(out, file)
+    if err != nil {
+        http.Error(w, "Unable to write file", http.StatusInternalServerError)
+        return
+    }
+
+    // Return the URL of the uploaded file
+    response := map[string]interface{}{
+        "url": "/uploads/" + handler.Filename,
+    }
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(response)
+}
+
+
+
 func EditPostFormHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     id, err := strconv.Atoi(vars["id"])
@@ -494,35 +531,3 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     templ.Handler(component).ServeHTTP(w, r)
 }
 
-
-func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
-    // Limit the size of the uploaded file
-    r.ParseMultipartForm(10 << 20) // 10 MB
-
-    file, handler, err := r.FormFile("file")
-    if err != nil {
-        http.Error(w, "Unable to upload file", http.StatusBadRequest)
-        return
-    }
-    defer file.Close()
-
-    // Create a unique file name
-    fileName := filepath.Join("uploads", handler.Filename)
-    out, err := os.Create(fileName)
-    if err != nil {
-        http.Error(w, "Unable to create the file for writing. Check your write access privilege", http.StatusInternalServerError)
-        return
-    }
-    defer out.Close()
-
-    // Write the content from the file to the new file
-    _, err = io.Copy(out, file)
-    if err != nil {
-        http.Error(w, "Unable to write file", http.StatusInternalServerError)
-        return
-    }
-
-    // Return the URL of the uploaded file
-    w.Header().Set("Content-Type", "application/json")
-    w.Write([]byte(`{"location":"` + "/uploads/" + handler.Filename + `"}`))
-}

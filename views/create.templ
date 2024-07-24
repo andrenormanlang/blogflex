@@ -1,6 +1,7 @@
 package views
 
 templ CreatePost(userID string) {
+    <!DOCTYPE html>
   <html>
     <head>
       <meta charset="UTF-8">
@@ -8,7 +9,7 @@ templ CreatePost(userID string) {
       <title>Create Post - BlogFlex</title>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
       <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-      <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
+      <script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
       <style>
         body {
           font-family: 'Inter', sans-serif;
@@ -22,7 +23,7 @@ templ CreatePost(userID string) {
             <div class="card shadow-sm">
               <div class="card-body">
                 <h1 class="card-title text-center mb-4">Create a New Post</h1>
-                <form hx-post="/protected/posts" hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST">
+                <form id="create-post-form" hx-post="/protected/posts" hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST">
                   <div class="form-group">
                     <label for="title">Title</label>
                     <input type="text" id="title" name="title" class="form-control" required>
@@ -43,15 +44,32 @@ templ CreatePost(userID string) {
         </div>
       </div>
       <script>
-        ClassicEditor
-          .create( document.querySelector( '#content' ), {
-              ckfinder: {
-                  uploadUrl: '/upload_image'
-              }
-          } )
-          .catch( error => {
-              console.error( error );
-          } );
+        document.addEventListener("DOMContentLoaded", function() {
+          tinymce.init({
+            selector: '#content',
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            mergetags_list: [
+              { value: 'First.Name', title: 'First Name' },
+              { value: 'Email', title: 'Email' },
+            ],
+            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant")),
+            setup: function(editor) {
+              editor.on('change', function(e) {
+                editor.save();
+              });
+            }
+          });
+
+          document.getElementById('create-post-form').addEventListener('submit', function(e) {
+            if (tinymce.get('content').getContent() === '') {
+              e.preventDefault();
+              alert('Content is required.');
+            }
+          });
+        });
       </script>
       <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
     </body>

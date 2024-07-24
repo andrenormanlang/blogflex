@@ -7,7 +7,7 @@ import (
     // "github.com/gorilla/sessions"
     "encoding/json"
     "io"
-    "net/url"
+    // "net/url"
     "strings"
     "log"
     "blogflex/internal/models"
@@ -17,6 +17,8 @@ import (
     "fmt"
     "blogflex/internal/helpers"
     "time"
+    "os"
+    "path/filepath"
 )
 
 func CreatePostFormHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,28 +46,20 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
         Content string `json:"content"`
     }
 
-    body, err := io.ReadAll(r.Body)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-
     contentType := r.Header.Get("Content-Type")
     if strings.Contains(contentType, "application/json") {
-        err = json.Unmarshal(body, &post)
+        err := json.NewDecoder(r.Body).Decode(&post)
         if err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
     } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-        values, err := url.ParseQuery(string(body))
-        if err != nil {
+        if err := r.ParseForm(); err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
-
-        post.Title = values.Get("title")
-        post.Content = values.Get("content")
+        post.Title = r.FormValue("title")
+        post.Content = r.FormValue("content")
     } else {
         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
@@ -88,8 +82,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "User does not have a blog", http.StatusBadRequest)
         return
     }
-
-    log.Printf("GraphQL query result: %v", result)
 
     blogs, ok := result["blogs"].([]interface{})
     if !ok || len(blogs) == 0 {
@@ -133,8 +125,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    log.Printf("GraphQL mutation result: %v", result)
-
     postData, ok := result["insert_posts_one"].(map[string]interface{})
     if !ok {
         log.Printf("Error parsing post data from GraphQL result: %v", result)
@@ -153,6 +143,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("HX-Redirect", fmt.Sprintf("/blogs/%d", int(blogID)))
     w.WriteHeader(http.StatusCreated)
 }
+
 
 func EditPostFormHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
@@ -240,28 +231,20 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
         Content string `json:"content"`
     }
 
-    body, err := io.ReadAll(r.Body)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-
     contentType := r.Header.Get("Content-Type")
     if strings.Contains(contentType, "application/json") {
-        err = json.Unmarshal(body, &post)
+        err := json.NewDecoder(r.Body).Decode(&post)
         if err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
     } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-        values, err := url.ParseQuery(string(body))
-        if err != nil {
+        if err := r.ParseForm(); err != nil {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
-
-        post.Title = values.Get("title")
-        post.Content = values.Get("content")
+        post.Title = r.FormValue("title")
+        post.Content = r.FormValue("content")
     } else {
         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
@@ -292,6 +275,7 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("HX-Redirect", fmt.Sprintf("/posts/%d", id)) // Redirect to post detail page
     w.WriteHeader(http.StatusOK)
 }
+
 
 
 func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -511,3 +495,34 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
+func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
+    // Limit the size of the uploaded file
+    r.ParseMultipartForm(10 << 20) // 10 MB
+
+    file, handler, err := r.FormFile("file")
+    if err != nil {
+        http.Error(w, "Unable to upload file", http.StatusBadRequest)
+        return
+    }
+    defer file.Close()
+
+    // Create a unique file name
+    fileName := filepath.Join("uploads", handler.Filename)
+    out, err := os.Create(fileName)
+    if err != nil {
+        http.Error(w, "Unable to create the file for writing. Check your write access privilege", http.StatusInternalServerError)
+        return
+    }
+    defer out.Close()
+
+    // Write the content from the file to the new file
+    _, err = io.Copy(out, file)
+    if err != nil {
+        http.Error(w, "Unable to write file", http.StatusInternalServerError)
+        return
+    }
+
+    // Return the URL of the uploaded file
+    w.Header().Set("Content-Type", "application/json")
+    w.Write([]byte(`{"location":"` + "/uploads/" + handler.Filename + `"}`))
+}

@@ -122,8 +122,6 @@ func BlogListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // BlogPageHandler handles displaying a single blog page with its posts
-// BlogPageHandler handles displaying a single blog page with its posts
-// BlogPageHandler handles displaying a single blog page with its posts
 func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     blogID, err := strconv.Atoi(vars["id"])
@@ -139,6 +137,10 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
                 id
                 name
                 description
+                user {
+                    id
+                    username
+                }
                 posts {
                     id
                     title
@@ -176,6 +178,13 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     if !ok || blogData == nil {
         log.Println("blogData is nil or not a map")
         http.Error(w, "Failed to fetch blog data", http.StatusInternalServerError)
+        return
+    }
+
+    userMap, ok := blogData["user"].(map[string]interface{})
+    if !ok {
+        log.Println("userMap is nil or not a map")
+        http.Error(w, "Failed to fetch blog user data", http.StatusInternalServerError)
         return
     }
 
@@ -267,7 +276,10 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
         ID:          uint(blogData["id"].(float64)),
         Name:        blogData["name"].(string),
         Description: blogData["description"].(string),
-        User:        &models.User{Username: "unknown"},
+        User: &models.User{
+            ID:       userMap["id"].(string),
+            Username: userMap["username"].(string),
+        },
     }
 
     // Check if user is authenticated to determine if they can create posts
@@ -293,7 +305,3 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     templ.Handler(component).ServeHTTP(w, r)
     log.Println("Blog page rendered successfully")
 }
-
-
-
-

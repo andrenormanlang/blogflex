@@ -497,20 +497,3 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
         templ.Handler(component).ServeHTTP(w, r)
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

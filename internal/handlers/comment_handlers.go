@@ -203,14 +203,12 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
 
     contentType := r.Header.Get("Content-Type")
     if strings.Contains(contentType, "application/json") {
-        // Handle JSON input
         if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
             log.Printf("Error decoding JSON input: %v", err)
             http.Error(w, "Invalid input", http.StatusBadRequest)
             return
         }
     } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-        // Handle URL-encoded input
         if err := r.ParseForm(); err != nil {
             log.Printf("Error parsing form input: %v", err)
             http.Error(w, "Invalid input", http.StatusBadRequest)
@@ -218,13 +216,10 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
         }
         input.Content = r.FormValue("content")
     } else {
-        // Unsupported content type
         log.Printf("Unsupported content type: %v", contentType)
         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
     }
-
-    log.Printf("Adding comment: %s by user: %s", input.Content, userID)
 
     comment := models.Comment{
         PostID:    uint(postID),
@@ -239,8 +234,9 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
             insert_comments_one(object: {content: $content, post_id: $post_id, user_id: $user_id, created_at: $created_at, updated_at: $updated_at}) {
                 id
                 content
-                user_id
-                post_id
+                user {
+                    username
+                }
                 created_at
                 updated_at
             }
@@ -271,55 +267,13 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
     comment.ID = uint(newCommentData["id"].(float64))
     comment.CreatedAt, _ = time.Parse(time.RFC3339, newCommentData["created_at"].(string))
     comment.UpdatedAt, _ = time.Parse(time.RFC3339, newCommentData["updated_at"].(string))
-
-    // Fetch updated comments list
-    commentsQuery := `
-        query GetComments($post_id: Int!) {
-            comments(where: {post_id: {_eq: $post_id}}) {
-                id
-                content
-                user_id
-                post_id
-                created_at
-                updated_at
-            }
-        }
-    `
-    commentsVariables := map[string]interface{}{
-        "post_id": postID,
+    comment.User = &models.User{
+        Username: newCommentData["user"].(map[string]interface{})["username"].(string),
     }
 
-    commentsResult, err := database.ExecuteGraphQL(commentsQuery, commentsVariables)
-    if err != nil {
-        log.Printf("Error fetching updated comments: %v", err)
-        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch comments")
-        return
-    }
-
-    commentsData, ok := commentsResult["comments"].([]interface{})
-    if !ok {
-        log.Printf("Unexpected format for comments: %v", commentsResult)
-        helpers.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch comments")
-        return
-    }
-
-    var comments []models.Comment
-    for _, c := range commentsData {
-        commentMap := c.(map[string]interface{})
-        createdAt, _ := time.Parse(time.RFC3339, commentMap["created_at"].(string))
-        updatedAt, _ := time.Parse(time.RFC3339, commentMap["updated_at"].(string))
-        comments = append(comments, models.Comment{
-            ID:        uint(commentMap["id"].(float64)),
-            Content:   commentMap["content"].(string),
-            PostID:    uint(commentMap["post_id"].(float64)),
-            UserID:    commentMap["user_id"].(string),
-            CreatedAt: createdAt,
-            UpdatedAt: updatedAt,
-        })
-    }
-
+    // Return the updated comments in JSON format
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(comments)
+    json.NewEncoder(w).Encode(comment)
 }
 
 

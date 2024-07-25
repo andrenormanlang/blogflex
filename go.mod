@@ -11,4 +11,7 @@ require (
 	golang.org/x/crypto v0.25.0
 )
 
-require github.com/gorilla/securecookie v1.1.2 // indirect
+require (
+	github.com/a-h/parse v0.0.0-20240121214402-3caf7543159a // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
+)

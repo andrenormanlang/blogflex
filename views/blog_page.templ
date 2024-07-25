@@ -1,10 +1,11 @@
 package views
 
 import (
-    "blogflex/internal/models"
-    "blogflex/internal/helpers"
-    "fmt"
-    "strconv"
+	"blogflex/internal/models"
+	"blogflex/internal/helpers"
+	"fmt"
+	"strconv"
+
 )
 
 templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool, successMessage string) {
@@ -33,7 +34,7 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
           for _, post := range posts {
             <div class="list-group-item">
               <h5 class="mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>{post.Title}</a></h5>
-              <p class="mb-1">{helpers.TruncateWords(post.Content, 20)}</p>
+              <p class="mb-1">@UnsafeHTML(helpers.TruncateWords(post.Content, 20))</p>
               <small>Posted on {post.FormattedCreatedAt}</small>
               <div>
                 <span>Comments: { strconv.Itoa(post.CommentsCount) }</span>

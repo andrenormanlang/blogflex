@@ -28,7 +28,6 @@ import (
 
 
 var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
-
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "session-name")
     userID := session.Values["userID"]
@@ -57,25 +56,47 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    blogsData := result["blogs"].([]interface{})
+    blogsData, ok := result["blogs"].([]interface{})
+    if !ok {
+        http.Error(w, "Invalid data format for blogs", http.StatusInternalServerError)
+        return
+    }
+
     var blogs []models.Blog
     for _, blogData := range blogsData {
-        blogMap := blogData.(map[string]interface{})
-        userMap := blogMap["user"].(map[string]interface{})
+        blogMap, ok := blogData.(map[string]interface{})
+        if !ok {
+            log.Printf("Invalid data format for blogData")
+            continue
+        }
+
+        userMap, ok := blogMap["user"].(map[string]interface{})
+        if !ok {
+            log.Printf("Invalid data format for user")
+            continue
+        }
+
         var latestPost *models.Post
-        posts := blogMap["posts"].([]interface{})
-        if len(posts) > 0 {
-            postMap := posts[0].(map[string]interface{})
-            createdAt, err := time.Parse("2006-01-02T15:04:05", postMap["created_at"].(string))
-            if err != nil {
-                log.Printf("Error parsing created_at time: %v", err)
+        posts, ok := blogMap["posts"].([]interface{})
+        if ok && len(posts) > 0 {
+            postMap, ok := posts[0].(map[string]interface{})
+            if !ok {
+                log.Printf("Invalid data format for post")
                 continue
             }
+
+            createdAt, err := time.Parse("2006-01-02T15:04:05", postMap["created_at"].(string))
+            if err != nil {
+                log.Printf("Error parsing post created_at time: %v", err)
+                continue
+            }
+
             latestPost = &models.Post{
                 Title:             postMap["title"].(string),
                 FormattedCreatedAt: helpers.FormatTime(createdAt),
             }
         }
+
         createdAtStr := blogMap["created_at"].(string)
         createdAt, err := time.Parse("2006-01-02T15:04:05", createdAtStr)
         if err != nil {
@@ -98,6 +119,7 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
     component := views.MainPage(blogs, loggedIn)
     templ.Handler(component).ServeHTTP(w, r)
 }
+
 
 // ListUsersHandler handles listing all users
 func ListUsersHandler(w http.ResponseWriter, r *http.Request) {

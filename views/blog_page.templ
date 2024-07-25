@@ -5,7 +5,6 @@ import (
 	"blogflex/internal/helpers"
 	"fmt"
 	"strconv"
-
 )
 
 templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool, successMessage string) {
@@ -33,7 +32,7 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
         <div class="list-group">
           for _, post := range posts {
             <div class="list-group-item">
-              <h5 class="mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>{post.Title}</a></h5>
+              <h5 class="mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>@UnsafeHTML(post.Title)</a></h5>
               <p class="mb-1">@UnsafeHTML(helpers.TruncateWords(post.Content, 20))</p>
               <small>Posted on {post.FormattedCreatedAt}</small>
               <div>
@@ -48,4 +47,3 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
     </body>
   </html>
 }
-

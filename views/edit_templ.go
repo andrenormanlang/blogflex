@@ -44,20 +44,20 @@ func EditPost(post models.Post) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-redirect=\"true\" hx-target=\"#response-message\" hx-swap=\"innerHTML\" method=\"POST\"><div class=\"form-group\"><label for=\"title\">Title</label> <input type=\"text\" id=\"title\" name=\"title\" class=\"form-control\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-redirect=\"true\" hx-target=\"#response-message\" hx-swap=\"innerHTML\" method=\"POST\"><div class=\"form-group\"><label for=\"title\">Title</label> <textarea id=\"title\" name=\"title\" rows=\"2\" class=\"form-control\" required>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit.templ`, Line: 34, Col: 102}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit.templ`, Line: 34, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" required></div><div class=\"form-group\"><label for=\"content\">Content</label> <textarea id=\"content\" name=\"content\" rows=\"10\" class=\"form-control\" required>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea></div><div class=\"form-group\"><label for=\"content\">Content</label> <textarea id=\"content\" name=\"content\" rows=\"10\" class=\"form-control\" required>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -70,7 +70,7 @@ func EditPost(post models.Post) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea></div><div class=\"text-center\"><button type=\"submit\" class=\"btn btn-primary\">Update Post</button></div></form><div id=\"response-message\" class=\"mt-4\"></div></div></div></div></div></div><script>\r\n        document.addEventListener(\"DOMContentLoaded\", function() {\r\n          tinymce.init({\r\n            selector: '#content',\r\n            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',\r\n            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',\r\n            tinycomments_mode: 'embedded',\r\n            tinycomments_author: 'Author name',\r\n            mergetags_list: [\r\n              { value: 'First.Name', title: 'First Name' },\r\n              { value: 'Email', title: 'Email' },\r\n            ],\r\n            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject(\"See docs to implement AI Assistant\")),\r\n            setup: function(editor) {\r\n              editor.on('change', function(e) {\r\n                editor.save();\r\n              });\r\n            }\r\n          });\r\n\r\n          document.getElementById('edit-post-form').addEventListener('submit', function(e) {\r\n            if (tinymce.get('content').getContent() === '') {\r\n              e.preventDefault();\r\n              alert('Content is required.');\r\n            }\r\n          });\r\n        });\r\n      </script><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea></div><div class=\"text-center\"><button type=\"submit\" class=\"btn btn-primary\">Update Post</button></div></form><div id=\"response-message\" class=\"mt-4\"></div></div></div></div></div></div><script>\r\n        document.addEventListener(\"DOMContentLoaded\", function() {\r\n          tinymce.init({\r\n            selector: '#title, #content',\r\n            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',\r\n            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',\r\n            tinycomments_mode: 'embedded',\r\n            tinycomments_author: 'Author name',\r\n            mergetags_list: [\r\n              { value: 'First.Name', title: 'First Name' },\r\n              { value: 'Email', title: 'Email' },\r\n            ],\r\n            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject(\"See docs to implement AI Assistant\")),\r\n            setup: function(editor) {\r\n              editor.on('change', function(e) {\r\n                editor.save();\r\n              });\r\n            }\r\n          });\r\n\r\n          document.getElementById('edit-post-form').addEventListener('submit', function(e) {\r\n            if (tinymce.get('content').getContent() === '' || tinymce.get('title').getContent() === '') {\r\n              e.preventDefault();\r\n              alert('Both Title and Content are required.');\r\n            }\r\n          });\r\n        });\r\n      </script><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

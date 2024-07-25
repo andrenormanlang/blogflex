@@ -29,15 +29,17 @@ templ MainPage(blogs []models.Blog, loggedIn bool) {
   <body class="bg-gray-100">
     @NavBar(loggedIn)
     <div class="container mt-5">
-      // <h3 class="mb-4">Latest Blogs</h3>
       <div class="list-group">
         for _, blog := range blogs {
           <div class="list-group-item list-group-item-action">
             <h5 class="mb-1 blog-title"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{blog.Name}</a></h5>
+            <small class="d-block">blog author: {blog.User.Username} blog created at: {blog.FormattedCreatedAt}</small>
             <p class="mb-1 blog-description">{blog.Description}</p>
             if blog.LatestPost != nil {
-                <small class="d-block mt-2 mb-2">latest post: {blog.LatestPost.Title} on {blog.LatestPost.FormattedCreatedAt}</small>
-                <small class="d-block">blog author: {blog.User.Username} created at: {blog.FormattedCreatedAt}</small>
+                <small class="d-block mt-2 mb-2">latest post: 
+                @RenderLatestPostTitle(blog.LatestPost.Title)
+                posted on {blog.LatestPost.FormattedCreatedAt}</small>
+                
             }
           </div>
         }
@@ -47,4 +49,3 @@ templ MainPage(blogs []models.Blog, loggedIn bool) {
   </body>
   </html>
 }
-

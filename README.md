@@ -1,20 +1,17 @@
+# BlogFlex ✨📝
 
-# BlogFlex
+## Features 🚀
 
-BlogFlex is an interactive blogging platform designed for bloggers and readers alike. Built with Go, HTMX, Templ, Bootstrap, Hasura (GraphQL + PostgreSQL) and Docker BlogFlex offers a comprehensive set of features for managing and enjoying content connected to multiple external services for enhanced user experience.
-
-## Features
-
-- User registration and authentication
-- Session management with Gorilla Sessions
-- JWT-based authentication middleware
-- Post creation, listing, and detail views
-- Commenting system
-- Real-time updates with HTMX
-- Responsive design with Bootstrap
-- TinyMCE advanced WYSIWYG HTML editor
-- Database management with Hasura using GraphQL with PostgreSQL
-- Containerization with Docker
+- User registration and authentication 🔐
+- Session management with Gorilla Sessions 🍪
+- JWT-based authentication middleware 🔑
+- Post creation, listing, and detail views 📝
+- Commenting system 💬
+- Real-time updates with HTMX ⚡
+- Responsive design with Bootstrap 📱
+- TinyMCE advanced WYSIWYG HTML editor 🖋️
+- Database management with Hasura using GraphQL with PostgreSQL 🗄️
+- Containerization with Docker 🐳
 
 ## Technologies Used
 
@@ -24,16 +21,16 @@ BlogFlex is an interactive blogging platform designed for bloggers and readers a
 
 ## Getting Started
 
-### Prerequisites
+### Prerequisites 📋
 
-- Go (version 1.18 or later)
+- Go (version 1.18 or later) 🐹
 - HTMX 
 - Templ
-- Docker
+- Docker 🐳
 - Hasura Account
 - [Air](https://github.com/cosmtrek/air) for live reloading
 
-### Installation
+### Installation ⚙️
 
 1. **Clone the repository**
 
@@ -52,92 +49,13 @@ BlogFlex is an interactive blogging platform designed for bloggers and readers a
    ```sh
    go mod tidy
    ```
+4. **Set Up Environment Variables**
 
-4. **Run the application**
+Create a .env file in the root directory and add the necessary environment variables. For example:
+HASURA_ENDPOINT=
+HASURA_ADMIN_SECRET=
 
-   ```sh
-   air
-   ```
 
-### API Endpoints
-
-#### Users
-
-- **Create a user**
-
-  ```http
-  POST /users
-  ```
-
-  ```json
-  {
-    "name": "Test User",
-    "email": "testuser@example.com",
-    "password": "password"
-  }
-  ```
-
-- **List users**
-
-  ```http
-  GET /users
-  ```
-
-- **Get user details**
-
-  ```http
-  GET /users/{id}
-  ```
-
-#### Posts
-
-- **Create a post**
-
-  ```http
-  POST /posts
-  ```
-
-  ```json
-  {
-    "title": "Test Post",
-    "content": "This is the content of the test post.",
-    "user_id": 1
-  }
-  ```
-
-- **List posts**
-
-  ```http
-  GET /posts
-  ```
-
-- **Get post details**
-
-  ```http
-  GET /posts/{id}
-  ```
-
-#### Comments
-
-- **Create a comment**
-
-  ```http
-  POST /posts/{postID}/comments
-  ```
-
-  ```json
-  {
-    "content": "This is a comment.",
-    "post_id": 1,
-    "user_id": 1
-  }
-  ```
-
-- **List comments for a post**
-
-  ```http
-  GET /posts/{postID}/comments
-  ```
 
 ## Directory Structure
 
@@ -146,6 +64,8 @@ blogflex/
 ├── .vscode/
 │   └── launch.json
 ├── internal/
+│   ├── auth/
+│   │   └── auth.go
 │   ├── database/
 │   │   └── database.go
 │   ├── handlers/
@@ -193,9 +113,8 @@ blogflex/
 └── README.md
 ```
 
-## Development
 
-### Running the Project Locally
+### Running the Project Locally ▶️
 
 To run the project locally, you have 3 options:
 
@@ -221,11 +140,13 @@ To run the project locally, you have 3 options:
      go run main.go
      ```
 
-**Note**: Before running your project, make sure to generate the Templ files to get the most updated UI. You can do this by running:
-```sh
-npm run generate:templ
+**Note**: Before running your project, make sure to generate the Templ files in the terminal to get the most updated UI. You can do this by running:
 
-### Testing
+```sh
+templ generate
+```
+
+### Testing the API 🧪
 
 To test the API endpoints, use the GraphQL queries in Hasura. Follow these steps:
 
@@ -259,5 +180,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Docker](https://www.docker.com/)
 
 ---
+
+### Contributing 🤝
+
+We welcome contributions! Please follow these steps to contribute:
+
+1. Fork the repository.
+2. Create a new branch (git checkout -b feature/your-feature-name).
+3. Make your changes.
+4. Commit your changes (git commit -m 'Add some feature').
+5. Push to the branch (git push origin feature/your-feature-name).
+6. Open a pull request.
 
 Enjoy using BlogFlex! If you encounter any issues, please feel free to open an issue or submit a pull request.

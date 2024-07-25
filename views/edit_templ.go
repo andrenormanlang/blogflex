@@ -31,14 +31,14 @@ func EditPost(post models.Post) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Edit Post - BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n        body {\r\n          font-family: 'Inter', sans-serif;\r\n        }\r\n      </style></head><body class=\"bg-light\"><div class=\"container mt-5\"><div class=\"row justify-content-center\"><div class=\"col-md-8\"><div class=\"card shadow-sm\"><div class=\"card-body\"><h1 class=\"card-title text-center mb-4\">Edit Post</h1><form hx-post=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Edit Post - BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><script src=\"https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js\" referrerpolicy=\"origin\"></script><style>\r\n        body {\r\n          font-family: 'Inter', sans-serif;\r\n        }\r\n      </style></head><body class=\"bg-light\"><div class=\"container mt-5\"><div class=\"row justify-content-center\"><div class=\"col-md-8\"><div class=\"card shadow-sm\"><div class=\"card-body\"><h1 class=\"card-title text-center mb-4\">Edit Post</h1><form id=\"edit-post-form\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/posts/%d/edit", post.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit.templ`, Line: 29, Col: 80}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit.templ`, Line: 31, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -51,26 +51,26 @@ func EditPost(post models.Post) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit.templ`, Line: 32, Col: 102}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit.templ`, Line: 34, Col: 102}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" required></div><div class=\"form-group\"><label for=\"content\">Content</label> <textarea id=\"content\" name=\"content\" rows=\"5\" class=\"form-control\" required>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" required></div><div class=\"form-group\"><label for=\"content\">Content</label> <textarea id=\"content\" name=\"content\" rows=\"10\" class=\"form-control\" required>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(post.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit.templ`, Line: 36, Col: 111}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit.templ`, Line: 38, Col: 112}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea></div><div class=\"text-center\"><button type=\"submit\" class=\"btn btn-primary\">Update Post</button></div></form><div id=\"response-message\" class=\"mt-4\"></div></div></div></div></div></div><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea></div><div class=\"text-center\"><button type=\"submit\" class=\"btn btn-primary\">Update Post</button></div></form><div id=\"response-message\" class=\"mt-4\"></div></div></div></div></div></div><script>\r\n        document.addEventListener(\"DOMContentLoaded\", function() {\r\n          tinymce.init({\r\n            selector: '#content',\r\n            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',\r\n            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',\r\n            tinycomments_mode: 'embedded',\r\n            tinycomments_author: 'Author name',\r\n            mergetags_list: [\r\n              { value: 'First.Name', title: 'First Name' },\r\n              { value: 'Email', title: 'Email' },\r\n            ],\r\n            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject(\"See docs to implement AI Assistant\")),\r\n            setup: function(editor) {\r\n              editor.on('change', function(e) {\r\n                editor.save();\r\n              });\r\n            }\r\n          });\r\n\r\n          document.getElementById('edit-post-form').addEventListener('submit', function(e) {\r\n            if (tinymce.get('content').getContent() === '') {\r\n              e.preventDefault();\r\n              alert('Content is required.');\r\n            }\r\n          });\r\n        });\r\n      </script><script src=\"https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -19,12 +19,71 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool) {
       <style>
         body {
           font-family: 'Inter', sans-serif;
+          background-color: #121212;
+          color: #e0e0e0;
+        }
+        .content-container {
+          background-color: #1e1e1e;
+          color: #e0e0e0;
+          border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .content-container h1,
+        .content-container h2 {
+          color: #bb86fc;
+        }
+        .content-container a {
+          color: #bb86fc;
+        }
+        .content-container a:hover {
+          color: #3700b3;
+        }
+        .content-container .text-gray-500 {
+          color: #a0a0a0;
+        }
+        .content-container .text-gray-700 {
+          color: #e0e0e0;
+        }
+        .content-container .btn-primary {
+          background-color: #bb86fc;
+          border: none;
+        }
+        .content-container .btn-primary:hover {
+          background-color: #3700b3;
+        }
+        .content-container .btn-warning {
+          background-color: #ff9800;
+          color: #121212;
+          border: none;
+        }
+        .content-container .btn-warning:hover {
+          background-color: #e68900;
+        }
+        .content-container .btn-danger {
+          background-color: #dc3545;
+          border: none;
+        }
+        .content-container .btn-danger:hover {
+          background-color: #c82333;
+        }
+        .content-container .list-group-item {
+          background-color: #2c2c2c;
+          border-color: #444;
+        }
+        .form-control {
+          background-color: #2c2c2c;
+          border: none;
+          color: #e0e0e0;
+        }
+        .form-control:focus {
+          background-color: #2c2c2c;
+          color: #e0e0e0;
         }
       </style>
     </head>
-    <body class="bg-gray-100">
+    <body>
       @NavBar(loggedIn)
-      <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+      <div class="max-w-4xl mx-auto p-6 content-container mt-10">
         <h1 class="text-3xl font-bold mb-6"> @UnsafeHTML(post.Title)</h1>
         <p class="text-gray-500 mb-4">Posted on { post.FormattedCreatedAt }</p>
         <p class="text-gray-700 mb-4">
@@ -42,7 +101,7 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool) {
         <h2 class="text-2xl font-bold mb-4 mt-4">Comments</h2>
         <div class="list-group" id="comments-section">
           for _, comment := range post.Comments {
-            <div class="list-group-item list-group-item-action border-t border-gray-200 mt-2 pt-2">
+            <div class="list-group-item list-group-item-action mt-2 pt-2">
               <p class="text-gray-700"><strong>{ comment.User.Username }</strong> posted on { comment.FormattedCreatedAt }</p>
               <p class="text-gray-700">{ comment.Content }</p>
             </div>
@@ -60,7 +119,7 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool) {
         } else {
           <p class="text-gray-500">Please login to add a comment</p>
         }
-        <a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", post.BlogID)) } class="inline-block mb-4 text-indigo-600 hover:text-indigo-900">
+        <a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", post.BlogID)) } class="inline-block mb-4 text-indigo-400 hover:text-indigo-700">
           &larr; Back to User's Blog Page
         </a>
       </div>

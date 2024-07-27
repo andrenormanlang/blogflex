@@ -18,26 +18,81 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
       <style>
         body {
           font-family: 'Inter', sans-serif;
+          background-color: #121212;
+          color: #e0e0e0;
+        }
+        .container {
+          max-width: 900px;
+        }
+        .card {
+          border: none;
+          margin-bottom: 30px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+          background-color: #1e1e1e;
+          color: #e0e0e0;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+        .card-body {
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .blog-title a {
+          text-decoration: none;
+          color: #bb86fc;
+        }
+        .blog-title a:hover {
+          color: #3700b3;
+        }
+        .blog-meta {
+          font-size: 0.9rem;
+          color: #a0a0a0;
+        }
+        .post-title a {
+          text-decoration: none;
+          color: #bb86fc;
+        }
+        .post-title a:hover {
+          color: #3700b3;
+        }
+        .post-meta {
+          font-size: 0.85rem;
+          color: #a0a0a0;
+        }
+        .post-stats {
+          font-size: 0.85rem;
+          color: #a0a0a0;
+        }
+        .post-stats span {
+          margin-right: 10px;
         }
       </style>
     </head>
-    <body class="bg-light">
+    <body>
       @NavBar(loggedIn)
       <div class="container mt-5">
-        <h1 class="mb-4">{blog.Name}</h1>
+        <h1 class="mb-4 blog-title">{blog.Name}</h1>
         <p class="mb-4">{blog.Description}</p>
         if isOwner {
           <a href="/protected/posts/create" class="btn btn-primary mb-3">Create a Post</a>
         }
-        <div class="list-group">
+        <div class="row">
           for _, post := range posts {
-            <div class="list-group-item">
-              <h5 class="mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>@UnsafeHTML(post.Title)</a></h5>
-              <p class="mb-1">@UnsafeHTML(helpers.TruncateWords(post.Content, 20))</p>
-              <small>Posted on {post.FormattedCreatedAt}</small>
-              <div>
-                <span>Comments: { strconv.Itoa(post.CommentsCount) }</span>
-                <span>Likes: { strconv.Itoa(post.LikesCount) }</span>
+            <div class="col-md-6 d-flex align-items-stretch mb-4">
+              <div class="card w-100">
+                <div class="card-body">
+                  <h5 class="post-title mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>@UnsafeHTML(post.Title)</a></h5>
+                  <p class="mb-1">@UnsafeHTML(helpers.TruncateWords(post.Content, 20))</p>
+                  <small class="post-meta">Posted on {post.FormattedCreatedAt}</small>
+                  <div class="post-stats mt-2">
+                    <span>Comments: { strconv.Itoa(post.CommentsCount) }</span>
+                    <span>Likes: { strconv.Itoa(post.LikesCount) }</span>
+                  </div>
+                </div>
               </div>
             </div>
           }
@@ -47,3 +102,4 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
     </body>
   </html>
 }
+

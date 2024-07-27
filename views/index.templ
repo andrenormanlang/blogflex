@@ -17,30 +17,59 @@ templ MainPage(blogs []models.Blog, loggedIn bool) {
     <style>
       body {
         font-family: 'Inter', sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
       }
-      .blog-description {
-        display: none;
+      .card {
+        border: none;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        height: 100%;
       }
-      .blog-title:hover + .blog-description {
-        display: block;
+      .card-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .blog-title a {
+        text-decoration: none;
+        color: #bb86fc;
+      }
+      .blog-title a:hover {
+        color: #3700b3;
+      }
+      .blog-meta {
+        font-size: 0.9rem;
+        color: #a0a0a0;
+      }
+      .card-container {
+        margin-bottom: 20px;
       }
     </style>
   </head>
-  <body class="bg-gray-100">
+  <body>
     @NavBar(loggedIn)
     <div class="container mt-5">
-      <div class="list-group">
+      <div class="row">
         for _, blog := range blogs {
-          <div class="list-group-item list-group-item-action">
-            <h5 class="mb-1 blog-title"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{blog.Name}</a></h5>
-            <small class="d-block">blog author: {blog.User.Username} blog created at: {blog.FormattedCreatedAt}</small>
-            <p class="mb-1 blog-description">{blog.Description}</p>
-            if blog.LatestPost != nil {
-                <small class="d-block mt-2 mb-2">latest post: 
-                @RenderLatestPostTitle(blog.LatestPost.Title)
-                posted on {blog.LatestPost.FormattedCreatedAt}</small>
-                
-            }
+          <div class="col-md-6 d-flex align-items-stretch card-container">
+            <div class="card w-100">
+              <div class="card-body">
+                <h5 class="blog-title"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{blog.Name}</a></h5>
+                <p class="d-block mb-2 blog-description">{blog.Description}</p>
+                <small class="d-block blog-meta">blog author: {blog.User.Username} | </small>
+                <small class="d-block blog-meta">created on {blog.FormattedCreatedAt}</small>
+                if blog.LatestPost != nil {
+                    <small class="d-block mt-2 blog-meta">latest post: 
+                    @RenderLatestPostTitle(blog.LatestPost.Title)
+                    posted on {blog.LatestPost.FormattedCreatedAt}</small>
+                }
+              </div>
+            </div>
           </div>
         }
       </div>

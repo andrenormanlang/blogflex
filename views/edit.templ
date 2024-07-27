@@ -14,20 +14,53 @@ templ EditPost(post models.Post) {
       <title>Edit Post - BlogFlex</title>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
       <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-      <script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+      <script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
       <style>
         body {
           font-family: 'Inter', sans-serif;
+          background-color: #121212;
+          color: #e0e0e0;
+        }
+        .container {
+          max-width: 1000px;
+        }
+        .card {
+          background-color: #1e1e1e;
+          border: none;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+        }
+        .card-body {
+          padding: 20px;
+        }
+        .card-title {
+          color: #bb86fc;
+        }
+        .form-control {
+          background-color: #2c2c2c;
+          border: none;
+          color: #e0e0e0;
+        }
+        .form-control:focus {
+          background-color: #2c2c2c;
+          color: #e0e0e0;
+        }
+        .btn-primary {
+          background-color: #bb86fc;
+          border: none;
+        }
+        .btn-primary:hover {
+          background-color: #3700b3;
         }
       </style>
     </head>
-    <body class="bg-light">
+    <body>
       <div class="container mt-5">
         <div class="row justify-content-center">
-          <div class="col-md-8">
+          <div class="col-md-12">
             <div class="card shadow-sm">
               <div class="card-body">
-                <h1 class="card-title text-center mb-4">Edit Post</h1>
+                // <h1 class="card-title text-center mb-4">Edit Post</h1>
                 <form id="edit-post-form" hx-post={ fmt.Sprintf("/protected/posts/%d/edit", post.ID) } hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST">
                   <div class="form-group">
                     <label for="title">Title</label>
@@ -64,7 +97,9 @@ templ EditPost(post models.Post) {
               editor.on('change', function(e) {
                 editor.save();
               });
-            }
+            },
+            skin: window.matchMedia("(prefers-color-scheme: dark)").matches ? "oxide-dark" : "",
+            content_css: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : ""
           });
 
           document.getElementById('edit-post-form').addEventListener('submit', function(e) {

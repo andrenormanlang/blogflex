@@ -5,76 +5,107 @@ import (
     "fmt"
 )
 
-templ MainPage(blogs []models.Blog, loggedIn bool) {
-  <html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to BlogFlex</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="/static/css/tailwind.generated.css" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #121212;
-        color: #e0e0e0;
-      }
-      .card {
-        border: none;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
-        background-color: #1e1e1e;
-        color: #e0e0e0;
-        height: 100%;
-      }
-      .card-body {
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-      .blog-title a {
-        text-decoration: none;
-        color: #bb86fc;
-      }
-      .blog-title a:hover {
-        color: #3700b3;
-      }
-      .blog-meta {
-        font-size: 0.9rem;
-        color: #a0a0a0;
-      }
-      .card-container {
-        margin-bottom: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    @NavBar(loggedIn)
-    <div class="container mt-5">
-      <div class="row">
-        for _, blog := range blogs {
-          <div class="col-md-6 d-flex align-items-stretch card-container">
-            <div class="card w-100">
-              <div class="card-body">
-                <h5 class="blog-title"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{blog.Name}</a></h5>
-                <p class="d-block mb-2 blog-description">{blog.Description}</p>
-                <small class="d-block blog-meta">blog author: {blog.User.Username} | </small>
-                <small class="d-block blog-meta">created on {blog.FormattedCreatedAt}</small>
-                if blog.LatestPost != nil {
-                    <small class="d-block mt-2 blog-meta">latest post: 
-                    @RenderLatestPostTitle(blog.LatestPost.Title)
-                    posted on {blog.LatestPost.FormattedCreatedAt}</small>
+func MainPageHandler(w http.ResponseWriter, r *http.Request) {
+    session, _ := store.Get(r, "session-name")
+    userID := session.Values["userID"]
+    loggedIn := userID != nil
+
+    query := `
+        query {
+            blogs {
+                id
+                name
+                description
+                image_path
+                user {
+                    username
                 }
-              </div>
-            </div>
-          </div>
+                created_at
+                posts(order_by: {created_at: desc}, limit: 1) {
+                    title
+                    created_at
+                }
+            }
         }
-      </div>
-    </div>
-    @SharedComponents()
-  </body>
-  </html>
+    `
+    result, err := database.ExecuteGraphQL(query, nil)
+    if err != nil {
+        http.Error(w, "Failed to fetch blogs", http.StatusInternalServerError)
+        return
+    }
+
+    blogsData, ok := result["blogs"].([]interface{})
+    if !ok {
+        http.Error(w, "Invalid data format for blogs", http.StatusInternalServerError)
+        return
+    }
+
+    var blogs []models.Blog
+    for _, blogData := range blogsData {
+        blogMap, ok := blogData.(map[string]interface{})
+        if !ok {
+            log.Printf("Invalid data format for blogData")
+            continue
+        }
+
+        userMap, ok := blogMap["user"].(map[string]interface{})
+        if !ok {
+            log.Printf("Invalid data format for user")
+            continue
+        }
+
+        var imagePath string
+        if blogMap["image_path"] != nil {
+            imagePath, ok = blogMap["image_path"].(string)
+            if !ok {
+                log.Printf("image_path is not a string")
+                imagePath = ""  // Assign a default value or handle the error as needed
+            }
+        }
+
+        var latestPost *models.Post
+        posts, ok := blogMap["posts"].([]interface{})
+        if ok && len(posts) > 0 {
+            postMap, ok := posts[0].(map[string]interface{})
+            if !ok {
+                log.Printf("Invalid data format for post")
+                continue
+            }
+
+            createdAt, err := time.Parse("2006-01-02T15:04:05", postMap["created_at"].(string))
+            if err != nil {
+                log.Printf("Error parsing post created_at time: %v", err)
+                continue
+            }
+
+            latestPost = &models.Post{
+                Title:             postMap["title"].(string),
+                FormattedCreatedAt: helpers.FormatTime(createdAt),
+            }
+        }
+
+        createdAtStr := blogMap["created_at"].(string)
+        createdAt, err := time.Parse("2006-01-02T15:04:05", createdAtStr)
+        if err != nil {
+            log.Printf("Error parsing blog created_at time: %v", err)
+            continue
+        }
+
+        blogs = append(blogs, models.Blog{
+            ID:                 uint(blogMap["id"].(float64)),
+            Name:               blogMap["name"].(string),
+            Description:        blogMap["description"].(string),
+            ImagePath:          imagePath,
+            FormattedCreatedAt: helpers.FormatTime(createdAt),
+            User: &models.User{
+                Username: userMap["username"].(string),
+            },
+            LatestPost: latestPost,
+        })
+    }
+
+    log.Printf("Blogs: %+v", blogs)
+
+    component := views.MainPage(blogs, loggedIn)
+    templ.Handler(component).ServeHTTP(w, r)
 }

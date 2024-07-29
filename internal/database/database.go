@@ -48,7 +48,7 @@ func InitHasura() {
     }
 }
 
-func SendGraphQLRequest(query string, variables map[string]interface{}) (*GraphQLResponse, error) {
+func SendGraphQLRequest(query string, variables map[string]interface{}) (map[string]interface{}, error) {
     requestBody, err := json.Marshal(GraphQLRequest{Query: query, Variables: variables})
     if err != nil {
         return nil, err
@@ -74,11 +74,17 @@ func SendGraphQLRequest(query string, variables map[string]interface{}) (*GraphQ
     }
 
     if len(response.Errors) > 0 {
-        return &response, errors.New(response.Errors[0].Message)
+        return nil, errors.New(response.Errors[0].Message)
     }
 
-    return &response, nil
+    var data map[string]interface{}
+    if err := json.Unmarshal(response.Data, &data); err != nil {
+        return nil, err
+    }
+
+    return data, nil
 }
+
 
 func ExecuteGraphQL(query string, variables map[string]interface{}) (map[string]interface{}, error) {
     requestBody, err := json.Marshal(map[string]interface{}{

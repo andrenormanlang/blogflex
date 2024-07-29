@@ -80,26 +80,31 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
         if isOwner {
           <a href="/protected/posts/create" class="btn btn-primary mb-3">Create a Post</a>
         }
-        <div class="row">
-          for _, post := range posts {
-            <div class="col-md-6 d-flex align-items-stretch mb-4">
-              <div class="card w-100">
-                <div class="card-body">
-                  <h5 class="post-title mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>@UnsafeHTML(post.Title)</a></h5>
-                  <p class="mb-1">@UnsafeHTML(helpers.TruncateWords(post.Content, 20))</p>
-                  <small class="post-meta">Posted on {post.FormattedCreatedAt}</small>
-                  <div class="post-stats mt-2">
-                    <span>Comments: { strconv.Itoa(post.CommentsCount) }</span>
-                    <span>Likes: { strconv.Itoa(post.LikesCount) }</span>
+        if len(posts) == 0 {
+          <p>No posts available for this blog.</p>
+        } else {
+          <div class="row">
+            for _, post := range posts {
+              <div class="col-md-6 d-flex align-items-stretch mb-4">
+                <div class="card w-100">
+                  <div class="card-body">
+                    <h5 class="post-title mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>@UnsafeHTML(post.Title)</a></h5>
+                    <p class="mb-1">@UnsafeHTML(helpers.TruncateWords(post.Content, 20))</p>
+                    <small class="post-meta">Posted on {post.FormattedCreatedAt}</small>
+                    <div class="post-stats mt-2">
+                      <span>Comments: { strconv.Itoa(post.CommentsCount) }</span>
+                      <span>Likes: { strconv.Itoa(post.LikesCount) }</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        }
       </div>
       @SharedComponents()
     </body>
   </html>
 }
+
 

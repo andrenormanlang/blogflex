@@ -122,6 +122,8 @@ func BlogListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // BlogPageHandler handles displaying a single blog page with its posts
+// BlogPageHandler handles displaying a single blog page with its posts
+// BlogPageHandler handles displaying a single blog page with its posts
 func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     blogID, err := strconv.Atoi(vars["id"])
@@ -205,42 +207,50 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
         postIDs = append(postIDs, postID)
     }
 
-    // Query to get likes count for the posts
-    likesQuery := `
-        query GetLikesCounts($post_ids: [Int!]!) {
-            posts_with_likes(where: {post_id: {_in: $post_ids}}) {
-                post_id
-                likes_count
+    var likesMap map[int]int
+    if len(postIDs) > 0 {
+        // Query to get likes count for the posts
+        likesQuery := `
+            query GetLikesCounts($post_ids: [Int!]!) {
+                posts_with_likes(where: {post_id: {_in: $post_ids}}) {
+                    post_id
+                    likes_count
+                }
             }
+        `
+        likesVariables := map[string]interface{}{
+            "post_ids": postIDs,
         }
-    `
-    likesVariables := map[string]interface{}{
-        "post_ids": postIDs,
-    }
 
-    likesResult, err := helpers.GraphQLRequest(likesQuery, likesVariables)
-    if err != nil {
-        log.Printf("Failed to fetch likes count: %v", err)
-        http.Error(w, "Failed to fetch likes count", http.StatusInternalServerError)
-        return
-    }
+        likesResult, err := helpers.GraphQLRequest(likesQuery, likesVariables)
+        if err != nil {
+            log.Printf("Failed to fetch likes count: %v", err)
+            http.Error(w, "Failed to fetch likes count", http.StatusInternalServerError)
+            return
+        }
 
-    log.Printf("GraphQL likes result: %+v\n", likesResult)
+        log.Printf("GraphQL likes result: %+v\n", likesResult)
 
-    likesData, ok := likesResult["data"].(map[string]interface{})["posts_with_likes"].([]interface{})
-    if !ok || likesData == nil {
-        log.Printf("posts_with_likes is nil or not a slice: %v", likesResult["data"])
-        http.Error(w, "Failed to fetch likes data", http.StatusInternalServerError)
-        return
-    }
+        likesData, ok := likesResult["data"].(map[string]interface{})["posts_with_likes"].([]interface{})
+        if !ok || likesData == nil {
+            log.Printf("posts_with_likes is nil or not a slice: %v", likesResult["data"])
+            http.Error(w, "Failed to fetch likes data", http.StatusInternalServerError)
+            return
+        }
 
-    // Create a map of post IDs to likes count
-    likesMap := make(map[int]int)
-    for _, like := range likesData {
-        likeMap := like.(map[string]interface{})
-        postID := int(likeMap["post_id"].(float64))
-        likesCount := int(likeMap["likes_count"].(float64))
-        likesMap[postID] = likesCount
+        // Create a map of post IDs to likes count
+        likesMap = make(map[int]int)
+        for _, like := range likesData {
+            likeMap := like.(map[string]interface{})
+            postID := int(likeMap["post_id"].(float64))
+            likesCount := 0
+            if likeMap["likes_count"] != nil {
+                likesCount = int(likeMap["likes_count"].(float64))
+            }
+            likesMap[postID] = likesCount
+        }
+    } else {
+        likesMap = make(map[int]int)
     }
 
     // Process posts and combine likes count
@@ -308,3 +318,5 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     templ.Handler(component).ServeHTTP(w, r)
     log.Println("Blog page rendered successfully")
 }
+
+

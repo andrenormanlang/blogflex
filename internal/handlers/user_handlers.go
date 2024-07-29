@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+    "mime/multipart"
+    "path/filepath"
 
 	"blogflex/internal/database"
 	"blogflex/views"
@@ -19,15 +21,29 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
+    "github.com/google/uuid"
+
+
 
 	"blogflex/internal/auth"
 	"blogflex/internal/helpers"
 	"blogflex/internal/models"
+    "cloud.google.com/go/storage"
+    "context"
+
+    "google.golang.org/api/option"
+
+
 )
 
 
 
 var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
+func ValidateURL(imagePath string) bool {
+    _, err := url.ParseRequestURI(imagePath)
+    return err == nil
+}
+
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "session-name")
     userID := session.Values["userID"]
@@ -39,6 +55,7 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
                 id
                 name
                 description
+                image_path
                 user {
                     username
                 }
@@ -52,12 +69,14 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
     `
     result, err := database.ExecuteGraphQL(query, nil)
     if err != nil {
+        log.Printf("Failed to fetch blogs: %v", err)
         http.Error(w, "Failed to fetch blogs", http.StatusInternalServerError)
         return
     }
 
     blogsData, ok := result["blogs"].([]interface{})
     if !ok {
+        log.Printf("Invalid data format for blogs: %v", result)
         http.Error(w, "Invalid data format for blogs", http.StatusInternalServerError)
         return
     }
@@ -66,14 +85,26 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
     for _, blogData := range blogsData {
         blogMap, ok := blogData.(map[string]interface{})
         if !ok {
-            log.Printf("Invalid data format for blogData")
+            log.Printf("Invalid data format for blogData: %v", blogData)
             continue
         }
 
         userMap, ok := blogMap["user"].(map[string]interface{})
         if !ok {
-            log.Printf("Invalid data format for user")
+            log.Printf("Invalid data format for user: %v", blogMap["user"])
             continue
+        }
+
+        var imagePath string
+        if blogMap["image_path"] != nil {
+            imagePath, ok = blogMap["image_path"].(string)
+            if !ok {
+                log.Printf("image_path is not a string: %v", blogMap["image_path"])
+                imagePath = ""
+            } else if !ValidateURL(imagePath) {
+                log.Printf("Invalid URL for image_path: %s", imagePath)
+                imagePath = ""
+            }
         }
 
         var latestPost *models.Post
@@ -81,7 +112,7 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
         if ok && len(posts) > 0 {
             postMap, ok := posts[0].(map[string]interface{})
             if !ok {
-                log.Printf("Invalid data format for post")
+                log.Printf("Invalid data format for post: %v", posts[0])
                 continue
             }
 
@@ -108,6 +139,7 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
             ID:                 uint(blogMap["id"].(float64)),
             Name:               blogMap["name"].(string),
             Description:        blogMap["description"].(string),
+            ImagePath:          imagePath,
             FormattedCreatedAt: helpers.FormatTime(createdAt),
             User: &models.User{
                 Username: userMap["username"].(string),
@@ -115,6 +147,8 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
             LatestPost: latestPost,
         })
     }
+
+    log.Printf("Blogs: %+v", blogs)
 
     component := views.MainPage(blogs, loggedIn)
     templ.Handler(component).ServeHTTP(w, r)
@@ -176,42 +210,66 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(user)
 }
 
-// SignUpHandler handles user registration
-// SignUpHandler handles user registration
+const (
+    googleProjectID   = "blogflex-images"
+    googleBucketName  = "images-blogs"
+    googleCredentials = "./credentials/blogflex-images-20064da6f3e5.json" // Update this path
+)
+
+func uploadFileToGCS(file multipart.File, fileName string) (string, error) {
+    ctx := context.Background()
+
+    client, err := storage.NewClient(ctx, option.WithCredentialsFile(googleCredentials))
+    if err != nil {
+        return "", fmt.Errorf("storage.NewClient: %v", err)
+    }
+    defer client.Close()
+
+    wc := client.Bucket(googleBucketName).Object(fileName).NewWriter(ctx)
+    if _, err = io.Copy(wc, file); err != nil {
+        return "", fmt.Errorf("io.Copy: %v", err)
+    }
+    if err := wc.Close(); err != nil {
+        return "", fmt.Errorf("Writer.Close: %v", err)
+    }
+
+    return fmt.Sprintf("https://storage.googleapis.com/%s/%s", googleBucketName, fileName), nil
+}
 
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User
-    var blogName, blogDescription string
+    var blogName, blogDescription, blogImagePath string
 
-    body, err := io.ReadAll(r.Body)
+    // Limit the size of the request body to prevent large uploads
+    r.Body = http.MaxBytesReader(w, r.Body, 10<<20+512) // 10 MB max file size + 512 bytes
+
+    // Parse the multipart form data
+    err := r.ParseMultipartForm(10 << 20) // 10 MB max file size
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
-    log.Printf("Request Body: %s", body)
 
-    contentType := r.Header.Get("Content-Type")
+    // Access the form fields
+    user.Username = r.FormValue("username")
+    user.Email = r.FormValue("email")
+    user.Password = r.FormValue("password")
+    blogName = r.FormValue("blogName")
+    blogDescription = r.FormValue("blogDescription")
 
-    if strings.Contains(contentType, "application/json") {
-        err = json.Unmarshal(body, &user)
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusBadRequest)
-            return
-        }
-    } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-        values, err := url.ParseQuery(string(body))
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusBadRequest)
-            return
-        }
+    // Handle the uploaded file
+    file, handler, err := r.FormFile("blogImage")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+    defer file.Close()
 
-        user.Username = values.Get("username")
-        user.Email = values.Get("email")
-        user.Password = values.Get("password")
-        blogName = values.Get("blogName")
-        blogDescription = values.Get("blogDescription")
-    } else {
-        http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
+    // Generate a unique file name and upload to Google Cloud Storage
+    fileName := fmt.Sprintf("%s%s", uuid.New().String(), filepath.Ext(handler.Filename))
+    blogImagePath, err = uploadFileToGCS(file, fileName)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
@@ -223,6 +281,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     }
     user.Password = string(hashedPassword)
 
+    // Insert user into Hasura
     mutation := `
         mutation CreateUser($username: String!, $email: String!, $password: String!) {
             insert_users_one(object: {username: $username, email: $email, password: $password}) {
@@ -238,28 +297,32 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         "password": user.Password,
     }
 
-    result, err := helpers.GraphQLRequest(mutation, variables)
+    data, err := database.SendGraphQLRequest(mutation, variables)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
+    // Extract the user ID from the GraphQL response
+    userData := data["insert_users_one"].(map[string]interface{})
+    userID := userData["id"].(string)
+
     // Create a blog for the new user
-    userId := result["data"].(map[string]interface{})["insert_users_one"].(map[string]interface{})["id"].(string)
     blogMutation := `
-        mutation CreateBlog($user_id: uuid!, $name: String!, $description: String!) {
-            insert_blogs_one(object: {user_id: $user_id, name: $name, description: $description}) {
+        mutation CreateBlog($user_id: uuid!, $name: String!, $description: String!, $image_path: String!) {
+            insert_blogs_one(object: {user_id: $user_id, name: $name, description: $description, image_path: $image_path}) {
                 id
             }
         }
     `
     blogVariables := map[string]interface{}{
-        "user_id":     userId,
+        "user_id":     userID,
         "name":        blogName,
         "description": blogDescription,
+        "image_path":  blogImagePath,
     }
 
-    _, err = helpers.GraphQLRequest(blogMutation, blogVariables)
+    _, err = database.SendGraphQLRequest(blogMutation, blogVariables)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -271,6 +334,9 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         "message": "Sign up successful! Please log in to continue.",
     })
 }
+
+
+
 // LoginHandler handles user login
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User

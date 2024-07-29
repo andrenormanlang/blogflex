@@ -13,14 +13,25 @@ type Blog struct {
     ID                 uint      `json:"id"`
     Name               string    `json:"name"`
     Description        string    `json:"description"`
+    ImagePath          string    `json:"image_path"` 
     UserID             uint      `json:"user_id"`
     User               *User     `json:"user"`
     Posts              []Post    `json:"posts"`
     CreatedAt          time.Time `json:"created_at"`
     UpdatedAt          time.Time `json:"updated_at"`
     FormattedCreatedAt string    `json:"-"`
-    LikesCount         int        `json:"likes_count"`
+    LikesCount         int       `json:"likes_count"`
     LatestPost         *Post     `json:"latest_post,omitempty"`
+}
+
+type CreateUserResponse struct {
+    Data struct {
+        InsertUserOne struct {
+            ID       string `json:"id"`
+            Username string `json:"username"`
+            Email    string `json:"email"`
+        } `json:"insert_users_one"`
+    } `json:"data"`
 }
 
 type Comment struct {

@@ -8,44 +8,75 @@ templ SharedComponents() {
 
 templ SignUpModal() {
     <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="signupModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content bg-dark text-light">
-          <div class="modal-header border-bottom-0">
-            <h5 class="modal-title" id="signupModalLabel">Join BlogFlex</h5>
-            <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form hx-post="/signup" hx-target="#signupModal" hx-swap="none" enctype="application/x-www-form-urlencoded" class="space-y-6">
-              <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control bg-secondary text-light border-0" id="username" name="username" required>
-              </div>
-              <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" class="form-control bg-secondary text-light border-0" id="email" name="email" required>
-              </div>
-              <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control bg-secondary text-light border-0" id="password" name="password" required>
-              </div>
-              <div class="form-group">
-                <label for="blogName">Blog Name</label>
-                <input type="text" class="form-control bg-secondary text-light border-0" id="blogName" name="blogName" required>
-              </div>
-              <div class="form-group">
-                <label for="blogDescription">Blog Description</label>
-                <textarea class="form-control bg-secondary text-light border-0" id="blogDescription" name="blogDescription" required></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary">Sign Up</button>
-            </form>
-          </div>
-          <div id="response-message" class="modal-footer border-top-0"></div>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title" id="signupModalLabel">Join BlogFlex</h5>
+                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="signup-form" hx-encoding="multipart/form-data" enctype="multipart/form-data" class="space-y-6">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control bg-secondary text-light border-0" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control bg-secondary text-light border-0" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control bg-secondary text-light border-0" id="password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="blogName">Blog Name</label>
+                            <input type="text" class="form-control bg-secondary text-light border-0" id="blogName" name="blogName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="blogDescription">Blog Description</label>
+                            <textarea class="form-control bg-secondary text-light border-0" id="blogDescription" name="blogDescription" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="blogImage">Upload Blog Image</label>
+                            <input type="file" class="form-control-file bg-secondary text-light border-0" id="blogImage" name="blogImage" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    </form>
+                </div>
+                <div id="response-message" class="modal-footer border-top-0"></div>
+            </div>
         </div>
-      </div>
     </div>
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let form = event.target;
+            let formData = new FormData(form);
+
+            fetch('/signup', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message); // Display success message or redirect as needed
+                    $('#signupModal').modal('hide');
+                } else {
+                    alert('An error occurred. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    </script>
 }
+
 
 templ LoginModal() {
     <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">

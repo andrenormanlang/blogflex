@@ -1,0 +1,29 @@
+name: Deploy to GCS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v0.10.0
+      with:
+        workload_identity_provider: 'projects/933537604681/locations/global/workloadIdentityPools/github-actions-deployment/providers/github-provider'
+        service_account: 'images-blog@blogflex-images.iam.gserviceaccount.com'
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0.10.0
+      with:
+        project_id: 'blogflex-images'
+
+    - name: Deploy to GCS
+      run: |
+        gsutil cp -r static/* gs://images-blogs/

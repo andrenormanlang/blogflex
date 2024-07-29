@@ -31,8 +31,6 @@ import (
 
 )
 
-
-
 var store = sessions.NewCookieStore([]byte("your-very-secret-key"))
 func ValidateURL(imagePath string) bool {
     _, err := url.ParseRequestURI(imagePath)

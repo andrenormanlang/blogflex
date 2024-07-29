@@ -6,19 +6,23 @@ import (
     "fmt"
     "io"
     "mime/multipart"
-    "google.golang.org/api/option"
+    "os"
 )
 
 const (
-    googleProjectID   = "blogflex-images"
-    googleBucketName  = "images-blogs"
-    googleCredentials = "./credentials/blogflex-images-d00c068cf344.json" // Update this path
+    googleProjectID  = "blogflex-images"
+    googleBucketName = "images-blogs"
 )
 
 func UploadFileToGCS(file multipart.File, fileName string) (string, error) {
     ctx := context.Background()
 
-    client, err := storage.NewClient(ctx, option.WithCredentialsFile(googleCredentials))
+    googleCredentials := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if googleCredentials == "" {
+        return "", fmt.Errorf("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set")
+    }
+
+    client, err := storage.NewClient(ctx)
     if err != nil {
         return "", fmt.Errorf("storage.NewClient: %v", err)
     }

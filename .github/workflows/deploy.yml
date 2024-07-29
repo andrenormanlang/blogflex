@@ -9,6 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -17,7 +21,7 @@ jobs:
       uses: google-github-actions/auth@v2.1.3
       with:
         workload_identity_provider: 'projects/933537604681/locations/global/workloadIdentityPools/github-actions-deployment/providers/github-provider'
-        service_account_email: 'images-blog@blogflex-images.iam.gserviceaccount.com'
+        service_account: 'images-blog@blogflex-images.iam.gserviceaccount.com'
 
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2.1.0

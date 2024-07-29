@@ -78,6 +78,8 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
         <h1 class="mb-4 blog-title">{blog.Name}</h1>
         <p class="mb-4">{blog.Description}</p>
         if isOwner {
+          <a href={ templ.URL("/protected/blogs/" + fmt.Sprintf("%d/edit", blog.ID)) } class="btn btn-warning mb-3">Edit Blog</a>
+          <button hx-delete={ fmt.Sprintf("/protected/blogs/%d", blog.ID) } hx-confirm="Are you sure you want to delete this blog?" class="btn btn-danger mb-3">Delete Blog</button>
           <a href="/protected/posts/create" class="btn btn-primary mb-3">Create a Post</a>
         }
         if len(posts) == 0 {
@@ -106,5 +108,4 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
     </body>
   </html>
 }
-
 

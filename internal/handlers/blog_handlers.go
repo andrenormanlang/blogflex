@@ -18,6 +18,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+    "blogflex/internal/database"
+    "fmt"
+    "github.com/google/uuid"
+    "path/filepath"
 )
 
 // CreateBlogHandler handles creating a new blog
@@ -121,8 +125,6 @@ func BlogListHandler(w http.ResponseWriter, r *http.Request) {
     templ.Handler(component).ServeHTTP(w, r)
 }
 
-// BlogPageHandler handles displaying a single blog page with its posts
-// BlogPageHandler handles displaying a single blog page with its posts
 // BlogPageHandler handles displaying a single blog page with its posts
 func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
@@ -319,4 +321,240 @@ func BlogPageHandler(w http.ResponseWriter, r *http.Request) {
     log.Println("Blog page rendered successfully")
 }
 
+
+func EditBlogFormHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    blogID, err := strconv.Atoi(vars["id"])
+    if err != nil {
+        http.Error(w, "Invalid blog ID", http.StatusBadRequest)
+        return
+    }
+
+    session, _ := store.Get(r, "session-name")
+    userID, ok := session.Values["userID"].(string)
+    if !ok {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    query := `
+        query GetBlog($id: Int!) {
+            blogs_by_pk(id: $id) {
+                id
+                name
+                description
+                image_path
+                user {
+                    id
+                }
+            }
+        }
+    `
+    variables := map[string]interface{}{
+        "id": blogID,
+    }
+
+    result, err := database.ExecuteGraphQL(query, variables)
+    if err != nil {
+        log.Printf("Failed to execute GraphQL query: %v", err)
+        http.Error(w, "Failed to fetch blog", http.StatusInternalServerError)
+        return
+    }
+
+    blogData, ok := result["blogs_by_pk"].(map[string]interface{})
+    if !ok || blogData == nil {
+        log.Printf("blogs_by_pk is nil or not a map: %v", result)
+        http.Error(w, "Blog not found", http.StatusNotFound)
+        return
+    }
+
+    blogOwnerID, ok := blogData["user"].(map[string]interface{})["id"].(string)
+    if !ok || blogOwnerID != userID {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    // Check if image_path is nil and handle accordingly
+    var imagePath string
+    if blogData["image_path"] != nil {
+        imagePath, ok = blogData["image_path"].(string)
+        if !ok {
+            imagePath = ""  // Assign a default value or handle the error as needed
+        }
+    }
+
+    blog := models.Blog{
+        ID:          uint(blogData["id"].(float64)),
+        Name:        blogData["name"].(string),
+        Description: blogData["description"].(string),
+        ImagePath:   imagePath,
+    }
+
+    component := views.EditBlog(blog)
+    templ.Handler(component).ServeHTTP(w, r)
+}
+
+
+
+func EditBlogHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    blogID, err := strconv.Atoi(vars["id"])
+    if err != nil {
+        http.Error(w, "Invalid blog ID", http.StatusBadRequest)
+        return
+    }
+
+    session, _ := store.Get(r, "session-name")
+    userID, ok := session.Values["userID"].(string)
+    if !ok {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    // Query to get the blog details
+    query := `
+        query GetBlog($id: Int!) {
+            blogs_by_pk(id: $id) {
+                user_id
+            }
+        }
+    `
+    variables := map[string]interface{}{
+        "id": blogID,
+    }
+
+    result, err := database.ExecuteGraphQL(query, variables)
+    if err != nil {
+        log.Printf("Failed to execute GraphQL query: %v", err)
+        http.Error(w, "Failed to fetch blog", http.StatusInternalServerError)
+        return
+    }
+
+    blogData, ok := result["blogs_by_pk"].(map[string]interface{})
+    if !ok || blogData == nil {
+        log.Printf("blogs_by_pk is nil or not a map: %v", result)
+        http.Error(w, "Blog not found", http.StatusNotFound)
+        return
+    }
+
+    blogOwnerID, ok := blogData["user_id"].(string)
+    if !ok || blogOwnerID != userID {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    var blog struct {
+        Name        string `json:"name"`
+        Description string `json:"description"`
+        ImagePath   string `json:"image_path"`
+    }
+
+    contentType := r.Header.Get("Content-Type")
+    if strings.Contains(contentType, "multipart/form-data") {
+        err := r.ParseMultipartForm(10 << 20) // 10 MB
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+
+        blog.Name = r.FormValue("name")
+        blog.Description = r.FormValue("description")
+        blog.ImagePath = r.FormValue("image_path")
+
+        file, handler, err := r.FormFile("blog_image")
+        if err == nil {
+            defer file.Close()
+            // Generate a unique file name and upload to Google Cloud Storage
+            fileName := fmt.Sprintf("%s%s", uuid.New().String(), filepath.Ext(handler.Filename))
+            blog.ImagePath, err = helpers.UploadFileToGCS(file, fileName)
+            if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+            }
+        }
+    } else if strings.Contains(contentType, "application/json") {
+        err := json.NewDecoder(r.Body).Decode(&blog)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+    } else if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+        if err := r.ParseForm(); err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+        blog.Name = r.FormValue("name")
+        blog.Description = r.FormValue("description")
+        blog.ImagePath = r.FormValue("image_path")
+    } else {
+        http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
+        return
+    }
+
+    query = `
+        mutation UpdateBlog($id: Int!, $name: String!, $description: String!, $image_path: String!) {
+            update_blogs(where: {id: {_eq: $id}}, _set: {name: $name, description: $description, image_path: $image_path}) {
+                affected_rows
+            }
+        }
+    `
+    variables = map[string]interface{}{
+        "id":          blogID,
+        "name":        blog.Name,
+        "description": blog.Description,
+        "image_path":  blog.ImagePath,
+    }
+
+    result, err = database.ExecuteGraphQL(query, variables)
+    if err != nil {
+        log.Printf("Error executing GraphQL mutation: %v", err)
+        http.Error(w, "Failed to update blog", http.StatusInternalServerError)
+        return
+    }
+
+    log.Printf("GraphQL mutation result: %v", result)
+    w.Header().Set("HX-Redirect", fmt.Sprintf("/blogs/%d", blogID))
+    w.WriteHeader(http.StatusOK)
+}
+
+
+
+func DeleteBlogHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    blogID, err := strconv.Atoi(vars["id"])
+    if err != nil {
+        http.Error(w, "Invalid blog ID", http.StatusBadRequest)
+        return
+    }
+
+    session, _ := store.Get(r, "session-name")
+    userID, ok := session.Values["userID"].(string)
+    if !ok {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    query := `
+        mutation DeleteBlog($id: Int!, $user_id: uuid!) {
+            delete_blogs(where: {id: {_eq: $id}, user_id: {_eq: $user_id}}) {
+                affected_rows
+            }
+        }
+    `
+    variables := map[string]interface{}{
+        "id":      blogID,
+        "user_id": userID,
+    }
+
+    result, err := database.ExecuteGraphQL(query, variables)
+    if err != nil {
+        log.Printf("Error executing GraphQL mutation: %v", err)
+        http.Error(w, "Failed to delete blog", http.StatusInternalServerError)
+        return
+    }
+
+    log.Printf("GraphQL mutation result: %v", result)
+    w.Header().Set("HX-Redirect", "/")
+    w.WriteHeader(http.StatusOK)
+}
 

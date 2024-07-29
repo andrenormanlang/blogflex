@@ -213,10 +213,10 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 const (
     googleProjectID   = "blogflex-images"
     googleBucketName  = "images-blogs"
-    googleCredentials = "./credentials/blogflex-images-20064da6f3e5.json" // Update this path
+    googleCredentials = "./credentials/blogflex-images-d00c068cf344.json" // Update this path
 )
 
-func uploadFileToGCS(file multipart.File, fileName string) (string, error) {
+func UploadFileToGCS(file multipart.File, fileName string) (string, error) {
     ctx := context.Background()
 
     client, err := storage.NewClient(ctx, option.WithCredentialsFile(googleCredentials))
@@ -267,7 +267,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
     // Generate a unique file name and upload to Google Cloud Storage
     fileName := fmt.Sprintf("%s%s", uuid.New().String(), filepath.Ext(handler.Filename))
-    blogImagePath, err = uploadFileToGCS(file, fileName)
+    blogImagePath, err = UploadFileToGCS(file, fileName)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return

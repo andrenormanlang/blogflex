@@ -21,7 +21,6 @@ func SetupRouter() *mux.Router {
     r.HandleFunc("/blogs/{id}", handlers.BlogPageHandler).Methods("GET")
     r.HandleFunc("/posts/{id}", handlers.PostDetailHandler).Methods("GET")
     r.HandleFunc("/posts/{id}/like", handlers.GetLikesCountHandler).Methods("GET")
-    
 
     // Serve static files
     r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
@@ -31,6 +30,9 @@ func SetupRouter() *mux.Router {
     protected.Use(middleware.AuthMiddleware)
     protected.HandleFunc("/logout", handlers.LogoutHandler).Methods("POST")
     protected.HandleFunc("/blogs/create", handlers.CreateBlogHandler).Methods("GET", "POST")
+    protected.HandleFunc("/blogs/{id}/edit", handlers.EditBlogFormHandler).Methods("GET")
+    protected.HandleFunc("/blogs/{id}/edit", handlers.EditBlogHandler).Methods("POST")
+    protected.HandleFunc("/blogs/{id}", handlers.DeleteBlogHandler).Methods("DELETE")
     protected.HandleFunc("/posts/create", handlers.CreatePostFormHandler).Methods("GET")
     protected.HandleFunc("/posts", handlers.CreatePostHandler).Methods("POST")
     protected.HandleFunc("/posts/{id}/edit", handlers.EditPostFormHandler).Methods("GET")

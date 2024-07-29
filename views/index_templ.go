@@ -31,7 +31,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Welcome to BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n        background-color: #121212;\r\n        color: #e0e0e0;\r\n      }\r\n      .card {\r\n        border: none;\r\n        margin-bottom: 20px;\r\n        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\r\n        border-radius: 10px;\r\n        background-color: #1e1e1e;\r\n        color: #e0e0e0;\r\n        height: 100%;\r\n      }\r\n      .card-body {\r\n        padding: 20px;\r\n        display: flex;\r\n        flex-direction: column;\r\n        justify-content: space-between;\r\n      }\r\n      .blog-title a {\r\n        text-decoration: none;\r\n        color: #bb86fc;\r\n      }\r\n      .blog-title a:hover {\r\n        color: #3700b3;\r\n      }\r\n      .blog-meta {\r\n        font-size: 0.9rem;\r\n        color: #a0a0a0;\r\n      }\r\n      .card-container {\r\n        margin-bottom: 20px;\r\n      }\r\n      .blog-image {\r\n        max-height: 200px;\r\n        object-fit: cover;\r\n        border-radius: 10px 10px 0 0;\r\n      }\r\n    </style></head><body>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Welcome to BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n        background-color: #121212;\r\n        color: #e0e0e0;\r\n      }\r\n      .card {\r\n        border: none;\r\n        margin-bottom: 20px;\r\n        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\r\n        border-radius: 10px;\r\n        background-color: #1e1e1e;\r\n        color: #e0e0e0;\r\n        height: 100%;\r\n      }\r\n      .card-body {\r\n        padding: 20px;\r\n        display: flex;\r\n        flex-direction: column;\r\n        justify-content: space-between;\r\n      }\r\n      .blog-title a {\r\n        text-decoration: none;\r\n        color: #bb86fc;\r\n      }\r\n      .blog-title a:hover {\r\n        color: #3700b3;\r\n      }\r\n      .blog-meta {\r\n        font-size: 0.9rem;\r\n        color: #a0a0a0;\r\n      }\r\n      .card-container {\r\n        margin-bottom: 20px;\r\n      }\r\n      .blog-image {\r\n        width: 100%;\r\n        height: 200px; /* You can adjust the height to suit your needs */\r\n        object-fit: cover; /* Ensures the image covers the area without distortion */\r\n        border-radius: 10px 10px 0 0;\r\n      }\r\n    </style></head><body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -56,7 +56,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(blog.ImagePath)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 67, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 68, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -83,7 +83,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 70, Col: 111}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 71, Col: 111}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -96,7 +96,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 71, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 72, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(blog.User.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 72, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 73, Col: 81}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -122,7 +122,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(blog.FormattedCreatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 73, Col: 84}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 74, Col: 84}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -148,7 +148,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(blog.LatestPost.FormattedCreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 77, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 78, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {

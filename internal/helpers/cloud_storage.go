@@ -6,6 +6,7 @@ import (
     "fmt"
     "io"
     "mime/multipart"
+    "os"
 )
 
 const (
@@ -13,9 +14,13 @@ const (
     googleBucketName = "images-blogs"
 )
 
-// UploadFileToGCS uploads a file to Google Cloud Storage and returns the public URL
 func UploadFileToGCS(file multipart.File, fileName string) (string, error) {
     ctx := context.Background()
+
+    googleCredentials := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if googleCredentials == "" {
+        return "", fmt.Errorf("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set")
+    }
 
     client, err := storage.NewClient(ctx)
     if err != nil {

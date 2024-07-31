@@ -24,6 +24,7 @@ func SetupRouter() *mux.Router {
 
     // Serve static files
     r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+    r.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 
     // Protected routes
     protected := r.PathPrefix("/protected").Subrouter()

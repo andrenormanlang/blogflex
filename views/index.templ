@@ -19,6 +19,27 @@ templ MainPage(blogs []models.Blog, loggedIn bool) {
         font-family: 'Inter', sans-serif;
         background-color: #121212;
         color: #e0e0e0;
+        position: relative;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+      .background-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('/public/images/blogflex-bg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        opacity: 0.4;
+        z-index: -1;
+      }
+      .content {
+        position: relative;
+        z-index: 1;
+        padding: 20px;
       }
       .card {
         border: none;
@@ -58,34 +79,40 @@ templ MainPage(blogs []models.Blog, loggedIn bool) {
     </style>
   </head>
   <body>
-    @NavBar(loggedIn)
-    <div class="container mt-5">
-      <div class="row">
-        for _, blog := range blogs {
-          <div class="col-md-6 d-flex align-items-stretch card-container">
-            <div class="card w-100">
-              if blog.ImagePath != "" {
-                <img src={blog.ImagePath} alt="Blog Image" class="card-img-top blog-image">
-              }
-              <div class="card-body">
-                <h5 class="blog-title"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{blog.Name}</a></h5>
-                <p class="d-block mb-2 blog-description">{blog.Description}</p>
-                <small class="d-block blog-meta">blog author: {blog.User.Username} | </small>
-                <small class="d-block blog-meta">created on {blog.FormattedCreatedAt}</small>
-                if blog.LatestPost != nil {
-                    <small class="d-block mt-2 blog-meta">latest post: 
-                    @RenderLatestPostTitle(blog.LatestPost.Title)
-                    posted on {blog.LatestPost.FormattedCreatedAt}</small>
+    <div class="background-image"></div>
+    <div class="content">
+      @NavBar(loggedIn)
+      <div class="container mt-5">
+        <div class="row">
+          for _, blog := range blogs {
+            <div class="col-md-6 d-flex align-items-stretch card-container">
+              <div class="card w-100">
+                if blog.ImagePath != "" {
+                  <img src={blog.ImagePath} alt="Blog Image" class="card-img-top blog-image">
                 }
+                <div class="card-body">
+                  <h5 class="blog-title"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{blog.Name}</a></h5>
+                  <p class="d-block mb-2 blog-description">{blog.Description}</p>
+                  <small class="d-block blog-meta">blog author: {blog.User.Username} | </small>
+                  <small class="d-block blog-meta">created on {blog.FormattedCreatedAt}</small>
+                  if blog.LatestPost != nil {
+                      <small class="d-block mt-2 blog-meta">latest post: 
+                      @RenderLatestPostTitle(blog.LatestPost.Title)
+                      posted on {blog.LatestPost.FormattedCreatedAt}</small>
+                  }
+                </div>
               </div>
             </div>
-          </div>
-        }
+          }
+        </div>
       </div>
     </div>
     @SharedComponents()
   </body>
   </html>
 }
+
+
+
 
 

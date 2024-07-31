@@ -517,8 +517,6 @@ func EditBlogHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusOK)
 }
 
-
-
 func DeleteBlogHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     blogID, err := strconv.Atoi(vars["id"])
@@ -534,19 +532,22 @@ func DeleteBlogHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    query := `
+    log.Printf("Attempting to delete blog with ID %d for user ID %s", blogID, userID)
+
+    // GraphQL mutation to delete the blog
+    deleteBlogQuery := `
         mutation DeleteBlog($id: Int!, $user_id: uuid!) {
             delete_blogs(where: {id: {_eq: $id}, user_id: {_eq: $user_id}}) {
                 affected_rows
             }
         }
     `
-    variables := map[string]interface{}{
+    blogVariables := map[string]interface{}{
         "id":      blogID,
         "user_id": userID,
     }
 
-    result, err := database.ExecuteGraphQL(query, variables)
+    result, err := database.ExecuteGraphQL(deleteBlogQuery, blogVariables)
     if err != nil {
         log.Printf("Error executing GraphQL mutation: %v", err)
         http.Error(w, "Failed to delete blog", http.StatusInternalServerError)
@@ -554,7 +555,57 @@ func DeleteBlogHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     log.Printf("GraphQL mutation result: %v", result)
+
+    affectedRows, ok := result["delete_blogs"].(map[string]interface{})["affected_rows"].(float64) // Note: GraphQL typically returns floats for numerical values
+    if !ok || int(affectedRows) == 0 {
+        log.Printf("No rows affected. Blog not found or user not authorized.")
+        http.Error(w, "Blog not found or you are not authorized to delete it", http.StatusBadRequest)
+        return
+    }
+
+    // GraphQL mutation to delete the user
+    deleteUserQuery := `
+        mutation DeleteUser($id: uuid!) {
+            delete_users(where: {id: {_eq: $id}}) {
+                affected_rows
+            }
+        }
+    `
+    userVariables := map[string]interface{}{
+        "id": userID,
+    }
+
+    _, err = database.ExecuteGraphQL(deleteUserQuery, userVariables)
+    if err != nil {
+        log.Printf("Error executing GraphQL mutation to delete user: %v", err)
+        http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+        return
+    }
+
+    // Clear the user's session and log them out
+    session.Values["token"] = ""
+    session.Values["userID"] = ""
+    session.Options.MaxAge = -1 // This will delete the session
+
+    err = session.Save(r, w)
+    if err != nil {
+        http.Error(w, "Failed to save session", http.StatusInternalServerError)
+        return
+    }
+
+    cookie := &http.Cookie{
+        Name:     "session-name",
+        Value:    "",
+        Path:     "/",
+        MaxAge:   -1,
+        HttpOnly: true,
+    }
+    http.SetCookie(w, cookie)
+
+    log.Printf("User and blog deletion successful, user logged out.")
     w.Header().Set("HX-Redirect", "/")
     w.WriteHeader(http.StatusOK)
 }
+
+
 

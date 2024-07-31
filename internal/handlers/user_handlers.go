@@ -224,20 +224,65 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
     blogName = r.FormValue("blogName")
     blogDescription = r.FormValue("blogDescription")
 
-    // Handle the uploaded file
-    file, handler, err := r.FormFile("blogImage")
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
+    // Check if username already exists
+    checkUsernameQuery := `
+        query CheckUsernameExists($username: String!) {
+            users(where: {username: {_eq: $username}}) {
+                id
+            }
+        }
+    `
+    checkUsernameVariables := map[string]interface{}{
+        "username": user.Username,
     }
-    defer file.Close()
 
-    // Generate a unique file name and upload to Google Cloud Storage
-    fileName := fmt.Sprintf("%s%s", uuid.New().String(), filepath.Ext(handler.Filename))
-    blogImagePath, err = helpers.UploadFileToGCS(file, fileName)
+    checkUsernameResult, err := database.ExecuteGraphQL(checkUsernameQuery, checkUsernameVariables)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
+    }
+
+    users := checkUsernameResult["users"].([]interface{})
+    if len(users) > 0 {
+        http.Error(w, "Username already exists, please enter another username", http.StatusConflict)
+        return
+    }
+
+    // Check if email already exists
+    checkEmailQuery := `
+        query CheckEmailExists($email: String!) {
+            users(where: {email: {_eq: $email}}) {
+                id
+            }
+        }
+    `
+    checkEmailVariables := map[string]interface{}{
+        "email": user.Email,
+    }
+
+    checkEmailResult, err := database.ExecuteGraphQL(checkEmailQuery, checkEmailVariables)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    users = checkEmailResult["users"].([]interface{})
+    if len(users) > 0 {
+        http.Error(w, "Email already exists, please use another email", http.StatusConflict)
+        return
+    }
+
+    // Handle the uploaded file
+    file, handler, err := r.FormFile("blogImage")
+    if err == nil {
+        defer file.Close()
+        // Generate a unique file name and upload to Google Cloud Storage
+        fileName := fmt.Sprintf("%s%s", uuid.New().String(), filepath.Ext(handler.Filename))
+        blogImagePath, err = helpers.UploadFileToGCS(file, fileName)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
     }
 
     // Hash the password before storing it
@@ -276,7 +321,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
     // Create a blog for the new user
     blogMutation := `
-        mutation CreateBlog($user_id: uuid!, $name: String!, $description: String!, $image_path: String!) {
+        mutation CreateBlog($user_id: uuid!, $name: String!, $description: String!, $image_path: String) {
             insert_blogs_one(object: {user_id: $user_id, name: $name, description: $description, image_path: $image_path}) {
                 id
             }
@@ -301,8 +346,6 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         "message": "Sign up successful! Please log in to continue.",
     })
 }
-
-
 
 // LoginHandler handles user login
 func LoginHandler(w http.ResponseWriter, r *http.Request) {

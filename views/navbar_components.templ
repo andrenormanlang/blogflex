@@ -39,8 +39,8 @@ templ SignUpModal() {
                             <textarea class="form-control bg-secondary text-light border-0" id="blogDescription" name="blogDescription" required></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="blogImage">Upload Blog Image</label>
-                            <input type="file" class="form-control-file bg-secondary text-light border-0" id="blogImage" name="blogImage" required>
+                            <label for="blogImage">Upload Blog Image (optional)</label>
+                            <input type="file" class="form-control-file bg-secondary text-light border-0" id="blogImage" name="blogImage">
                         </div>
                         <button type="submit" class="btn btn-primary">Sign Up</button>
                     </form>
@@ -60,18 +60,24 @@ templ SignUpModal() {
                 method: 'POST',
                 body: formData,
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.message) {
-                    alert(data.message); // Display success message or redirect as needed
                     $('#signupModal').modal('hide');
+                    $('body').append('<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="successModalLabel">Registration Successful</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body"><div class="alert alert-success">' + data.message + '</div></div></div></div></div>');
+                    $('#successModal').modal('show');
                 } else {
-                    alert('An error occurred. Please try again.');
+                    $('#response-message').html('<div class="alert alert-danger">An error occurred. Please try again.</div>');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred. Please try again.');
+                $('#response-message').html('<div class="alert alert-danger">' + error.message + '</div>');
             });
         });
     </script>

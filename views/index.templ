@@ -79,9 +79,9 @@ templ MainPage(blogs []models.Blog, loggedIn bool) {
     </style>
   </head>
   <body>
+      @NavBar(loggedIn)
     <div class="background-image"></div>
     <div class="content">
-      @NavBar(loggedIn)
       <div class="container mt-5">
         <div class="row">
           for _, blog := range blogs {
@@ -111,7 +111,6 @@ templ MainPage(blogs []models.Blog, loggedIn bool) {
   </body>
   </html>
 }
-
 
 
 

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
     "path/filepath"
+    "sort"
 
 	"blogflex/internal/database"
 	"blogflex/views"
@@ -141,11 +142,26 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
         })
     }
 
+    // Sort blogs by the latest post date
+    sort.SliceStable(blogs, func(i, j int) bool {
+        if blogs[i].LatestPost == nil && blogs[j].LatestPost == nil {
+            return false
+        }
+        if blogs[i].LatestPost == nil {
+            return false
+        }
+        if blogs[j].LatestPost == nil {
+            return true
+        }
+        return blogs[i].LatestPost.FormattedCreatedAt > blogs[j].LatestPost.FormattedCreatedAt
+    })
+
     log.Printf("Blogs: %+v", blogs)
 
     component := views.MainPage(blogs, loggedIn)
     templ.Handler(component).ServeHTTP(w, r)
 }
+
 
 
 // ListUsersHandler handles listing all users

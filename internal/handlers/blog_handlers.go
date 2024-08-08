@@ -466,7 +466,7 @@ func EditBlogHandler(w http.ResponseWriter, r *http.Request) {
             defer file.Close()
             // Generate a unique file name and upload to Google Cloud Storage
             fileName := fmt.Sprintf("%s%s", uuid.New().String(), filepath.Ext(handler.Filename))
-            blog.ImagePath, err = helpers.UploadFileToGCS(file, fileName)
+            blog.ImagePath, err = helpers.UploadFileToCloudinary(file, fileName)
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
                 return

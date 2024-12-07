@@ -6,29 +6,28 @@ import (
 )
 
 templ EditPost(post models.Post) {
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Edit Post - BlogFlex</title>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-      <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-      <!-- Place the first <script> tag in your HTML's <head> -->
-<script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-
-<!-- Place the following <script> and <textarea> tags your HTML's <body> -->
-<script>
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Edit Post - BlogFlex</title>
+			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+			<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
+			<!-- Place the first <script> tag in your HTML's <head> -->
+			<script src="https://cdn.tiny.cloud/1/7xbog5vcrh51qgt6v64oxx7cvpqbgjezxtc42rq11wtscrsq/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+			<!-- Place the following <script> and <textarea> tags your HTML's <body> -->
+			<script>
   tinymce.init({
     selector: 'textarea',
     plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount linkchecker',
     toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
   });
 </script>
-// <textarea>
-//   Welcome to TinyMCE!
-// </textarea>
-      <style>
+			// <textarea>
+			//   Welcome to TinyMCE!
+			// </textarea>
+			<style>
         body {
           font-family: 'Inter', sans-serif;
           background-color: #121212;
@@ -66,34 +65,34 @@ templ EditPost(post models.Post) {
           background-color: #3700b3;
         }
       </style>
-    </head>
-    <body>
-      <div class="container mt-5">
-        <div class="row justify-content-center">
-          <div class="col-md-12">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                // <h1 class="card-title text-center mb-4">Edit Post</h1>
-                <form id="edit-post-form" hx-post={ fmt.Sprintf("/protected/posts/%d/edit", post.ID) } hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST">
-                  <div class="form-group">
-                    <label for="title">Title</label>
-                    <textarea id="title" name="title" rows="2" class="form-control" required>{ post.Title }</textarea>
-                  </div>
-                  <div class="form-group">
-                    <label for="content">Content</label>
-                    <textarea id="content" name="content" rows="10" class="form-control" required>{ post.Content }</textarea>
-                  </div>
-                  <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Update Post</button>
-                  </div>
-                </form>
-                <div id="response-message" class="mt-4"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <script>
+		</head>
+		<body>
+			<div class="container mt-5">
+				<div class="row justify-content-center">
+					<div class="col-md-12">
+						<div class="card shadow-sm">
+							<div class="card-body">
+								// <h1 class="card-title text-center mb-4">Edit Post</h1>
+								<form id="edit-post-form" hx-post={ fmt.Sprintf("/protected/posts/%d/edit", post.ID) } hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST">
+									<div class="form-group">
+										<label for="title">Title</label>
+										<textarea id="title" name="title" rows="2" class="form-control" required>{ post.Title }</textarea>
+									</div>
+									<div class="form-group">
+										<label for="content">Content</label>
+										<textarea id="content" name="content" rows="10" class="form-control" required>{ post.Content }</textarea>
+									</div>
+									<div class="text-center">
+										<button type="submit" class="btn btn-primary">Update Post</button>
+									</div>
+								</form>
+								<div id="response-message" class="mt-4"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<script>
         document.addEventListener("DOMContentLoaded", function() {
           tinymce.init({
             selector: '#title, #content',
@@ -123,7 +122,7 @@ templ EditPost(post models.Post) {
           });
         });
       </script>
-      <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
-    </body>
-  </html>
+			<script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
+		</body>
+	</html>
 }

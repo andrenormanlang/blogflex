@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
- "scripts": {
+  "scripts": {
     "start": "npx concurrently \"CompileDaemon -command='go run main.go'\" \"npm run watch:css\"",
+    "build": "npm run build:css",
     "build:css": "postcss static/css/tailwind.css -o static/css/tailwind.generated.css",
     "watch:css": "postcss static/css/tailwind.css -o static/css/tailwind.generated.css --watch"
   },

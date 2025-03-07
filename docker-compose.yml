@@ -1,17 +1,31 @@
-version: '3.8'
-
 services:
   db:
-    image: mariadb:latest
+    image: postgres:latest
     environment:
-      MYSQL_ROOT_PASSWORD: shiva7
-      MYSQL_DATABASE: blogflex
-      MYSQL_USER: andrenormanlang
-      MYSQL_PASSWORD: shiva7
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: shiva7
+      POSTGRES_DB: blogflex
     ports:
-      - "3306:3306"
+      - "5433:5432"
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: host.docker.internal
+      DB_USER: postgres
+      DB_PASSWORD: shiva7
+      DB_NAME: blogflex
+      DB_PORT: 5432
+      HASURA_ADMIN_SECRET: ${HASURA_ADMIN_SECRET}
+      HASURA_ENDPOINT: ${HASURA_ENDPOINT}
+    volumes:
+      - ./.env:/app/.env
+    depends_on: []
 
 volumes:
   db_data:

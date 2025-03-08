@@ -66,7 +66,6 @@ templ EditPost(post models.Post) {
 					padding: 10px;
 					color: #e0e0e0;
 					font-family: 'Courier New', Courier, monospace;
-					font-size: 14px;
 					line-height: 1.5;
 					white-space: pre-wrap;
 				}
@@ -79,6 +78,14 @@ templ EditPost(post models.Post) {
 				.mce-content-body div {
 					border: none !important;
 				}
+				/* Ensure TinyMCE toolbar is visible */
+				.tox-tinymce {
+					z-index: 1000 !important;
+				}
+				/* Optional: Add min-height to textarea for consistency */
+				#title {
+					min-height: 60px; /* Minimum height for the textarea */
+				}
 			</style>
 		</head>
 		<body>
@@ -90,7 +97,7 @@ templ EditPost(post models.Post) {
 								<form id="edit-post-form" hx-post={ fmt.Sprintf("/protected/posts/%d/edit", post.ID) } hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST">
 									<div class="form-group">
 										<label for="title">Title</label>
-										<textarea id="title" name="title" rows="2" class="form-control" required>{ post.Title }</textarea>
+										<textarea id="title" name="title" rows="2" class="form-control" style="height: 50px; min-height: 60px;" required>{ post.Title }</textarea>
 									</div>
 									<div class="form-group">
 										<label for="content">Content</label>
@@ -107,11 +114,15 @@ templ EditPost(post models.Post) {
 				</div>
 			</div>
 			<script>
-				document.addEventListener("DOMContentLoaded", function() {
+				window.onload = function() {
+					console.log("Window loaded, initializing TinyMCE...");
+
+					// Initialize content editor
 					tinymce.init({
 						selector: '#content',
 						plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount code',
 						toolbar: 'undo redo | codesample | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | code | removeformat',
+						fontsize_formats: '8pt 10pt 12pt 14pt 18pt 24pt 36pt',
 						codesample_languages: [
 							{ text: 'Text', value: 'text' },
 							{ text: 'HTML/XML', value: 'markup' },
@@ -122,20 +133,20 @@ templ EditPost(post models.Post) {
 						],
 						codesample_global_prismjs: true,
 						forced_root_block: 'p',
-						verify_html: true,
-						cleanup: true,
-						valid_elements: 'p,br,strong/em,b/i,ul/ol/li,a[href],pre/code[class|data-mce-type],img[src|alt|width|height],table,thead,tbody,tr,th,td',
+						verify_html: false,
+						cleanup: false,
+						valid_elements: 'p,br,strong/em,b/i,ul/ol/li,a[href],pre/code[class|data-mce-type],img[src|alt|width|height],table,thead,tbody,tr,th,td,span[style]',
 						paste_preprocess: function(plugin, args) {
 							args.content = args.content.replace(/<div>/gi, '<p>').replace(/<\/div>/gi, '</p>');
 						},
-						// Clean up content on initialization
 						init_instance_callback: function(editor) {
 							var content = editor.getContent();
 							content = content.replace(/<div>/gi, '<p>').replace(/<\/div>/gi, '</p>');
 							editor.setContent(content);
+							console.log("Content editor initialized successfully.");
 						},
 						content_style: 'body { font-family: Inter, sans-serif; background-color: #1e1e1e; color: #e0e0e0; } ' +
-							'pre { background-color: #2c2c2c; border: 1px solid #444; border-radius: 4px; padding: 10px; color: #e0e0e0; font-family: "Courier New", Courier, monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; } ' +
+							'pre { background-color: #2c2c2c; border: 1px solid #444; border-radius: 4px; padding: 10px; color: #e0e0e0; font-family: "Courier New", Courier, monospace; line-height: 1.5; white-space: pre-wrap; } ' +
 							'pre code { background: transparent; color: #e0e0e0; font-family: "Courier New", Courier, monospace; } ' +
 							'div { margin: 0; padding: 0; }',
 						skin: window.matchMedia("(prefers-color-scheme: dark)").matches ? "oxide-dark" : "",
@@ -146,29 +157,39 @@ templ EditPost(post models.Post) {
 								editor.save();
 							});
 						}
+					}).then(function(editors) {
+						console.log("TinyMCE content editor initialized:", editors);
+					}, function(error) {
+						console.error("TinyMCE content editor failed to initialize:", error);
 					});
 
+					// Initialize title editor
 					tinymce.init({
 						selector: '#title',
 						plugins: 'autolink emoticons link wordcount',
-						toolbar: 'undo redo | bold italic underline | removeformat',
-						menubar: false,
-						statusbar: false,
+						toolbar: 'undo redo | fontfamily fontsize | bold italic underline | align lineheight | removeformat',
+						menubar: true,
+						statusbar: true,
 						content_style: 'body { font-family: Inter, sans-serif; background-color: #2c2c2c; color: #e0e0e0; }',
 						skin: window.matchMedia("(prefers-color-scheme: dark)").matches ? "oxide-dark" : "",
 						content_css: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "",
 						height: 100,
+						min_height: 60, // Set minimum height for the TinyMCE editor
 						setup: function(editor) {
 							editor.on('change', function(e) {
 								editor.save();
 							});
 						}
+					}).then(function(editors) {
+						console.log("TinyMCE title editor initialized:", editors);
+					}, function(error) {
+						console.error("TinyMCE title editor failed to initialize:", error);
 					});
 
 					document.getElementById('edit-post-form').addEventListener('submit', function(e) {
 						e.preventDefault();
-						const titleContent = tinymce.get('title').getContent();
-						const contentContent = tinymce.get('content').getContent();
+						const titleContent = tinymce.get('title') ? tinymce.get('title').getContent() : document.getElementById('title').value;
+						const contentContent = tinymce.get('content') ? tinymce.get('content').getContent() : document.getElementById('content').value;
 						if (titleContent === '' || contentContent === '') {
 							alert('Both Title and Content are required.');
 							return;
@@ -205,7 +226,7 @@ templ EditPost(post models.Post) {
 							document.getElementById('response-message').innerHTML = 'An error occurred while updating the post.';
 						});
 					});
-				});
+				};
 			</script>
 			<script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
 		</body>

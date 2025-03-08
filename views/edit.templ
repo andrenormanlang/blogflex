@@ -14,56 +14,72 @@ templ EditPost(post models.Post) {
 			<title>Edit Post - BlogFlex</title>
 			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 			<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
-			<!-- Place the first <script> tag in your HTML's <head> -->
-			<!-- Place the first <script> tag in your HTML's <head> -->
-			<!-- Place the first <script> tag in your HTML's <head> -->
+			<!-- TinyMCE Script -->
 			<script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-			<!-- Place the following <script> and <textarea> tags your HTML's <body> -->
-			<script>
-  tinymce.init({
-    selector: 'textarea',
-    plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-  });
-</script>
+			<!-- Prism.js for code syntax highlighting -->
+			<link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.css" rel="stylesheet"/>
+			<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
 			<style>
-        body {
-          font-family: 'Inter', sans-serif;
-          background-color: #121212;
-          color: #e0e0e0;
-        }
-        .container {
-          max-width: 1200px;
-        }
-        .card {
-          background-color: #1e1e1e;
-          border: none;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          border-radius: 10px;
-        }
-        .card-body {
-          padding: 20px;
-        }
-        .card-title {
-          color: #bb86fc;
-        }
-        .form-control {
-          background-color: #2c2c2c;
-          border: none;
-          color: #e0e0e0;
-        }
-        .form-control:focus {
-          background-color: #2c2c2c;
-          color: #e0e0e0;
-        }
-        .btn-primary {
-          background-color: #bb86fc;
-          border: none;
-        }
-        .btn-primary:hover {
-          background-color: #3700b3;
-        }
-      </style>
+				body {
+					font-family: 'Inter', sans-serif;
+					background-color: #121212;
+					color: #e0e0e0;
+				}
+				.container {
+					max-width: 1200px;
+				}
+				.card {
+					background-color: #1e1e1e;
+					border: none;
+					box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+					border-radius: 10px;
+				}
+				.card-body {
+					padding: 20px;
+				}
+				.card-title {
+					color: #bb86fc;
+				}
+				.form-control {
+					background-color: #2c2c2c;
+					border: none;
+					color: #e0e0e0;
+				}
+				.form-control:focus {
+					background-color: #2c2c2c;
+					color: #e0e0e0;
+				}
+				.btn-primary {
+					background-color: #bb86fc;
+					border: none;
+				}
+				.btn-primary:hover {
+					background-color: #3700b3;
+				}
+				/* Style for code blocks in TinyMCE */
+				.mce-content-body pre {
+					background-color: #2c2c2c;
+					border: 1px solid #444;
+					border-radius: 4px;
+					padding: 10px;
+					color: #e0e0e0;
+					font-family: 'Courier New', Courier, monospace;
+					font-size: 14px;
+					line-height: 1.5;
+					white-space: pre-wrap;
+				}
+				.mce-content-body pre code {
+					background: transparent;
+					color: #e0e0e0;
+					font-family: 'Courier New', Courier, monospace;
+				}
+				/* Minimize visual impact of divs */
+				.mce-content-body div {
+					border: none !important;
+				}
+			</style>
 		</head>
 		<body>
 			<div class="container mt-5">
@@ -71,7 +87,6 @@ templ EditPost(post models.Post) {
 					<div class="col-md-12">
 						<div class="card shadow-sm">
 							<div class="card-body">
-								// <h1 class="card-title text-center mb-4">Edit Post</h1>
 								<form id="edit-post-form" hx-post={ fmt.Sprintf("/protected/posts/%d/edit", post.ID) } hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST">
 									<div class="form-group">
 										<label for="title">Title</label>
@@ -92,80 +107,106 @@ templ EditPost(post models.Post) {
 				</div>
 			</div>
 			<script>
-        document.addEventListener("DOMContentLoaded", function() {
-          tinymce.init({
-            selector: '#title, #content',
-            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',
-            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-            tinycomments_mode: 'embedded',
-            tinycomments_author: 'Author name',
-            mergetags_list: [
-              { value: 'First.Name', title: 'First Name' },
-              { value: 'Email', title: 'Email' },
-            ],
-            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant")),
-            setup: function(editor) {
-              editor.on('change', function(e) {
-                editor.save();
-              });
-            },
-            skin: window.matchMedia("(prefers-color-scheme: dark)").matches ? "oxide-dark" : "",
-            content_css: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : ""
-          });
+				document.addEventListener("DOMContentLoaded", function() {
+					tinymce.init({
+						selector: '#content',
+						plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount code',
+						toolbar: 'undo redo | codesample | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | code | removeformat',
+						codesample_languages: [
+							{ text: 'Text', value: 'text' },
+							{ text: 'HTML/XML', value: 'markup' },
+							{ text: 'JavaScript', value: 'javascript' },
+							{ text: 'CSS', value: 'css' },
+							{ text: 'Go', value: 'go' },
+							{ text: 'Python', value: 'python' },
+						],
+						codesample_global_prismjs: true,
+						forced_root_block: 'p',
+						verify_html: true,
+						cleanup: true,
+						valid_elements: 'p,br,strong/em,b/i,ul/ol/li,a[href],pre/code[class|data-mce-type],img[src|alt|width|height],table,thead,tbody,tr,th,td',
+						paste_preprocess: function(plugin, args) {
+							args.content = args.content.replace(/<div>/gi, '<p>').replace(/<\/div>/gi, '</p>');
+						},
+						// Clean up content on initialization
+						init_instance_callback: function(editor) {
+							var content = editor.getContent();
+							content = content.replace(/<div>/gi, '<p>').replace(/<\/div>/gi, '</p>');
+							editor.setContent(content);
+						},
+						content_style: 'body { font-family: Inter, sans-serif; background-color: #1e1e1e; color: #e0e0e0; } ' +
+							'pre { background-color: #2c2c2c; border: 1px solid #444; border-radius: 4px; padding: 10px; color: #e0e0e0; font-family: "Courier New", Courier, monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; } ' +
+							'pre code { background: transparent; color: #e0e0e0; font-family: "Courier New", Courier, monospace; } ' +
+							'div { margin: 0; padding: 0; }',
+						skin: window.matchMedia("(prefers-color-scheme: dark)").matches ? "oxide-dark" : "",
+						content_css: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "",
+						height: 400,
+						setup: function(editor) {
+							editor.on('change', function(e) {
+								editor.save();
+							});
+						}
+					});
 
-          document.getElementById('edit-post-form').addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
-            
-            // Get content from TinyMCE editors
-            const titleContent = tinymce.get('title').getContent();
-            const contentContent = tinymce.get('content').getContent();
-            
-            // Validate content
-            if (titleContent === '' || contentContent === '') {
-              alert('Both Title and Content are required.');
-              return;
-            }
-            
-            // Update form fields with TinyMCE content
-            document.getElementById('title').value = titleContent;
-            document.getElementById('content').value = contentContent;
-            
-            // Get form data
-            const form = this;
-            const formData = new FormData(form);
-            
-            // Send AJAX request
-            fetch(form.getAttribute('hx-post'), {
-              method: 'POST',
-              body: formData,
-              headers: {
-                'Accept': 'application/json',
-              }
-            })
-            .then(response => {
-              if (response.ok) {
-                // Get the redirect URL from the header
-                const redirectUrl = response.headers.get('HX-Redirect');
-                if (redirectUrl) {
-                  window.location.href = redirectUrl;
-                } else {
-                  return response.text().then(text => {
-                    document.getElementById('response-message').innerHTML = text || 'Post updated successfully!';
-                  });
-                }
-              } else {
-                return response.text().then(text => {
-                  document.getElementById('response-message').innerHTML = text || 'Failed to update post.';
-                });
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              document.getElementById('response-message').innerHTML = 'An error occurred while updating the post.';
-            });
-          });
-        });
-      </script>
+					tinymce.init({
+						selector: '#title',
+						plugins: 'autolink emoticons link wordcount',
+						toolbar: 'undo redo | bold italic underline | removeformat',
+						menubar: false,
+						statusbar: false,
+						content_style: 'body { font-family: Inter, sans-serif; background-color: #2c2c2c; color: #e0e0e0; }',
+						skin: window.matchMedia("(prefers-color-scheme: dark)").matches ? "oxide-dark" : "",
+						content_css: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "",
+						height: 100,
+						setup: function(editor) {
+							editor.on('change', function(e) {
+								editor.save();
+							});
+						}
+					});
+
+					document.getElementById('edit-post-form').addEventListener('submit', function(e) {
+						e.preventDefault();
+						const titleContent = tinymce.get('title').getContent();
+						const contentContent = tinymce.get('content').getContent();
+						if (titleContent === '' || contentContent === '') {
+							alert('Both Title and Content are required.');
+							return;
+						}
+						document.getElementById('title').value = titleContent;
+						document.getElementById('content').value = contentContent;
+						const form = this;
+						const formData = new FormData(form);
+						fetch(form.getAttribute('hx-post'), {
+							method: 'POST',
+							body: formData,
+							headers: {
+								'Accept': 'application/json',
+							}
+						})
+						.then(response => {
+							if (response.ok) {
+								const redirectUrl = response.headers.get('HX-Redirect');
+								if (redirectUrl) {
+									window.location.href = redirectUrl;
+								} else {
+									return response.text().then(text => {
+										document.getElementById('response-message').innerHTML = text || 'Post updated successfully!';
+									});
+								}
+							} else {
+								return response.text().then(text => {
+									document.getElementById('response-message').innerHTML = text || 'Failed to update post.';
+								});
+							}
+						})
+						.catch(error => {
+							console.error('Error:', error);
+							document.getElementById('response-message').innerHTML = 'An error occurred while updating the post.';
+						});
+					});
+				});
+			</script>
 			<script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
 		</body>
 	</html>

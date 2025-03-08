@@ -123,7 +123,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 				return templ_7745c5c3_Err
 			}
 			for _, post := range posts {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-md-6 mb-4\"><div class=\"card h-100\"><div class=\"card-body\"><h5 class=\"post-title mb-1\"><a href=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-md-6 d-flex align-items-stretch mb-4\"><div class=\"card w-100\"><div class=\"card-body\"><h5 class=\"post-title mb-1\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

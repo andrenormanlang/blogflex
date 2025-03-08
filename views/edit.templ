@@ -15,12 +15,11 @@ templ EditPost(post models.Post) {
 			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 			<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
 			<!-- Place the first <script> tag in your HTML's <head> -->
-<!-- Place the first <script> tag in your HTML's <head> -->
-<!-- Place the first <script> tag in your HTML's <head> -->
-<script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-
-<!-- Place the following <script> and <textarea> tags your HTML's <body> -->
-<script>
+			<!-- Place the first <script> tag in your HTML's <head> -->
+			<!-- Place the first <script> tag in your HTML's <head> -->
+			<script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+			<!-- Place the following <script> and <textarea> tags your HTML's <body> -->
+			<script>
   tinymce.init({
     selector: 'textarea',
     plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
@@ -115,10 +114,55 @@ templ EditPost(post models.Post) {
           });
 
           document.getElementById('edit-post-form').addEventListener('submit', function(e) {
-            if (tinymce.get('content').getContent() === '' || tinymce.get('title').getContent() === '') {
-              e.preventDefault();
+            e.preventDefault(); // Prevent default form submission
+            
+            // Get content from TinyMCE editors
+            const titleContent = tinymce.get('title').getContent();
+            const contentContent = tinymce.get('content').getContent();
+            
+            // Validate content
+            if (titleContent === '' || contentContent === '') {
               alert('Both Title and Content are required.');
+              return;
             }
+            
+            // Update form fields with TinyMCE content
+            document.getElementById('title').value = titleContent;
+            document.getElementById('content').value = contentContent;
+            
+            // Get form data
+            const form = this;
+            const formData = new FormData(form);
+            
+            // Send AJAX request
+            fetch(form.getAttribute('hx-post'), {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'Accept': 'application/json',
+              }
+            })
+            .then(response => {
+              if (response.ok) {
+                // Get the redirect URL from the header
+                const redirectUrl = response.headers.get('HX-Redirect');
+                if (redirectUrl) {
+                  window.location.href = redirectUrl;
+                } else {
+                  return response.text().then(text => {
+                    document.getElementById('response-message').innerHTML = text || 'Post updated successfully!';
+                  });
+                }
+              } else {
+                return response.text().then(text => {
+                  document.getElementById('response-message').innerHTML = text || 'Failed to update post.';
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              document.getElementById('response-message').innerHTML = 'An error occurred while updating the post.';
+            });
           });
         });
       </script>

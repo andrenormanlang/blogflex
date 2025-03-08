@@ -411,39 +411,22 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
             <div class="d-flex justify-content-between">
                 <p class="text-gray-700 mb-1"><strong>%s</strong> posted on %s</p>
                 <div>
-                    <button class="btn btn-sm btn-outline-warning mr-1 edit-comment-btn" 
-                        onclick="editComment(%d)">
-                        <i class="fas fa-edit"></i>
-                    </button>
                     <button class="btn btn-sm btn-outline-danger delete-comment-btn"
                         hx-delete="/protected/comments/%d"
                         hx-confirm="Are you sure you want to delete this comment?"
                         hx-target="#comment-%d"
                         hx-swap="outerHTML">
-                        <i class="fas fa-trash"></i>
+                        <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
             </div>
-            <p class="text-gray-700 comment-content" id="comment-content-%d">%s</p>
-            <div class="edit-comment-form d-none" id="edit-form-%d">
-                <textarea class="form-control mb-2" id="edit-comment-text-%d">%s</textarea>
-                <button class="btn btn-sm btn-primary mr-1" 
-                    hx-put="/protected/comments/%d"
-                    hx-include="#edit-comment-text-%d"
-                    hx-target="#comment-%d"
-                    hx-swap="outerHTML">
-                    Save
-                </button>
-                <button class="btn btn-sm btn-secondary" onclick="cancelEdit(%d)">Cancel</button>
-            </div>
+            <p class="text-gray-700 comment-content">%s</p>
         </div>`,
-		comment.ID, comment.User.Username, formattedCreatedAt,
-		comment.ID, comment.ID, comment.ID, comment.ID, comment.Content, comment.ID, comment.ID,
-		comment.ID, comment.ID, comment.ID, comment.ID)
+		comment.ID, comment.User.Username, formattedCreatedAt, comment.ID, comment.ID, comment.Content)
 
 	// Set appropriate headers for HTMX
 	w.Header().Set("Content-Type", "text/html")
-	w.Header().Set("HX-Trigger", "commentAdded")
+	w.Header().Set("HX-Trigger", "resetCommentForm")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(commentHTML))
 }

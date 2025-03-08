@@ -93,16 +93,6 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool, loggedInUserID s
         }
       </style>
 			<script>
-        function editComment(commentId) {
-          document.getElementById('comment-content-' + commentId).classList.add('d-none');
-          document.getElementById('edit-form-' + commentId).classList.remove('d-none');
-        }
-        
-        function cancelEdit(commentId) {
-          document.getElementById('comment-content-' + commentId).classList.remove('d-none');
-          document.getElementById('edit-form-' + commentId).classList.add('d-none');
-        }
-        
         function resetCommentForm() {
           var form = document.getElementById('comment-form');
           if (form) {
@@ -111,6 +101,8 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool, loggedInUserID s
             if (submitButton) {
               submitButton.disabled = false;
             }
+            // Re-enable the form for another submission
+            form.removeAttribute('hx-trigger-once');
           }
         }
         
@@ -127,7 +119,8 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool, loggedInUserID s
         });
         
         // Listen for the custom event to clear the form
-        document.addEventListener('clearCommentForm', function(event) {
+        document.addEventListener('resetCommentForm', function(event) {
+          console.log('Reset comment form event received');
           resetCommentForm();
         });
         
@@ -197,15 +190,9 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool, loggedInUserID s
 						<div class="list-group-item list-group-item-action mt-2 pt-2" id={ fmt.Sprintf("comment-%d", comment.ID) }>
 							<div class="d-flex justify-content-between">
 								<p class="text-gray-700 mb-1"><strong>{ comment.User.Username }</strong> posted on { comment.FormattedCreatedAt }</p>
-								// Only show edit/delete buttons if the user is the comment author or post owner
+								// Only show delete button if the user is the comment author or post owner
 								if loggedIn && (isOwner || comment.UserID == loggedInUserID) {
 									<div>
-										<button
-											class="btn btn-sm btn-outline-warning mr-1 edit-comment-btn"
-											onclick="editComment({ fmt.Sprint(comment.ID) })"
-										>
-											<i class="fas fa-edit"></i>
-										</button>
 										<button
 											class="btn btn-sm btn-outline-danger delete-comment-btn"
 											hx-delete={ fmt.Sprintf("/protected/comments/%d", comment.ID) }
@@ -213,25 +200,12 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool, loggedInUserID s
 											hx-target={ fmt.Sprintf("#comment-%d", comment.ID) }
 											hx-swap="outerHTML"
 										>
-											<i class="fas fa-trash"></i>
+											<i class="fas fa-trash"></i> Delete
 										</button>
 									</div>
 								}
 							</div>
-							<p class="text-gray-700 comment-content" id={ fmt.Sprintf("comment-content-%d", comment.ID) }>{ comment.Content }</p>
-							<div class="edit-comment-form d-none" id={ fmt.Sprintf("edit-form-%d", comment.ID) }>
-								<textarea class="form-control mb-2" id={ fmt.Sprintf("edit-comment-text-%d", comment.ID) }>{ comment.Content }</textarea>
-								<button
-									class="btn btn-sm btn-primary mr-1"
-									hx-put={ fmt.Sprintf("/protected/comments/%d", comment.ID) }
-									hx-include={ fmt.Sprintf("#edit-comment-text-%d", comment.ID) }
-									hx-target={ fmt.Sprintf("#comment-%d", comment.ID) }
-									hx-swap="outerHTML"
-								>
-									Save
-								</button>
-								<button class="btn btn-sm btn-secondary" onclick="cancelEdit({ fmt.Sprint(comment.ID) })">Cancel</button>
-							</div>
+							<p class="text-gray-700 comment-content">{ comment.Content }</p>
 						</div>
 					}
 				</div>
@@ -245,11 +219,12 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool, loggedInUserID s
 						hx-post={ fmt.Sprintf("/protected/posts/%d/comments", post.ID) }
 						hx-target="#comments-section"
 						hx-swap="afterbegin"
-						hx-trigger="submit once"
+						hx-trigger="submit"
 						class="mt-3"
 						hx-headers='{"Accept": "text/html"}'
 						hx-indicator="#comment-loading"
 						id="comment-form"
+						hx-on:after-request="resetCommentForm()"
 					>
 						<div>
 							<textarea name="content" placeholder="Add a Comment" class="form-control" required></textarea>

@@ -532,9 +532,23 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
 		createdAtStr, ok := commentMap["created_at"].(string)
 		var formattedCommentCreatedAt string
 		if ok {
-			createdAt, err := time.Parse("2006-01-02T15:04:05", createdAtStr)
+			// The GraphQL API returns timestamps in RFC3339 format
+			createdAt, err := time.Parse(time.RFC3339, createdAtStr)
 			if err != nil {
-				log.Printf("Error parsing comment created_at time: %v", err)
+				// Try alternative format if the first one fails
+				createdAt, err = time.Parse("2006-01-02T15:04:05Z", createdAtStr)
+				if err != nil {
+					// Try one more format
+					createdAt, err = time.Parse("2006-01-02T15:04:05", createdAtStr)
+					if err != nil {
+						log.Printf("Error parsing comment created_at time: %v", err)
+						log.Printf("Problematic timestamp: %s", createdAtStr)
+					} else {
+						formattedCommentCreatedAt = helpers.FormatTime(createdAt)
+					}
+				} else {
+					formattedCommentCreatedAt = helpers.FormatTime(createdAt)
+				}
 			} else {
 				formattedCommentCreatedAt = helpers.FormatTime(createdAt)
 			}

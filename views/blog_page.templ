@@ -1,30 +1,29 @@
 package views
 
 import (
-	"blogflex/internal/models"
 	"blogflex/internal/helpers"
+	"blogflex/internal/models"
 	"fmt"
 	"strconv"
 )
 
 templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool, successMessage string) {
-  <html>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>{blog.Name} - BlogFlex</title>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-      <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-      <link rel="stylesheet" href="./css/styles.css" >
-      
-      <style>
+	<html>
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ blog.Name } - BlogFlex</title>
+			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+			<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
+			<link rel="stylesheet" href="./css/styles.css"/>
+			<style>
         body {
           font-family: 'Inter', sans-serif;
           background-color: #121212;
           color: #e0e0e0;
         }
         .container {
-          max-width: 900px;
+          max-width: 1200px;
         }
         .card {
           border: none;
@@ -73,45 +72,50 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
           margin-right: 10px;
         }
       </style>
-    </head>
-    <body>
-     <!-- Spinner and Loading Message -->
-      <div id="loading-spinner" class="spinner"></div>
-      <div id="loading-message" class="loading-message"></div>
-
-      @NavBar(loggedIn)
-      <div class="container mt-5">
-        <h1 class="mb-4 blog-title">{blog.Name}</h1>
-        <p class="mb-4">{blog.Description}</p>
-        if isOwner {
-          <a href={ templ.URL("/protected/blogs/" + fmt.Sprintf("%d/edit", blog.ID)) } class="btn btn-warning mb-3">Edit Blog</a>
-          <button hx-delete={ fmt.Sprintf("/protected/blogs/%d", blog.ID) } hx-confirm="Are you sure you want to delete this blog?" class="btn btn-danger mb-3">Delete Blog</button>
-          <a href="/protected/posts/create" class="btn btn-primary mb-3">Create a Post</a>
-        }
-        if len(posts) == 0 {
-          <p>No posts available for this blog.</p>
-        } else {
-          <div class="row">
-            for _, post := range posts {
-              <div class="col-md-6 d-flex align-items-stretch mb-4">
-                <div class="card w-100">
-                  <div class="card-body">
-                    <h5 class="post-title mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>@UnsafeHTML(post.Title)</a></h5>
-                    <p class="mb-1">@UnsafeHTML(helpers.TruncateWords(post.Content, 20))</p>
-                    <small class="post-meta">Posted on {post.FormattedCreatedAt}</small>
-                    <div class="post-stats mt-2">
-                      <span>Comments: { strconv.Itoa(post.CommentsCount) }</span>
-                      <span>Likes: { strconv.Itoa(post.LikesCount) }</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-        }
-      </div>
-      @SharedComponents()
-      <script src='./js/script.js'></script>
-    </body>
-  </html>
+		</head>
+		<body>
+			<!-- Spinner and Loading Message -->
+			<div id="loading-spinner" class="spinner"></div>
+			<div id="loading-message" class="loading-message"></div>
+			@NavBar(loggedIn)
+			<div class="container mt-5">
+				<h1 class="mb-4 blog-title">{ blog.Name }</h1>
+				<p class="mb-4">{ blog.Description }</p>
+				if isOwner {
+					<a href={ templ.URL("/protected/blogs/" + fmt.Sprintf("%d/edit", blog.ID)) } class="btn btn-warning mb-3">Edit Blog</a>
+					<button hx-delete={ fmt.Sprintf("/protected/blogs/%d", blog.ID) } hx-confirm="Are you sure you want to delete this blog?" class="btn btn-danger mb-3">Delete Blog</button>
+					<a href="/protected/posts/create" class="btn btn-primary mb-3">Create a Post</a>
+				}
+				if len(posts) == 0 {
+					<p>No posts available for this blog.</p>
+				} else {
+					<div class="row">
+						for _, post := range posts {
+							<div class="col-md-6 d-flex align-items-stretch mb-4">
+								<div class="card w-100">
+									<div class="card-body">
+										<h5 class="post-title mb-1">
+											<a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>
+												@UnsafeHTML(post.Title)
+											</a>
+										</h5>
+										<p class="mb-1">
+											@UnsafeHTML(helpers.TruncateWords(post.Content, 20))
+										</p>
+										<small class="post-meta">Posted on { post.FormattedCreatedAt }</small>
+										<div class="post-stats mt-2">
+											<span>Comments: { strconv.Itoa(post.CommentsCount) }</span>
+											<span>Likes: { strconv.Itoa(post.LikesCount) }</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+				}
+			</div>
+			@SharedComponents()
+			<script src="./js/script.js"></script>
+		</body>
+	</html>
 }

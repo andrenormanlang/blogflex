@@ -1,27 +1,27 @@
 package views
 
 import (
-    "blogflex/internal/models"
-    "fmt"
+	"blogflex/internal/models"
+	"fmt"
 )
 
 templ EditBlog(blog models.Blog) {
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Edit Blog - BlogFlex</title>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-      <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-      <style>
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Edit Blog - BlogFlex</title>
+			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+			<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
+			<style>
         body {
           font-family: 'Inter', sans-serif;
           background-color: #121212;
           color: #e0e0e0;
         }
         .container {
-          max-width: 1000px;
+          max-width: 1200px;
         }
         .card {
           background-color: #1e1e1e;
@@ -52,44 +52,42 @@ templ EditBlog(blog models.Blog) {
           background-color: #3700b3;
         }
       </style>
-    </head>
-    <body>
-      <div class="container mt-5">
-        <div class="row justify-content-center">
-          <div class="col-md-12">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h1 class="card-title text-center mb-4">Edit Blog</h1>
-                <form id="edit-blog-form" hx-post={ fmt.Sprintf("/protected/blogs/%d/edit", blog.ID) } hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST" enctype="multipart/form-data">
-                  <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name" class="form-control" value={ blog.Name } required>
-                  </div>
-                  <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4" class="form-control" required>{ blog.Description }</textarea>
-                  </div>
-                  <div class="form-group">
-                    <label for="image_path">Image URL</label>
-                    <input type="text" id="image_path" name="image_path" class="form-control" value={ blog.ImagePath }>
-                  </div>
-                  <div class="form-group">
-                    <label for="blog_image">Upload Blog Image</label>
-                    <input type="file" id="blog_image" name="blog_image" class="form-control">
-                  </div>
-                  <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Update Blog</button>
-                  </div>
-                </form>
-                <div id="response-message" class="mt-4"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
-    </body>
-  </html>
+		</head>
+		<body>
+			<div class="container mt-5">
+				<div class="row justify-content-center">
+					<div class="col-md-12">
+						<div class="card shadow-sm">
+							<div class="card-body">
+								<h1 class="card-title text-center mb-4">Edit Blog</h1>
+								<form id="edit-blog-form" hx-post={ fmt.Sprintf("/protected/blogs/%d/edit", blog.ID) } hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST" enctype="multipart/form-data">
+									<div class="form-group">
+										<label for="name">Name</label>
+										<input type="text" id="name" name="name" class="form-control" value={ blog.Name } required/>
+									</div>
+									<div class="form-group">
+										<label for="description">Description</label>
+										<textarea id="description" name="description" rows="4" class="form-control" required>{ blog.Description }</textarea>
+									</div>
+									<div class="form-group">
+										<label for="image_path">Image URL</label>
+										<input type="text" id="image_path" name="image_path" class="form-control" value={ blog.ImagePath }/>
+									</div>
+									<div class="form-group">
+										<label for="blog_image">Upload Blog Image</label>
+										<input type="file" id="blog_image" name="blog_image" class="form-control"/>
+									</div>
+									<div class="text-center">
+										<button type="submit" class="btn btn-primary">Update Blog</button>
+									</div>
+								</form>
+								<div id="response-message" class="mt-4"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
+		</body>
+	</html>
 }
-
-

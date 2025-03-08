@@ -40,13 +40,13 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 15, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 15, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" - BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><link rel=\"stylesheet\" href=\"./css/styles.css\"><style>\n        body {\n          font-family: 'Inter', sans-serif;\n          background-color: #121212;\n          color: #e0e0e0;\n        }\n        .container {\n          max-width: 900px;\n        }\n        .card {\n          border: none;\n          margin-bottom: 30px;\n          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n          border-radius: 10px;\n          background-color: #1e1e1e;\n          color: #e0e0e0;\n          display: flex;\n          flex-direction: column;\n          height: 100%;\n        }\n        .card-body {\n          padding: 20px;\n          display: flex;\n          flex-direction: column;\n          justify-content: space-between;\n        }\n        .blog-title a {\n          text-decoration: none;\n          color: #bb86fc;\n        }\n        .blog-title a:hover {\n          color: #3700b3;\n        }\n        .blog-meta {\n          font-size: 0.9rem;\n          color: #a0a0a0;\n        }\n        .post-title a {\n          text-decoration: none;\n          color: #bb86fc;\n        }\n        .post-title a:hover {\n          color: #3700b3;\n        }\n        .post-meta {\n          font-size: 0.85rem;\n          color: #a0a0a0;\n        }\n        .post-stats {\n          font-size: 0.85rem;\n          color: #a0a0a0;\n        }\n        .post-stats span {\n          margin-right: 10px;\n        }\n      </style></head><body><!-- Spinner and Loading Message --><div id=\"loading-spinner\" class=\"spinner\"></div><div id=\"loading-message\" class=\"loading-message\"></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" - BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><link rel=\"stylesheet\" href=\"./css/styles.css\"><style>\n        body {\n          font-family: 'Inter', sans-serif;\n          background-color: #121212;\n          color: #e0e0e0;\n        }\n        .container {\n          max-width: 1200px;\n        }\n        .card {\n          border: none;\n          margin-bottom: 30px;\n          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n          border-radius: 10px;\n          background-color: #1e1e1e;\n          color: #e0e0e0;\n          display: flex;\n          flex-direction: column;\n          height: 100%;\n        }\n        .card-body {\n          padding: 20px;\n          display: flex;\n          flex-direction: column;\n          justify-content: space-between;\n        }\n        .blog-title a {\n          text-decoration: none;\n          color: #bb86fc;\n        }\n        .blog-title a:hover {\n          color: #3700b3;\n        }\n        .blog-meta {\n          font-size: 0.9rem;\n          color: #a0a0a0;\n        }\n        .post-title a {\n          text-decoration: none;\n          color: #bb86fc;\n        }\n        .post-title a:hover {\n          color: #3700b3;\n        }\n        .post-meta {\n          font-size: 0.85rem;\n          color: #a0a0a0;\n        }\n        .post-stats {\n          font-size: 0.85rem;\n          color: #a0a0a0;\n        }\n        .post-stats span {\n          margin-right: 10px;\n        }\n      </style></head><body><!-- Spinner and Loading Message --><div id=\"loading-spinner\" class=\"spinner\"></div><div id=\"loading-message\" class=\"loading-message\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,7 +61,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 84, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 82, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -74,7 +74,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 85, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 83, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -101,7 +101,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/blogs/%d", blog.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 88, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 86, Col: 68}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -155,7 +155,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(post.FormattedCreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 101, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 101, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -168,7 +168,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.CommentsCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 103, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 103, Col: 61}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -181,7 +181,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.LikesCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 104, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 104, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {

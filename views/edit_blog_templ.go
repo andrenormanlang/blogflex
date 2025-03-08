@@ -31,14 +31,14 @@ func EditBlog(blog models.Blog) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Edit Blog - BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n        body {\r\n          font-family: 'Inter', sans-serif;\r\n          background-color: #121212;\r\n          color: #e0e0e0;\r\n        }\r\n        .container {\r\n          max-width: 1000px;\r\n        }\r\n        .card {\r\n          background-color: #1e1e1e;\r\n          border: none;\r\n          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\r\n          border-radius: 10px;\r\n        }\r\n        .card-body {\r\n          padding: 20px;\r\n        }\r\n        .card-title {\r\n          color: #bb86fc;\r\n        }\r\n        .form-control {\r\n          background-color: #2c2c2c;\r\n          border: none;\r\n          color: #e0e0e0;\r\n        }\r\n        .form-control:focus {\r\n          background-color: #2c2c2c;\r\n          color: #e0e0e0;\r\n        }\r\n        .btn-primary {\r\n          background-color: #bb86fc;\r\n          border: none;\r\n        }\r\n        .btn-primary:hover {\r\n          background-color: #3700b3;\r\n        }\r\n      </style></head><body><div class=\"container mt-5\"><div class=\"row justify-content-center\"><div class=\"col-md-12\"><div class=\"card shadow-sm\"><div class=\"card-body\"><h1 class=\"card-title text-center mb-4\">Edit Blog</h1><form id=\"edit-blog-form\" hx-post=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Edit Blog - BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n        body {\r\n          font-family: 'Inter', sans-serif;\r\n          background-color: #121212;\r\n          color: #e0e0e0;\r\n        }\r\n        .container {\r\n          max-width: 1200px;\r\n        }\r\n        .card {\r\n          background-color: #1e1e1e;\r\n          border: none;\r\n          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\r\n          border-radius: 10px;\r\n        }\r\n        .card-body {\r\n          padding: 20px;\r\n        }\r\n        .card-title {\r\n          color: #bb86fc;\r\n        }\r\n        .form-control {\r\n          background-color: #2c2c2c;\r\n          border: none;\r\n          color: #e0e0e0;\r\n        }\r\n        .form-control:focus {\r\n          background-color: #2c2c2c;\r\n          color: #e0e0e0;\r\n        }\r\n        .btn-primary {\r\n          background-color: #bb86fc;\r\n          border: none;\r\n        }\r\n        .btn-primary:hover {\r\n          background-color: #3700b3;\r\n        }\r\n      </style></head><body><div class=\"container mt-5\"><div class=\"row justify-content-center\"><div class=\"col-md-12\"><div class=\"card shadow-sm\"><div class=\"card-body\"><h1 class=\"card-title text-center mb-4\">Edit Blog</h1><form id=\"edit-blog-form\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/blogs/%d/edit", blog.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit_blog.templ`, Line: 63, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit_blog.templ`, Line: 63, Col: 92}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -51,7 +51,7 @@ func EditBlog(blog models.Blog) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit_blog.templ`, Line: 66, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit_blog.templ`, Line: 66, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -64,7 +64,7 @@ func EditBlog(blog models.Blog) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit_blog.templ`, Line: 70, Col: 123}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit_blog.templ`, Line: 70, Col: 113}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -77,7 +77,7 @@ func EditBlog(blog models.Blog) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(blog.ImagePath)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit_blog.templ`, Line: 74, Col: 116}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/edit_blog.templ`, Line: 74, Col: 106}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

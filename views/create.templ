@@ -10,7 +10,6 @@ templ CreatePost(userID string) {
 			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 			<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
 			<script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-			
 			<style>
         body {
           font-family: 'Inter', sans-serif;
@@ -18,7 +17,7 @@ templ CreatePost(userID string) {
           color: #e0e0e0;
         }
         .container {
-          max-width: 1000px;
+          max-width: 1200px;
         }
         .card {
           background-color: #1e1e1e;
@@ -60,11 +59,11 @@ templ CreatePost(userID string) {
 								<form id="create-post-form" hx-post="/protected/posts" hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST">
 									<div class="form-group">
 										<label for="title">Title</label>
-                    <textarea id="title" name="title" rows="2" class="form-control"></textarea>
+										<textarea id="title" name="title" rows="2" class="form-control"></textarea>
 									</div>
 									<div class="form-group">
 										<label for="content">Content</label>
-                    <textarea id="content" name="content" rows="10" class="form-control"></textarea>
+										<textarea id="content" name="content" rows="10" class="form-control"></textarea>
 									</div>
 									<input type="hidden" name="user_id" value={ userID }/>
 									<div class="text-center">

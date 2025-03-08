@@ -7,7 +7,7 @@ import (
     // "github.com/gorilla/sessions"
     "encoding/json"
     "io"
-    // "net/url"
+    "net/url"
     "strings"
     "log"
     "blogflex/internal/models"
@@ -60,6 +60,11 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
         }
         post.Title = r.FormValue("title")
         post.Content = r.FormValue("content")
+        
+        // Ensure content is properly decoded
+        if decodedContent, err := url.QueryUnescape(post.Content); err == nil {
+            post.Content = decodedContent
+        }
     } else {
         http.Error(w, "Unsupported content type", http.StatusUnsupportedMediaType)
         return
@@ -530,4 +535,3 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
     component := views.PostDetail(post, loggedIn, isOwner)
     templ.Handler(component).ServeHTTP(w, r)
 }
-

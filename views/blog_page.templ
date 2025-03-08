@@ -93,8 +93,8 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
         } else {
           <div class="row">
             for _, post := range posts {
-              <div class="col-md-6 d-flex align-items-stretch mb-4">
-                <div class="card w-100">
+              <div class="col-md-6 mb-4">
+                <div class="card h-100">
                   <div class="card-body">
                     <h5 class="post-title mb-1"><a href={ templ.SafeURL(fmt.Sprintf("/posts/%d", post.ID)) }>@UnsafeHTML(post.Title)</a></h5>
                     <p class="mb-1">@UnsafeHTML(helpers.TruncateWords(post.Content, 20))</p>
@@ -115,4 +115,3 @@ templ BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn boo
     </body>
   </html>
 }
-

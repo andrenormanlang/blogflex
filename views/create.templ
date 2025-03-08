@@ -9,31 +9,8 @@ templ CreatePost(userID string) {
 			<title>Create Post - BlogFlex</title>
 			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 			<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
-			<!-- Place the first <script> tag in your HTML's <head> -->
-<!-- Place the first <script> tag in your HTML's <head> -->
-<script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-
-<!-- Place the following <script> and <textarea> tags your HTML's <body> -->
-<script>
-  tinymce.init({
-    selector: 'textarea',
-    plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-  });
-</script>
-<textarea>
-  Welcome to TinyMCE!
-</textarea>			<!-- Place the following <script> and <textarea> tags your HTML's <body> -->
-			<script>
-  tinymce.init({
-    selector: 'textarea',
-    plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount linkchecker',
-    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-  });
-</script>
-			// <textarea>
-			//   Welcome to TinyMCE!
-			// </textarea>
+			<script src="https://cdn.tiny.cloud/1/3ptuccpjxd9qd48kti566c6geohm1x5u2jhrl4szbz9l14ee/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+			
 			<style>
         body {
           font-family: 'Inter', sans-serif;
@@ -79,15 +56,15 @@ templ CreatePost(userID string) {
 					<div class="col-md-12">
 						<div class="card shadow-sm">
 							<div class="card-body">
-								// <h1 class="card-title text-center mb-4">Create a New Post</h1>
+								<h1 class="card-title text-center mb-4">Create a New Post</h1>
 								<form id="create-post-form" hx-post="/protected/posts" hx-redirect="true" hx-target="#response-message" hx-swap="innerHTML" method="POST">
 									<div class="form-group">
 										<label for="title">Title</label>
-										<textarea id="title" name="title" rows="2" class="form-control" required></textarea>
+                    <textarea id="title" name="title" rows="2" class="form-control"></textarea>
 									</div>
 									<div class="form-group">
 										<label for="content">Content</label>
-										<textarea id="content" name="content" rows="10" class="form-control" required></textarea>
+                    <textarea id="content" name="content" rows="10" class="form-control"></textarea>
 									</div>
 									<input type="hidden" name="user_id" value={ userID }/>
 									<div class="text-center">
@@ -104,26 +81,22 @@ templ CreatePost(userID string) {
         document.addEventListener("DOMContentLoaded", function() {
           tinymce.init({
             selector: '#title, #content',
-            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',
-            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist bullist numlist indent outdent | emoticons charmap | removeformat',
-            tinycomments_mode: 'embedded',
-            tinycomments_author: 'Author name',
-            mergetags_list: [
-              { value: 'First.Name', title: 'First Name' },
-              { value: 'Email', title: 'Email' },
-            ],
-            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant")),
+            // Using only free plugins
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+            skin: "oxide-dark",
+            content_css: "dark",
             setup: function(editor) {
               editor.on('change', function(e) {
                 editor.save();
               });
-            },
-            skin: window.matchMedia("(prefers-color-scheme: dark)").matches ? "oxide-dark" : "",
-            content_css: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : ""
+            }
           });
 
           document.getElementById('create-post-form').addEventListener('submit', function(e) {
-            if (tinymce.get('content').getContent() === '' || tinymce.get('title').getContent() === '') {
+            const title = tinymce.get('title').getContent().trim();
+            const content = tinymce.get('content').getContent().trim();
+            if (!title || !content) {
               e.preventDefault();
               alert('Both Title and Content are required.');
             }

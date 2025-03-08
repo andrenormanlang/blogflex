@@ -8,6 +8,7 @@ toolchain go1.22.3
 require (
 	cloud.google.com/go/storage v1.43.0
 	github.com/a-h/templ v0.2.747
+	github.com/cloudinary/cloudinary-go/v2 v2.8.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
@@ -22,8 +23,6 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	cloud.google.com/go/iam v1.1.8 // indirect
-	github.com/cloudinary/cloudinary-go v1.7.0 // indirect
-	github.com/cloudinary/cloudinary-go/v2 v2.8.0 // indirect
 	github.com/creasty/defaults v1.7.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect

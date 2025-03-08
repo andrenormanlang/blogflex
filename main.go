@@ -11,9 +11,11 @@ import (
 
 func main() {
     // Load environment variables from .env file if it exists
-    if err := godotenv.Load(); err != nil {
-        log.Println("Warning: No .env file found or error loading it")
-    }
+    err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 
     // Check required environment variables
     hasuraAdminSecret := os.Getenv("HASURA_ADMIN_SECRET")

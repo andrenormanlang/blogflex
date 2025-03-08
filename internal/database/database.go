@@ -33,10 +33,10 @@ type GraphQLError struct {
 func InitHasura() {
     // Load .env file
     err := godotenv.Load()
-    if err != nil {
-        log.Println("Warning: Error loading .env file:", err)
-        // Continue execution instead of fatal error
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
+
 
     HasuraEndpoint = os.Getenv("HASURA_ENDPOINT")
     if HasuraEndpoint == "" {

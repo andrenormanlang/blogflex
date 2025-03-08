@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
+func PostDetail(post models.Post, loggedIn bool, isOwner bool, loggedInUserID string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -32,7 +32,7 @@ func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css\"><style>\r\n        body {\r\n          font-family: 'Inter', sans-serif;\r\n          background-color: #121212;\r\n          color: #e0e0e0;\r\n        }\r\n        .content-container {\r\n          background-color: #1e1e1e;\r\n          color: #e0e0e0;\r\n          border-radius: 10px;\r\n          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\r\n        }\r\n        .content-container h1,\r\n        .content-container h2 {\r\n          color: #bb86fc;\r\n        }\r\n        .content-container a {\r\n          color: #bb86fc;\r\n        }\r\n        .content-container a:hover {\r\n          color: #3700b3;\r\n        }\r\n        .content-container .text-gray-500 {\r\n          color: #a0a0a0;\r\n        }\r\n        .content-container .text-gray-700 {\r\n          color: #e0e0e0;\r\n        }\r\n        .content-container .btn-primary {\r\n          background-color: #bb86fc;\r\n          border: none;\r\n        }\r\n        .content-container .btn-primary:hover {\r\n          background-color: #3700b3;\r\n        }\r\n        .content-container .btn-warning {\r\n          background-color: #ff9800;\r\n          color: #121212;\r\n          border: none;\r\n        }\r\n        .content-container .btn-warning:hover {\r\n          background-color: #e68900;\r\n        }\r\n        .content-container .btn-danger {\r\n          background-color: #dc3545;\r\n          border: none;\r\n        }\r\n        .content-container .btn-danger:hover {\r\n          background-color: #c82333;\r\n        }\r\n        .content-container .list-group-item {\r\n          background-color: #2c2c2c;\r\n          border-color: #444;\r\n        }\r\n        .form-control {\r\n          background-color: #2c2c2c;\r\n          border: none;\r\n          color: #e0e0e0;\r\n        }\r\n        .form-control:focus {\r\n          background-color: #2c2c2c;\r\n          color: #e0e0e0;\r\n        }\r\n      </style></head><body>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css\"><style>\r\n        body {\r\n          font-family: 'Inter', sans-serif;\r\n          background-color: #121212;\r\n          color: #e0e0e0;\r\n        }\r\n        .content-container {\r\n          background-color: #1e1e1e;\r\n          color: #e0e0e0;\r\n          border-radius: 10px;\r\n          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\r\n        }\r\n        .content-container h1,\r\n        .content-container h2 {\r\n          color: #bb86fc;\r\n        }\r\n        .content-container a {\r\n          color: #bb86fc;\r\n        }\r\n        .content-container a:hover {\r\n          color: #3700b3;\r\n        }\r\n        .content-container .text-gray-500 {\r\n          color: #a0a0a0;\r\n        }\r\n        .content-container .text-gray-700 {\r\n          color: #e0e0e0;\r\n        }\r\n        .content-container .btn-primary {\r\n          background-color: #bb86fc;\r\n          border: none;\r\n        }\r\n        .content-container .btn-primary:hover {\r\n          background-color: #3700b3;\r\n        }\r\n        .content-container .btn-warning {\r\n          background-color: #ff9800;\r\n          color: #121212;\r\n          border: none;\r\n        }\r\n        .content-container .btn-warning:hover {\r\n          background-color: #e68900;\r\n        }\r\n        .content-container .btn-danger {\r\n          background-color: #dc3545;\r\n          border: none;\r\n        }\r\n        .content-container .btn-danger:hover {\r\n          background-color: #c82333;\r\n        }\r\n        .content-container .list-group-item {\r\n          background-color: #2c2c2c;\r\n          border-color: #444;\r\n        }\r\n        .form-control {\r\n          background-color: #2c2c2c;\r\n          border: none;\r\n          color: #e0e0e0;\r\n        }\r\n        .form-control:focus {\r\n          background-color: #2c2c2c;\r\n          color: #e0e0e0;\r\n        }\r\n        .d-none {\r\n          display: none;\r\n        }\r\n        .htmx-indicator {\r\n          display: none;\r\n        }\r\n        .htmx-request .htmx-indicator {\r\n          display: block;\r\n        }\r\n        .htmx-request.htmx-indicator {\r\n          display: block;\r\n        }\r\n      </style><script>\r\n        function editComment(commentId) {\r\n          document.getElementById('comment-content-' + commentId).classList.add('d-none');\r\n          document.getElementById('edit-form-' + commentId).classList.remove('d-none');\r\n        }\r\n        \r\n        function cancelEdit(commentId) {\r\n          document.getElementById('comment-content-' + commentId).classList.remove('d-none');\r\n          document.getElementById('edit-form-' + commentId).classList.add('d-none');\r\n        }\r\n        \r\n        function resetCommentForm() {\r\n          var form = document.getElementById('comment-form');\r\n          if (form) {\r\n            form.reset();\r\n            var submitButton = form.querySelector('button[type=\"submit\"]');\r\n            if (submitButton) {\r\n              submitButton.disabled = false;\r\n            }\r\n          }\r\n        }\r\n        \r\n        document.addEventListener('htmx:afterSwap', function(event) {\r\n          // Check if the event was triggered by a comment submission\r\n          if (event.detail.target.id === 'comments-section') {\r\n            resetCommentForm();\r\n          }\r\n        });\r\n        \r\n        document.addEventListener('htmx:responseError', function(event) {\r\n          console.error('HTMX Error:', event.detail);\r\n          resetCommentForm();\r\n        });\r\n        \r\n        // Listen for the custom event to clear the form\r\n        document.addEventListener('clearCommentForm', function(event) {\r\n          resetCommentForm();\r\n        });\r\n        \r\n        // Prevent multiple form submissions\r\n        document.addEventListener('htmx:beforeRequest', function(event) {\r\n          if (event.detail.elt.id === 'comment-form') {\r\n            // Disable the submit button during the request\r\n            var submitButton = event.detail.elt.querySelector('button[type=\"submit\"]');\r\n            if (submitButton) {\r\n              submitButton.disabled = true;\r\n            }\r\n          }\r\n        });\r\n        \r\n        document.addEventListener('htmx:afterRequest', function(event) {\r\n          if (event.detail.elt.id === 'comment-form') {\r\n            // Re-enable the submit button after the request\r\n            resetCommentForm();\r\n          }\r\n        });\r\n      </script></head><body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -55,7 +55,7 @@ func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(post.FormattedCreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 89, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 159, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -90,7 +90,7 @@ func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/posts/%d", post.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 95, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 165, Col: 68}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -101,47 +101,137 @@ func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div><button id=\"like-button\" hx-post=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mt-3 mb-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/posts/%d/like", post.ID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 98, Col: 88}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#like-button\" hx-swap=\"outerHTML\"><i class=\"fas fa-thumbs-up mt-2\"></i> <span id=\"likes-count\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.LikesCount))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 99, Col: 98}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></button></div><h2 class=\"text-2xl font-bold mb-4 mt-4\">Comments</h2><div class=\"list-group\" id=\"comments-section\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		for _, comment := range post.Comments {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"list-group-item list-group-item-action mt-2 pt-2\"><p class=\"text-gray-700\"><strong>")
+		if isOwner {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- Post owners can't like their own posts --> <button id=\"like-button\" class=\"btn btn-outline-secondary\" disabled><i class=\"fas fa-thumbs-up\"></i> <span id=\"likes-count\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.LikesCount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 171, Col: 94}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></button> <small class=\"text-muted ml-2\">You can't like your own post</small>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else if !loggedIn {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- Not logged in users see a disabled button --> <button id=\"like-button\" class=\"btn btn-outline-secondary\" disabled><i class=\"fas fa-thumbs-up\"></i> <span id=\"likes-count\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.LikesCount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 177, Col: 94}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></button> <small class=\"text-muted ml-2\">Log in to like this post</small>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else if post.UserHasLiked {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- User has already liked the post --> <button id=\"like-button\" hx-post=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(comment.User.Username)
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/posts/%d/like", post.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 106, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 182, Col: 89}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#like-button\" hx-swap=\"outerHTML\" class=\"btn btn-primary\"><i class=\"fas fa-thumbs-up\"></i> <span id=\"likes-count\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.LikesCount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 183, Col: 94}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></button> <small class=\"text-muted ml-2\">You liked this post</small>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- User can like the post --> <button id=\"like-button\" hx-post=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/posts/%d/like", post.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 188, Col: 89}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#like-button\" hx-swap=\"outerHTML\" class=\"btn btn-outline-primary\"><i class=\"fas fa-thumbs-up\"></i> <span id=\"likes-count\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var10 string
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.LikesCount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 189, Col: 94}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></button> <small class=\"text-muted ml-2\">Like this post</small>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><h2 class=\"text-2xl font-bold mb-4 mt-4\">Comments</h2><div class=\"list-group\" id=\"comments-section\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, comment := range post.Comments {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"list-group-item list-group-item-action mt-2 pt-2\" id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("comment-%d", comment.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 197, Col: 110}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"d-flex justify-content-between\"><p class=\"text-gray-700 mb-1\"><strong>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(comment.User.Username)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 199, Col: 69}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -149,29 +239,156 @@ func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(comment.FormattedCreatedAt)
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(comment.FormattedCreatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 106, Col: 113}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 199, Col: 119}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-700\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(comment.Content)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 107, Col: 49}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div>")
+			if loggedIn && (isOwner || comment.UserID == loggedInUserID) {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div><button class=\"btn btn-sm btn-outline-warning mr-1 edit-comment-btn\" onclick=\"editComment({ fmt.Sprint(comment.ID) })\"><i class=\"fas fa-edit\"></i></button> <button class=\"btn btn-sm btn-outline-danger delete-comment-btn\" hx-delete=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var14 string
+				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/comments/%d", comment.ID))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 211, Col: 72}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-confirm=\"Are you sure you want to delete this comment?\" hx-target=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var15 string
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#comment-%d", comment.ID))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 213, Col: 61}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\"><i class=\"fas fa-trash\"></i></button></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><p class=\"text-gray-700 comment-content\" id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var16 string
+			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("comment-content-%d", comment.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 221, Col: 98}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var17 string
+			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(comment.Content)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 221, Col: 118}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><div class=\"edit-comment-form d-none\" id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var18 string
+			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("edit-form-%d", comment.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 222, Col: 89}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><textarea class=\"form-control mb-2\" id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var19 string
+			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("edit-comment-text-%d", comment.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 223, Col: 96}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var20 string
+			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(comment.Content)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 223, Col: 116}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea> <button class=\"btn btn-sm btn-primary mr-1\" hx-put=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var21 string
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/comments/%d", comment.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 226, Col: 67}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-include=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var22 string
+			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#edit-comment-text-%d", comment.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 227, Col: 70}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var23 string
+			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#comment-%d", comment.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 228, Col: 59}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\">Save</button> <button class=\"btn btn-sm btn-secondary\" onclick=\"cancelEdit({ fmt.Sprint(comment.ID) })\">Cancel</button></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -181,20 +398,20 @@ func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if loggedIn {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form hx-post=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"comment-loading\" class=\"htmx-indicator\"><div class=\"spinner-border text-primary\" role=\"status\"><span class=\"sr-only\">Loading...</span></div></div><form hx-post=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/posts/%d/comments", post.ID))
+			var templ_7745c5c3_Var24 string
+			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/protected/posts/%d/comments", post.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 112, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/detail.templ`, Line: 245, Col: 68}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#comments-section\" hx-swap=\"afterbegin\" method=\"POST\" class=\"mt-3\"><div><textarea name=\"content\" placeholder=\"Add a Comment\" class=\"form-control\" required></textarea></div><div class=\"text-center mt-3\"><button type=\"submit\" class=\"btn btn-primary\">Submit</button></div></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#comments-section\" hx-swap=\"afterbegin\" hx-trigger=\"submit once\" class=\"mt-3\" hx-headers=\"{&#34;Accept&#34;: &#34;text/html&#34;}\" hx-indicator=\"#comment-loading\" id=\"comment-form\"><div><textarea name=\"content\" placeholder=\"Add a Comment\" class=\"form-control\" required></textarea></div><div class=\"text-center mt-3\"><button type=\"submit\" class=\"btn btn-primary\">Submit</button></div></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -208,8 +425,8 @@ func PostDetail(post models.Post, loggedIn bool, isOwner bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var11 templ.SafeURL = templ.URL("/blogs/" + fmt.Sprintf("%d", post.BlogID))
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var11)))
+		var templ_7745c5c3_Var25 templ.SafeURL = templ.URL("/blogs/" + fmt.Sprintf("%d", post.BlogID))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var25)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

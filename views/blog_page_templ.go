@@ -155,7 +155,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(post.FormattedCreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 101, Col: 70}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 105, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -168,7 +168,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.CommentsCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 103, Col: 61}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 107, Col: 61}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -181,7 +181,7 @@ func BlogPage(blog models.Blog, posts []models.Post, isOwner bool, loggedIn bool
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(post.LikesCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 104, Col: 55}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/blog_page.templ`, Line: 108, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {

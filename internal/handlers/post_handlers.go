@@ -494,6 +494,63 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
 		BlogID:             uint(postData["blog_id"].(float64)),
 	}
 
+	// Fetch likes count for the post
+	likesCountQuery := `
+		query GetLikesCount($post_id: Int!) {
+			likes_aggregate(where: {post_id: {_eq: $post_id}}) {
+				aggregate {
+					count
+				}
+			}
+		}
+	`
+	likesCountVariables := map[string]interface{}{
+		"post_id": id,
+	}
+
+	likesCountResult, err := database.ExecuteGraphQL(likesCountQuery, likesCountVariables)
+	if err != nil {
+		log.Printf("Failed to fetch likes count: %v", err)
+		// Continue without likes count
+	} else {
+		if likesAggregate, ok := likesCountResult["likes_aggregate"].(map[string]interface{}); ok {
+			if aggregate, ok := likesAggregate["aggregate"].(map[string]interface{}); ok {
+				if count, ok := aggregate["count"].(float64); ok {
+					post.LikesCount = int(count)
+				}
+			}
+		}
+	}
+
+	// Check if the current user has liked this post
+	session, _ := store.Get(r, "session-name")
+	loggedInUserID, ok := session.Values["userID"].(string)
+	isOwner := ok && loggedInUserID == post.User.ID
+
+	// Only check if user has liked the post if they're logged in and not the owner
+	userHasLiked := false
+	if ok && !isOwner {
+		hasLikedQuery := `
+			query CheckUserLike($post_id: Int!, $user_id: uuid!) {
+				likes(where: {post_id: {_eq: $post_id}, user_id: {_eq: $user_id}}) {
+					id
+				}
+			}
+		`
+		hasLikedVariables := map[string]interface{}{
+			"post_id": id,
+			"user_id": loggedInUserID,
+		}
+
+		hasLikedResult, err := database.ExecuteGraphQL(hasLikedQuery, hasLikedVariables)
+		if err == nil {
+			if likes, ok := hasLikedResult["likes"].([]interface{}); ok {
+				userHasLiked = len(likes) > 0
+			}
+		}
+	}
+	post.UserHasLiked = userHasLiked
+
 	// Fetch comments for the post
 	commentsQuery := `
         query GetComments($post_id: Int!) {
@@ -501,10 +558,12 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
                 id
                 content
                 user {
+                    id
                     username
                 }
                 created_at
                 updated_at
+                user_id
             }
         }
     `
@@ -558,22 +617,24 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
 			ID:      uint(commentMap["id"].(float64)),
 			Content: commentMap["content"].(string),
 			User: &models.User{
+				ID:       commentMap["user"].(map[string]interface{})["id"].(string),
 				Username: commentMap["user"].(map[string]interface{})["username"].(string),
 			},
+			UserID:             commentMap["user_id"].(string),
 			FormattedCreatedAt: formattedCommentCreatedAt,
 		})
 	}
 	post.Comments = comments
 
 	// Check if the logged-in user is the owner of the post
-	session, _ := store.Get(r, "session-name")
-	loggedInUserID, ok := session.Values["userID"].(string)
-	isOwner := ok && loggedInUserID == post.User.ID
+	session, _ = store.Get(r, "session-name")
+	loggedInUserID, ok = session.Values["userID"].(string)
+	isOwner = ok && loggedInUserID == post.User.ID
 
 	log.Printf("Post found: ID=%d, Title=%s", post.ID, post.Title) // Log the found post
 
 	// Render HTML template
 	loggedIn := helpers.IsLoggedIn(r)
-	component := views.PostDetail(post, loggedIn, isOwner)
+	component := views.PostDetail(post, loggedIn, isOwner, loggedInUserID)
 	templ.Handler(component).ServeHTTP(w, r)
 }

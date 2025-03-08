@@ -21,6 +21,6 @@ WORKDIR /app
 COPY --from=go-builder /app/blogflex .
 COPY --from=node-builder /app/static ./static
 COPY ../views ./views
-COPY ../.env ./.env  
+# COPY ../.env ./.env  
 EXPOSE 8080
 CMD ["./blogflex"]

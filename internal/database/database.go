@@ -30,13 +30,12 @@ type GraphQLError struct {
 }
 
 // Initialize the Hasura endpoint from environment variables
+// Initialize the Hasura endpoint from environment variables
 func InitHasura() {
-    // Load .env file
-    err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
+    // Load .env file if it exists (for local dev)
+    if err := godotenv.Load(); err != nil {
+        log.Println("No .env file found, relying on system environment variables")
+    }
 
     HasuraEndpoint = os.Getenv("HASURA_ENDPOINT")
     if HasuraEndpoint == "" {

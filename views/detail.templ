@@ -144,8 +144,10 @@ templ PostDetail(post models.Post, loggedIn bool, isOwner bool, loggedInUserID s
       </script>
 		</head>
 		<body>
-			@NavBar(loggedIn)
-			<div class="max-w-6xl mx-auto p-6 content-container mt-10">
+			<div>
+				@NavBar(loggedIn)
+			</div>
+			<div class="mx-auto p-6 content-container mt-16" style="max-width: 1200px; margin-top: 16px; margin-bottom: 16px; padding: 2rem 3rem;">
 				<h1 class="text-3xl font-bold mb-6">
 					@UnsafeHTML(post.Title)
 				</h1>

@@ -1,20 +1,21 @@
 package views
 
 import (
-    "blogflex/internal/models"
-    "fmt"
+	"blogflex/internal/models"
+	"fmt"
 )
 
 templ MainPage(blogs []models.Blog, loggedIn bool) {
-  <html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to BlogFlex</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="/static/css/tailwind.generated.css" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
+	<html>
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Welcome to BlogFlex</title>
+			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+			<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
+			<link href="./css/styles.css" rel="stylesheet"/>
+			<link href="./css/mobile-first.css" rel="stylesheet"/>
+			<style>
       body {
         font-family: 'Inter', sans-serif;
         background-color: #121212;
@@ -77,41 +78,43 @@ templ MainPage(blogs []models.Blog, loggedIn bool) {
         border-radius: 10px 10px 0 0;
       }
     </style>
-  </head>
-  <body>
-      @NavBar(loggedIn)
-    <div class="background-image"></div>
-    <div class="content">
-      <div class="container mt-5">
-        <div class="row">
-          for _, blog := range blogs {
-            <div class="col-md-6 d-flex align-items-stretch card-container">
-              <div class="card w-100">
-                if blog.ImagePath != "" {
-                  <img src={blog.ImagePath} alt="Blog Image" class="card-img-top blog-image">
-                }
-                <div class="card-body">
-                  <h5 class="blog-title"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{blog.Name}</a></h5>
-                  <p class="d-block mb-2 blog-description">{blog.Description}</p>
-                  <small class="d-block blog-meta">blog author: {blog.User.Username} | </small>
-                  <small class="d-block blog-meta">created on {blog.FormattedCreatedAt}</small>
-                  if blog.LatestPost != nil {
-                      <small class="d-block mt-2 blog-meta">latest post: 
-                      @RenderLatestPostTitle(blog.LatestPost.Title)
-                      posted on {blog.LatestPost.FormattedCreatedAt}</small>
-                  }
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-    @SharedComponents()
-  </body>
-  </html>
+		</head>
+		<body>
+			@NavBar(loggedIn)
+			<div class="background-image"></div>
+			<div class="content">
+				<div class="container mt-5">
+					<div class="row">
+						for _, blog := range blogs {
+							<div class="col-12 col-sm-6 col-lg-4 d-flex align-items-stretch">
+								<div class="card w-100">
+									if blog.ImagePath != "" {
+										<img src={ blog.ImagePath } alt="Blog Image" class="blog-image"/>
+									}
+									<div class="card-body">
+										<h5 class="blog-title mb-2"><a href={ templ.URL("/blogs/" + fmt.Sprintf("%d", blog.ID)) }>{ blog.Name }</a></h5>
+										<p class="d-block mb-2 blog-description">{ blog.Description }</p>
+										<small class="d-block blog-meta">blog author: { blog.User.Username } | </small>
+										<small class="d-block blog-meta">created on { blog.FormattedCreatedAt }</small>
+										if blog.LatestPost != nil {
+											<small class="d-block mt-2 blog-meta">
+												latest post: 
+												@RenderLatestPostTitle(blog.LatestPost.Title)
+												posted on { blog.LatestPost.FormattedCreatedAt }
+											</small>
+										}
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+			@SharedComponents()
+		</body>
+	</html>
 }
 
-
-
-
+templ RenderLatestPostTitle(title string) {
+	<span class="latest-post-title">{ title }</span>
+}

@@ -31,7 +31,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Welcome to BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/tailwind.generated.css\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n        background-color: #121212;\r\n        color: #e0e0e0;\r\n        position: relative;\r\n        min-height: 100vh;\r\n        margin: 0;\r\n        padding: 0;\r\n        overflow-x: hidden;\r\n      }\r\n      .background-image {\r\n        position: absolute;\r\n        top: 0;\r\n        left: 0;\r\n        width: 100%;\r\n        height: 100%;\r\n        background: url('/public/images/blogflex-bg.jpg') no-repeat center center fixed;\r\n        background-size: cover;\r\n        opacity: 0.4;\r\n        z-index: -1;\r\n      }\r\n      .content {\r\n        position: relative;\r\n        z-index: 1;\r\n        padding: 20px;\r\n      }\r\n      .card {\r\n        border: none;\r\n        margin-bottom: 20px;\r\n        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\r\n        border-radius: 10px;\r\n        background-color: #1e1e1e;\r\n        color: #e0e0e0;\r\n        height: 100%;\r\n      }\r\n      .card-body {\r\n        padding: 20px;\r\n        display: flex;\r\n        flex-direction: column;\r\n        justify-content: space-between;\r\n      }\r\n      .blog-title a {\r\n        text-decoration: none;\r\n        color: #bb86fc;\r\n      }\r\n      .blog-title a:hover {\r\n        color: #3700b3;\r\n      }\r\n      .blog-meta {\r\n        font-size: 0.9rem;\r\n        color: #a0a0a0;\r\n      }\r\n      .card-container {\r\n        margin-bottom: 20px;\r\n      }\r\n      .blog-image {\r\n        width: 100%;\r\n        height: 200px; /* You can adjust the height to suit your needs */\r\n        object-fit: cover; /* Ensures the image covers the area without distortion */\r\n        border-radius: 10px 10px 0 0;\r\n      }\r\n    </style></head><body>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Welcome to BlogFlex</title><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap\" rel=\"stylesheet\"><link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"./css/styles.css\" rel=\"stylesheet\"><link href=\"./css/mobile-first.css\" rel=\"stylesheet\"><style>\r\n      body {\r\n        font-family: 'Inter', sans-serif;\r\n        background-color: #121212;\r\n        color: #e0e0e0;\r\n        position: relative;\r\n        min-height: 100vh;\r\n        margin: 0;\r\n        padding: 0;\r\n        overflow-x: hidden;\r\n      }\r\n      .background-image {\r\n        position: absolute;\r\n        top: 0;\r\n        left: 0;\r\n        width: 100%;\r\n        height: 100%;\r\n        background: url('/public/images/blogflex-bg.jpg') no-repeat center center fixed;\r\n        background-size: cover;\r\n        opacity: 0.4;\r\n        z-index: -1;\r\n      }\r\n      .content {\r\n        position: relative;\r\n        z-index: 1;\r\n        padding: 20px;\r\n      }\r\n      .card {\r\n        border: none;\r\n        margin-bottom: 20px;\r\n        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\r\n        border-radius: 10px;\r\n        background-color: #1e1e1e;\r\n        color: #e0e0e0;\r\n        height: 100%;\r\n      }\r\n      .card-body {\r\n        padding: 20px;\r\n        display: flex;\r\n        flex-direction: column;\r\n        justify-content: space-between;\r\n      }\r\n      .blog-title a {\r\n        text-decoration: none;\r\n        color: #bb86fc;\r\n      }\r\n      .blog-title a:hover {\r\n        color: #3700b3;\r\n      }\r\n      .blog-meta {\r\n        font-size: 0.9rem;\r\n        color: #a0a0a0;\r\n      }\r\n      .card-container {\r\n        margin-bottom: 20px;\r\n      }\r\n      .blog-image {\r\n        width: 100%;\r\n        height: 200px; /* You can adjust the height to suit your needs */\r\n        object-fit: cover; /* Ensures the image covers the area without distortion */\r\n        border-radius: 10px 10px 0 0;\r\n      }\r\n    </style></head><body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -44,7 +44,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, blog := range blogs {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-md-6 d-flex align-items-stretch card-container\"><div class=\"card w-100\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-12 col-sm-6 col-lg-4 d-flex align-items-stretch\"><div class=\"card w-100\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -56,18 +56,18 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(blog.ImagePath)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 91, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 92, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"Blog Image\" class=\"card-img-top blog-image\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"Blog Image\" class=\"blog-image\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card-body\"><h5 class=\"blog-title\"><a href=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card-body\"><h5 class=\"blog-title mb-2\"><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -83,7 +83,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 94, Col: 113}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 95, Col: 111}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -96,7 +96,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(blog.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 95, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 96, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(blog.User.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 96, Col: 83}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 97, Col: 76}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -122,7 +122,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(blog.FormattedCreatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 97, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 98, Col: 79}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -148,7 +148,7 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(blog.LatestPost.FormattedCreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 101, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 103, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -173,6 +173,45 @@ func MainPage(blogs []models.Blog, loggedIn bool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</body></html>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func RenderLatestPostTitle(title string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"latest-post-title\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 119, Col: 40}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

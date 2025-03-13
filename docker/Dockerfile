@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y curl
 WORKDIR /app
 COPY --from=go-builder /app/blogflex .
 COPY --from=node-builder /app/static ./static
+
+COPY public ./public
 COPY ../views ./views
 # COPY ../.env ./.env  
 EXPOSE 8080
